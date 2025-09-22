@@ -6,9 +6,12 @@ import jagm.classicpipes.ClassicPipes;
 import jagm.classicpipes.block.PipeBlock;
 import jagm.classicpipes.services.Services;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
@@ -16,6 +19,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.Comparator;
+import java.util.function.Consumer;
 
 public class MiscUtil {
 
@@ -56,6 +60,14 @@ public class MiscUtil {
 
     public static String modFromItem(ItemStack stack) {
         return BuiltInRegistries.ITEM.getKey(stack.getItem()).toString().split(":")[0];
+    }
+
+    public static <T> void loadFromTag(Tag tag, Codec<T> codec, HolderLookup.Provider registries, Consumer<? super T> resultConsumer) {
+        codec.parse(registries.createSerializationContext(NbtOps.INSTANCE), tag).result().ifPresent(resultConsumer);
+    }
+
+    public static <T> void saveToTag(Tag tag, T thing, Codec<T> codec, HolderLookup.Provider registries, Consumer<? super Tag> resultConsumer) {
+        codec.encode(thing, registries.createSerializationContext(NbtOps.INSTANCE), tag).result().ifPresent(resultConsumer);
     }
 
 }

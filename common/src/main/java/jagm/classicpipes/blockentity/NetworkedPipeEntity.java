@@ -4,13 +4,13 @@ import jagm.classicpipes.block.NetworkedPipeBlock;
 import jagm.classicpipes.util.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.ItemStackWithSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.storage.ValueInput;
-import net.minecraft.world.level.storage.ValueOutput;
 
 import java.util.*;
 
@@ -377,44 +377,49 @@ public abstract class NetworkedPipeEntity extends RoundRobinPipeEntity {
     }
 
     @Override
-    protected void loadAdditional(ValueInput valueInput) {
-        super.loadAdditional(valueInput);
+    protected void loadAdditional(CompoundTag valueInput, HolderLookup.Provider registries) {
+        super.loadAdditional(valueInput, registries);
         this.routingSchedule.clear();
         this.setController(valueInput.getBooleanOr("controller", false));
         if (this.isController()) {
             this.network = new PipeNetwork(this.getBlockPos(), SortingMode.fromByte(valueInput.getByteOr("sorting_mode", (byte) 1)));
-            ValueInput.TypedInputList<RequestedItem> requestedItems = valueInput.listOrEmpty("requested_items", RequestedItem.CODEC);
-            for (RequestedItem requestedItem : requestedItems) {
-                this.network.addRequestedItem(requestedItem);
-            }
+            ListTag requestedItems = valueInput.getListOrEmpty("requested_items");
+            requestedItems.forEach(tag -> MiscUtil.loadFromTag(tag, RequestedItem.CODEC, registries, this.network::addRequestedItem));
             this.syncedNetworkPos = this.getBlockPos();
         } else {
             this.syncedNetworkPos = valueInput.read("synced_network_pos", BlockPos.CODEC).orElse(this.getBlockPos());
         }
-        ValueInput.TypedInputList<ItemStackWithSlot> routingList = valueInput.listOrEmpty("routing_schedule", ItemStackWithSlot.CODEC);
-        for (ItemStackWithSlot slotStack : routingList) {
-            this.routingSchedule.put(slotStack.stack(), new ScheduledRoute(Direction.from3DDataValue(slotStack.slot())));
-        }
+        ListTag routingList = valueInput.getListOrEmpty("routing_schedule");
+        routingList.forEach(tag -> {
+            if (tag instanceof CompoundTag compoundTag) {
+                int slot = compoundTag.getIntOr("slot", 0);
+                MiscUtil.loadFromTag(tag, ItemStack.CODEC, registries, stack -> this.routingSchedule.put(stack, new ScheduledRoute(Direction.from3DDataValue(slot))));
+            }
+        });
     }
 
     @Override
-    protected void saveAdditional(ValueOutput valueOutput) {
-        super.saveAdditional(valueOutput);
+    protected void saveAdditional(CompoundTag valueOutput, HolderLookup.Provider registries) {
+        super.saveAdditional(valueOutput, registries);
         valueOutput.putBoolean("controller", this.isController());
         if (this.hasNetwork() && this.isController()) {
             valueOutput.putByte("sorting_mode", this.getNetwork().getSortingMode().getValue());
-            ValueOutput.TypedOutputList<RequestedItem> requestedItems = valueOutput.list("requested_items", RequestedItem.CODEC);
+            ListTag requestedItems = new ListTag();
             for (RequestedItem requestedItem : this.getNetwork().getRequestedItems()) {
                 if (!requestedItem.isDelivered()) {
-                    requestedItems.add(requestedItem);
+                    MiscUtil.saveToTag(new CompoundTag(), requestedItem, RequestedItem.CODEC, registries, requestedItems::add);
                 }
             }
+            valueOutput.put("requested_items", requestedItems);
         }
         valueOutput.store("synced_network_pos", BlockPos.CODEC, this.hasNetwork() ? this.network.getPos() : this.getBlockPos());
-        ValueOutput.TypedOutputList<ItemStackWithSlot> routingList = valueOutput.list("routing_schedule", ItemStackWithSlot.CODEC);
+        ListTag routingList = new ListTag();
         for (ItemStack stack : this.routingSchedule.keySet()) {
-            routingList.add(new ItemStackWithSlot(this.routingSchedule.get(stack).getDirection().get3DDataValue(), stack));
+            CompoundTag tag = new CompoundTag();
+            tag.putInt("slot", this.routingSchedule.get(stack).getDirection().get3DDataValue());
+            MiscUtil.saveToTag(tag, stack, ItemStack.CODEC, registries, routingList::add);
         }
+        valueOutput.put("routing_schedule", routingList);
     }
 
 }

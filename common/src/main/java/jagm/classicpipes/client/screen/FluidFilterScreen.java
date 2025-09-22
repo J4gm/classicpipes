@@ -6,7 +6,7 @@ import jagm.classicpipes.inventory.menu.FluidFilterMenu;
 import jagm.classicpipes.services.Services;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
-import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.ARGB;
@@ -28,7 +28,7 @@ public abstract class FluidFilterScreen<T extends FluidFilterMenu> extends Filte
             if (fluid != null) {
                 FluidRenderInfo info = Services.LOADER_SERVICE.getFluidRenderInfo(fluid.defaultFluidState());
                 graphics.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, ARGB.opaque(info.tint()));
-                graphics.blitSprite(RenderPipelines.GUI_TEXTURED, info.sprite(), slot.x, slot.y, 16, 16, info.tint());
+                graphics.blitSprite(RenderType::guiTextured, info.sprite(), slot.x, slot.y, 16, 16, info.tint());
                 return;
             }
         }
@@ -43,11 +43,11 @@ public abstract class FluidFilterScreen<T extends FluidFilterMenu> extends Filte
                 if (this.hoveredSlot.container instanceof Filter) {
                     Fluid fluid = Services.LOADER_SERVICE.getFluidFromStack(stack);
                     if (fluid != null) {
-                        graphics.setTooltipForNextFrame(this.font, Services.LOADER_SERVICE.getFluidName(fluid), mouseX, mouseY);
+                        graphics.renderTooltip(this.font, Services.LOADER_SERVICE.getFluidName(fluid), mouseX, mouseY);
                         return;
                     }
                 }
-                graphics.setTooltipForNextFrame(this.font, this.getTooltipFromContainerItem(stack), stack.getTooltipImage(), mouseX, mouseY, stack.get(DataComponents.TOOLTIP_STYLE));
+                graphics.renderTooltip(this.font, this.getTooltipFromContainerItem(stack), stack.getTooltipImage(), mouseX, mouseY, stack.get(DataComponents.TOOLTIP_STYLE));
             }
         }
     }

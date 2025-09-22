@@ -7,7 +7,10 @@ import jagm.classicpipes.util.ItemInPipe;
 import jagm.classicpipes.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -16,8 +19,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraft.world.level.storage.ValueInput;
-import net.minecraft.world.level.storage.ValueOutput;
 
 import java.util.*;
 
@@ -174,24 +175,25 @@ public class FluidPipeEntity extends PipeEntity {
     }
 
     @Override
-    protected void loadAdditional(ValueInput valueInput) {
+    protected void loadAdditional(CompoundTag valueInput, HolderLookup.Provider registries) {
         this.contents.clear();
         this.tickAdded.clear();
-        super.loadAdditional(valueInput);
-        ValueInput.TypedInputList<FluidInPipe> fluidPacketList = valueInput.listOrEmpty("fluid_packets", FluidInPipe.CODEC);
-        fluidPacketList.forEach(this.contents::add);
+        super.loadAdditional(valueInput, registries);
+        ListTag fluidPacketList = valueInput.getListOrEmpty("fluid_packets");
+        fluidPacketList.forEach(tag -> MiscUtil.loadFromTag(tag, FluidInPipe.CODEC, registries, this.contents::add));
         this.setFluid(valueInput.read("fluid", BuiltInRegistries.FLUID.byNameCodec()).orElse(Fluids.WATER));
     }
 
     @Override
-    protected void saveAdditional(ValueOutput valueOutput) {
-        super.saveAdditional(valueOutput);
-        ValueOutput.TypedOutputList<FluidInPipe> fluidPacketList = valueOutput.list("fluid_packets", FluidInPipe.CODEC);
+    protected void saveAdditional(CompoundTag valueOutput, HolderLookup.Provider registries) {
+        super.saveAdditional(valueOutput, registries);
+        ListTag fluidPacketList = new ListTag();
         for (FluidInPipe fluidPacket : this.contents) {
             if (fluidPacket.getAmount() > 0) {
-                fluidPacketList.add(fluidPacket);
+                MiscUtil.saveToTag(new CompoundTag(), fluidPacket, FluidInPipe.CODEC, registries, fluidPacketList::add);
             }
         }
+        valueOutput.put("fluid_packets", fluidPacketList);
         valueOutput.store("fluid", BuiltInRegistries.FLUID.byNameCodec(), this.fluid);
     }
 

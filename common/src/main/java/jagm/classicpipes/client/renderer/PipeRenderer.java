@@ -2,6 +2,7 @@ package jagm.classicpipes.client.renderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import jagm.classicpipes.ClassicPipes;
 import jagm.classicpipes.blockentity.ItemPipeEntity;
 import jagm.classicpipes.blockentity.NetworkedPipeEntity;
 import jagm.classicpipes.util.ItemInPipe;
@@ -32,6 +33,7 @@ public class PipeRenderer implements BlockEntityRenderer<ItemPipeEntity> {
 
     public static void renderPipeItems(BlockEntityRendererProvider.Context context, ItemPipeEntity pipe, float partialTicks, PoseStack poses, MultiBufferSource bufferSource, int light, int overlay) {
         if (!pipe.isEmpty()){
+            ClassicPipes.LOGGER.info("Rendering pipe items");
             for (ItemInPipe item : pipe.getContents()) {
                 Direction direction = item.getProgress() < ItemInPipe.HALFWAY ? item.getFromDirection() : item.getTargetDirection();
                 poses.pushPose();

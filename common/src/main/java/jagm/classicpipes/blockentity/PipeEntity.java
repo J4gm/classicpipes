@@ -1,6 +1,5 @@
 package jagm.classicpipes.blockentity;
 
-import jagm.classicpipes.ClassicPipes;
 import jagm.classicpipes.block.PipeBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -10,12 +9,10 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.storage.TagValueOutput;
 
 public abstract class PipeEntity extends BlockEntity {
 
@@ -63,23 +60,8 @@ public abstract class PipeEntity extends BlockEntity {
     }
 
     @Override
-    public CompoundTag getUpdateTag(HolderLookup.Provider levelRegistry) {
-        ProblemReporter.ScopedCollector scopedCollector = new ProblemReporter.ScopedCollector(this.problemPath(), ClassicPipes.LOGGER);
-        CompoundTag tag;
-        try {
-            TagValueOutput valueOutput = TagValueOutput.createWithContext(scopedCollector, levelRegistry);
-            this.saveAdditional(valueOutput);
-            tag = valueOutput.buildResult();
-        } catch (Throwable error) {
-            try {
-                scopedCollector.close();
-            } catch (Throwable error2) {
-                error.addSuppressed(error2);
-            }
-            throw error;
-        }
-        scopedCollector.close();
-        return tag;
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        return this.saveWithoutMetadata(registries);
     }
 
     @Override

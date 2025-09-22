@@ -4,9 +4,13 @@ import jagm.classicpipes.ClassicPipes;
 import jagm.classicpipes.block.NetworkedPipeBlock;
 import jagm.classicpipes.services.Services;
 import jagm.classicpipes.util.ItemInPipe;
+import jagm.classicpipes.util.MiscUtil;
 import jagm.classicpipes.util.Tuple;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Container;
@@ -16,8 +20,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.storage.ValueInput;
-import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.*;
@@ -310,13 +312,13 @@ public abstract class ItemPipeEntity extends PipeEntity {
     }
 
     @Override
-    protected void loadAdditional(ValueInput valueInput) {
+    protected void loadAdditional(CompoundTag valueInput, HolderLookup.Provider registries) {
         this.clearContent();
         this.networkDistances.clear();
         this.tickAdded.clear();
-        super.loadAdditional(valueInput);
-        ValueInput.TypedInputList<ItemInPipe> itemsList = valueInput.listOrEmpty("items", ItemInPipe.CODEC);
-        itemsList.forEach(this.contents::add);
+        super.loadAdditional(valueInput, registries);
+        ListTag itemsList = valueInput.getListOrEmpty("items");
+        itemsList.forEach(tag -> MiscUtil.loadFromTag(tag, ItemInPipe.CODEC, registries, this.contents::add));
         for (Direction direction : Direction.values()) {
             BlockPos pos = valueInput.read(direction.getName() + "_pos", BlockPos.CODEC).orElse(BlockPos.ZERO);
             valueInput.getInt(direction.getName() + "_distance").ifPresent(distance -> this.networkDistances.put(direction, new Tuple<>(pos, distance)));
@@ -324,14 +326,15 @@ public abstract class ItemPipeEntity extends PipeEntity {
     }
 
     @Override
-    protected void saveAdditional(ValueOutput valueOutput) {
-        super.saveAdditional(valueOutput);
-        ValueOutput.TypedOutputList<ItemInPipe> itemsList = valueOutput.list("items", ItemInPipe.CODEC);
+    protected void saveAdditional(CompoundTag valueOutput, HolderLookup.Provider registries) {
+        super.saveAdditional(valueOutput, registries);
+        ListTag itemsList = new ListTag();
         for (ItemInPipe item : this.contents) {
             if (!item.getStack().isEmpty()) {
-                itemsList.add(item);
+                MiscUtil.saveToTag(new CompoundTag(), item, ItemInPipe.CODEC, registries, itemsList::add);
             }
         }
+        valueOutput.put("items", itemsList);
         for (Direction direction : this.networkDistances.keySet()) {
             Tuple<BlockPos, Integer> tuple = this.networkDistances.get(direction);
             valueOutput.store(direction.getName() + "_pos", BlockPos.CODEC, tuple.a());

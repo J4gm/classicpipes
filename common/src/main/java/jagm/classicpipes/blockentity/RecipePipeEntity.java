@@ -1,22 +1,24 @@
 package jagm.classicpipes.blockentity;
 
-import com.mojang.serialization.Codec;
 import jagm.classicpipes.ClassicPipes;
 import jagm.classicpipes.block.NetworkedPipeBlock;
 import jagm.classicpipes.inventory.container.FilterContainer;
 import jagm.classicpipes.inventory.menu.RecipePipeMenu;
 import jagm.classicpipes.services.Services;
 import jagm.classicpipes.util.ItemInPipe;
+import jagm.classicpipes.util.MiscUtil;
 import jagm.classicpipes.util.RequestedItem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.ItemStackWithSlot;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
@@ -27,8 +29,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.CrafterBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.storage.ValueInput;
-import net.minecraft.world.level.storage.ValueOutput;
 
 import java.util.*;
 
@@ -273,11 +273,11 @@ public class RecipePipeEntity extends NetworkedPipeEntity implements MenuProvide
     }
 
     @Override
-    protected void loadAdditional(ValueInput valueInput) {
+    protected void loadAdditional(CompoundTag valueInput, HolderLookup.Provider registries) {
         this.filter.clearContent();
         this.heldItems.clear();
-        super.loadAdditional(valueInput);
-        ValueInput.TypedInputList<Byte> directionsByteList = valueInput.listOrEmpty("slot_directions", Codec.BYTE);
+        super.loadAdditional(valueInput, registries);
+        byte[] directionsByteList = valueInput.getByteArray("slot_directions").orElse(new byte[0]);
         int i = 0;
         for (byte directionByte : directionsByteList) {
             if (i >= 10) {
@@ -286,42 +286,55 @@ public class RecipePipeEntity extends NetworkedPipeEntity implements MenuProvide
             this.slotDirections[i] = Direction.from3DDataValue(directionByte);
             i++;
         }
-        ValueInput.TypedInputList<ItemStackWithSlot> filterList = valueInput.listOrEmpty("filter", ItemStackWithSlot.CODEC);
-        for (ItemStackWithSlot slotStack : filterList) {
-            this.filter.setItem(slotStack.slot(), slotStack.stack());
-        }
-        ValueInput.TypedInputList<ItemStackWithSlot> heldItemList = valueInput.listOrEmpty("held_items", ItemStackWithSlot.CODEC);
-        for (ItemStackWithSlot slotStack : heldItemList) {
-            if (slotStack.slot() >= 0 && slotStack.slot() < 9) {
-                this.heldItems.set(slotStack.slot(), slotStack.stack());
+        ListTag filterList = valueInput.getListOrEmpty("filter");
+        filterList.forEach(tag -> {
+            if (tag instanceof CompoundTag compoundTag) {
+                int slot = compoundTag.getIntOr("slot", 0);
+                MiscUtil.loadFromTag(tag, ItemStack.CODEC, registries, stack -> this.filter.setItem(slot, stack));
             }
-        }
+        });
+        ListTag heldItemList = valueInput.getListOrEmpty("held_items");
+        heldItemList.forEach(tag -> {
+            if (tag instanceof CompoundTag compoundTag) {
+                int slot = compoundTag.getIntOr("slot", 0);
+                if (slot >= 0 && slot < 9) {
+                    MiscUtil.loadFromTag(tag, ItemStack.CODEC, registries, stack -> this.heldItems.set(slot, stack));
+                }
+            }
+        });
         this.waitingForCraft = valueInput.getIntOr("waiting_for_craft", 0);
         this.crafterTicked = valueInput.getBooleanOr("crafter_ticked", false);
         this.cooldown = valueInput.getByteOr("cooldown", DEFAULT_COOLDOWN);
     }
 
     @Override
-    protected void saveAdditional(ValueOutput valueOutput) {
-        super.saveAdditional(valueOutput);
-        ValueOutput.TypedOutputList<Byte> directionsByteList = valueOutput.list("slot_directions", Codec.BYTE);
-        for (Direction direction : this.slotDirections) {
-            directionsByteList.add(direction == null ? (byte) 0 : (byte) direction.get3DDataValue());
+    protected void saveAdditional(CompoundTag valueOutput, HolderLookup.Provider registries) {
+        super.saveAdditional(valueOutput, registries);
+        byte[] directionsByteArray = new byte[10];
+        for (int i = 0; i < this.slotDirections.length; i++) {
+            directionsByteArray[i] = this.slotDirections[i] == null ? (byte) 0 : (byte) this.slotDirections[i].get3DDataValue();
         }
-        ValueOutput.TypedOutputList<ItemStackWithSlot> filterList = valueOutput.list("filter", ItemStackWithSlot.CODEC);
+        valueOutput.putByteArray("slot_directions", directionsByteArray);
+        ListTag filterList = new ListTag();
         for (int slot = 0; slot < this.filter.getContainerSize(); slot++) {
             ItemStack stack = this.filter.getItem(slot);
             if (!stack.isEmpty()) {
-                filterList.add(new ItemStackWithSlot(slot, stack));
+                CompoundTag tag = new CompoundTag();
+                tag.putInt("slot", slot);
+                MiscUtil.saveToTag(tag, stack, ItemStack.CODEC, registries, filterList::add);
             }
         }
-        ValueOutput.TypedOutputList<ItemStackWithSlot> heldItemList = valueOutput.list("held_items", ItemStackWithSlot.CODEC);
+        valueOutput.put("filter", filterList);
+        ListTag heldItemList = new ListTag();
         for (int slot = 0; slot < this.heldItems.size(); slot++) {
             ItemStack stack = this.heldItems.get(slot);
             if (!stack.isEmpty()) {
-                heldItemList.add(new ItemStackWithSlot(slot, stack));
+                CompoundTag tag = new CompoundTag();
+                tag.putInt("slot", slot);
+                MiscUtil.saveToTag(tag, stack, ItemStack.CODEC, registries, heldItemList::add);
             }
         }
+        valueOutput.put("held_items", heldItemList);
         valueOutput.putInt("waiting_for_craft", this.waitingForCraft);
         valueOutput.putBoolean("crafter_ticked", this.crafterTicked);
         valueOutput.putByte("cooldown", this.cooldown);

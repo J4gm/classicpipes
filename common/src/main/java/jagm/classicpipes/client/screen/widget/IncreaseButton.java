@@ -3,7 +3,7 @@ package jagm.classicpipes.client.screen.widget;
 import jagm.classicpipes.util.MiscUtil;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.resources.ResourceLocation;
 
@@ -29,7 +29,7 @@ public class IncreaseButton extends Button {
         ResourceLocation sprite = this.decrease ?
                 (!this.active ? DECREASE_GREYED : (this.isHovered() ? DECREASE_SELECT : DECREASE_NORMAL)) :
                 (!this.active ? INCREASE_GREYED : (this.isHovered() ? INCREASE_SELECT : INCREASE_NORMAL));
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, this.getX(), this.getY(), this.width, this.height);
+        graphics.blitSprite(RenderType::guiTextured, sprite, this.getX(), this.getY(), this.width, this.height);
     }
 
 }

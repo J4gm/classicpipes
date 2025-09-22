@@ -5,10 +5,10 @@ import jagm.classicpipes.util.ItemInPipe;
 import jagm.classicpipes.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.storage.ValueInput;
-import net.minecraft.world.level.storage.ValueOutput;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -102,14 +102,14 @@ public class RoundRobinPipeEntity extends ItemPipeEntity {
     }
 
     @Override
-    protected void loadAdditional(ValueInput valueInput) {
-        super.loadAdditional(valueInput);
+    protected void loadAdditional(CompoundTag valueInput, HolderLookup.Provider registries) {
+        super.loadAdditional(valueInput, registries);
         this.nextDirection = Direction.from3DDataValue(valueInput.getByteOr("next_direction", (byte) 0));
     }
 
     @Override
-    protected void saveAdditional(ValueOutput valueOutput) {
-        super.saveAdditional(valueOutput);
+    protected void saveAdditional(CompoundTag valueOutput, HolderLookup.Provider registries) {
+        super.saveAdditional(valueOutput, registries);
         valueOutput.putByte("next_direction", (byte) this.nextDirection.get3DDataValue());
     }
 

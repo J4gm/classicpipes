@@ -6,20 +6,21 @@ import jagm.classicpipes.inventory.container.SingleItemFilterContainer;
 import jagm.classicpipes.inventory.menu.ProviderPipeMenu;
 import jagm.classicpipes.services.Services;
 import jagm.classicpipes.util.FacingOrNone;
+import jagm.classicpipes.util.MiscUtil;
 import jagm.classicpipes.util.PipeNetwork;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.ItemStackWithSlot;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.storage.ValueInput;
-import net.minecraft.world.level.storage.ValueOutput;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -60,28 +61,34 @@ public class ProviderPipeEntity extends NetworkedPipeEntity implements MenuProvi
     }
 
     @Override
-    protected void loadAdditional(ValueInput valueInput) {
+    protected void loadAdditional(CompoundTag valueInput, HolderLookup.Provider registries) {
         this.filter.clearContent();
         this.cacheInitialised = false;
-        super.loadAdditional(valueInput);
-        ValueInput.TypedInputList<ItemStackWithSlot> filterList = valueInput.listOrEmpty("filter", ItemStackWithSlot.CODEC);
-        for (ItemStackWithSlot slotStack : filterList) {
-            this.filter.setItem(slotStack.slot(), slotStack.stack());
-        }
+        super.loadAdditional(valueInput, registries);
+        ListTag filterList = valueInput.getListOrEmpty("filter");
+        filterList.forEach(tag -> {
+            if (tag instanceof CompoundTag compoundTag) {
+                int slot = compoundTag.getIntOr("slot", 0);
+                MiscUtil.loadFromTag(tag, ItemStack.CODEC, registries, stack -> this.filter.setItem(slot, stack));
+            }
+        });
         this.filter.setMatchComponents(valueInput.getBooleanOr("match_components", false));
         this.leaveOne = valueInput.getBooleanOr("leave_one", false);
     }
 
     @Override
-    protected void saveAdditional(ValueOutput valueOutput) {
-        super.saveAdditional(valueOutput);
-        ValueOutput.TypedOutputList<ItemStackWithSlot> filterList = valueOutput.list("filter", ItemStackWithSlot.CODEC);
+    protected void saveAdditional(CompoundTag valueOutput, HolderLookup.Provider registries) {
+        super.saveAdditional(valueOutput, registries);
+        ListTag filterList = new ListTag();
         for (int slot = 0; slot < this.filter.getContainerSize(); slot++) {
             ItemStack stack = this.filter.getItem(slot);
             if (!stack.isEmpty()) {
-                filterList.add(new ItemStackWithSlot(slot, stack));
+                CompoundTag tag = new CompoundTag();
+                tag.putInt("slot", slot);
+                MiscUtil.saveToTag(tag, stack, ItemStack.CODEC, registries, filterList::add);
             }
         }
+        valueOutput.put("filter", filterList);
         valueOutput.putBoolean("match_components", this.filter.shouldMatchComponents());
         valueOutput.putBoolean("leave_one", this.leaveOne);
     }

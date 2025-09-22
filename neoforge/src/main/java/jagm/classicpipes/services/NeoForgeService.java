@@ -36,7 +36,6 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
-import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
@@ -75,7 +74,7 @@ public class NeoForgeService implements LoaderService {
 
     @Override
     public void sendToServer(CustomPacketPayload payload) {
-        ClientPacketDistributor.sendToServer(payload);
+        PacketDistributor.sendToServer(payload);
     }
 
     @Override

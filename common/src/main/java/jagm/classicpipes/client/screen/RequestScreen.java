@@ -14,7 +14,7 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ARGB;
@@ -75,24 +75,19 @@ public class RequestScreen extends AbstractContainerScreen<RequestMenu> {
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         this.updatePageButtons();
-        this.renderContents(graphics, mouseX, mouseY, partialTicks);
-        this.renderTooltip(graphics, mouseX, mouseY);
-    }
-
-    @Override
-    public void renderContents(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
-        super.renderContents(graphics, mouseX, mouseY, partialTicks);
-        graphics.pose().pushMatrix();
-        graphics.pose().translate((float) this.leftPos, (float) this.topPos);
+        super.render(graphics, mouseX, mouseY, partialTicks);
+        graphics.pose().pushPose();
+        graphics.pose().translate(this.leftPos, this.topPos, 0.0F);
         this.hoveredSlot = this.getHoveredSlot(mouseX, mouseY);
         if (this.hoveredSlot != null && this.hoveredSlot.isHighlightable()) {
-            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT_HIGHLIGHT_BACK_SPRITE, this.hoveredSlot.x - 4, this.hoveredSlot.y - 4, 24, 24);
+            graphics.blitSprite(RenderType::guiTextured, SLOT_HIGHLIGHT_BACK_SPRITE, this.hoveredSlot.x - 4, this.hoveredSlot.y - 4, 24, 24);
         }
-        this.renderSlots(graphics);
+        this.renderSlotsReal(graphics);
         if (this.hoveredSlot != null && this.hoveredSlot.isHighlightable()) {
-            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT_HIGHLIGHT_FRONT_SPRITE, this.hoveredSlot.x - 4, this.hoveredSlot.y - 4, 24, 24);
+            graphics.blitSprite(RenderType::guiTexturedOverlay, SLOT_HIGHLIGHT_FRONT_SPRITE, this.hoveredSlot.x - 4, this.hoveredSlot.y - 4, 24, 24);
         }
-        graphics.pose().popMatrix();
+        graphics.pose().popPose();
+        this.renderTooltip(graphics, mouseX, mouseY);
     }
 
     private Slot getHoveredSlot(double mouseX, double mouseY) {
@@ -108,7 +103,9 @@ public class RequestScreen extends AbstractContainerScreen<RequestMenu> {
     }
 
     @Override
-    protected void renderSlots(GuiGraphics graphics) {
+    protected void renderSlots(GuiGraphics graphics) {}
+
+    protected void renderSlotsReal(GuiGraphics graphics) {
         for (Slot slot : this.menu.displaySlots) {
             if (slot.isActive()) {
                 this.renderSlot(graphics, slot);
@@ -120,7 +117,7 @@ public class RequestScreen extends AbstractContainerScreen<RequestMenu> {
     protected void renderBg(GuiGraphics graphics, float f, int x, int y) {
         int i = (this.width - this.imageWidth) / 2;
         int j = (this.height - this.imageHeight) / 2;
-        graphics.blit(RenderPipelines.GUI_TEXTURED, BACKGROUND, i, j, 0.0F, 0.0F, this.imageWidth, this.imageHeight, 256, 256);
+        graphics.blit(RenderType::guiTextured, BACKGROUND, i, j, 0.0F, 0.0F, this.imageWidth, this.imageHeight, 256, 256);
     }
 
     @Override
@@ -138,10 +135,11 @@ public class RequestScreen extends AbstractContainerScreen<RequestMenu> {
         int seed = slot.x + slot.y * this.imageWidth;
         graphics.renderItem(stack, slot.x, slot.y, seed);
         if (!stack.isEmpty()) {
-            graphics.pose().pushMatrix();
+            graphics.pose().pushPose();
+            graphics.pose().translate(0, 0, 200.0F);
             this.renderItemBar(graphics, stack, slot.x, slot.y);
             this.renderItemCount(graphics, this.font, stack, slot.x, slot.y, this.menu.itemCraftable(stack));
-            graphics.pose().popMatrix();
+            graphics.pose().popPose();
         }
     }
 
@@ -149,8 +147,8 @@ public class RequestScreen extends AbstractContainerScreen<RequestMenu> {
         if (stack.isBarVisible()) {
             int i = x + 2;
             int j = y + 13;
-            graphics.fill(RenderPipelines.GUI, i, j, i + 13, j + 2, -16777216);
-            graphics.fill(RenderPipelines.GUI, i, j, i + stack.getBarWidth(), j + 1, ARGB.opaque(stack.getBarColor()));
+            graphics.fill(RenderType.gui(), i, j, i + 13, j + 2, -16777216);
+            graphics.fill(RenderType.gui(), i, j, i + stack.getBarWidth(), j + 1, ARGB.opaque(stack.getBarColor()));
         }
     }
 
@@ -160,7 +158,7 @@ public class RequestScreen extends AbstractContainerScreen<RequestMenu> {
         int colour = colourForCount(count);
         float countScale = 1.0F;
         if (this.minecraft != null) {
-            final int guiScale = this.minecraft.getWindow().getGuiScale();
+            final int guiScale = (int) this.minecraft.getWindow().getGuiScale();
             int numerator = guiScale;
             while (font.width(s) * countScale > 16 && numerator > 1) {
                 numerator--;
@@ -168,11 +166,11 @@ public class RequestScreen extends AbstractContainerScreen<RequestMenu> {
             }
         }
         int slotOffset = countScale == 1.0F ? 17 : 16;
-        graphics.pose().pushMatrix();
-        graphics.pose().translate(x + slotOffset, y + slotOffset);
-        graphics.pose().scale(countScale);
+        graphics.pose().pushPose();
+        graphics.pose().translate(x + slotOffset, y + slotOffset, 0.0F);
+        graphics.pose().scale(countScale, countScale, 1.0F);
         graphics.drawString(font, s, -font.width(s), -8, colour, true);
-        graphics.pose().popMatrix();
+        graphics.pose().popPose();
     }
 
     private static int colourForCount(int count) {

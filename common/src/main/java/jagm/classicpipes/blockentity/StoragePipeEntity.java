@@ -8,6 +8,8 @@ import jagm.classicpipes.services.Services;
 import jagm.classicpipes.util.FacingOrNone;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.MenuProvider;
@@ -16,8 +18,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.storage.ValueInput;
-import net.minecraft.world.level.storage.ValueOutput;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -143,17 +143,17 @@ public class StoragePipeEntity extends NetworkedPipeEntity implements MenuProvid
     }
 
     @Override
-    protected void loadAdditional(ValueInput valueInput) {
+    protected void loadAdditional(CompoundTag valueInput, HolderLookup.Provider registries) {
         this.cacheInitialised = false;
-        super.loadAdditional(valueInput);
+        super.loadAdditional(valueInput, registries);
         this.defaultRoute = valueInput.getBooleanOr("default_route", false);
         this.matchComponents = valueInput.getBooleanOr("match_components", false);
         this.leaveOne = valueInput.getBooleanOr("leave_one", false);
     }
 
     @Override
-    protected void saveAdditional(ValueOutput valueOutput) {
-        super.saveAdditional(valueOutput);
+    protected void saveAdditional(CompoundTag valueOutput, HolderLookup.Provider registries) {
+        super.saveAdditional(valueOutput, registries);
         valueOutput.putBoolean("default_route", this.isDefaultRoute());
         valueOutput.putBoolean("match_components", this.shouldMatchComponents());
         valueOutput.putBoolean("leave_one", this.shouldLeaveOne());
