@@ -2,9 +2,15 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "O": "minecraft:acacia_planks",
-    "W": "minecraft:glass",
-    "X": "minecraft:honeycomb"
+    "O": {
+      "item": "minecraft:acacia_planks"
+    },
+    "W": {
+      "item": "minecraft:glass"
+    },
+    "X": {
+      "item": "minecraft:honeycomb"
+    }
   },
   "pattern": [
     "OWO",

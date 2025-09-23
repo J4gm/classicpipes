@@ -2,9 +2,15 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "Q": "minecraft:quartz",
-    "P": "classicpipes:request_pipe",
-    "S": "minecraft:stick"
+    "Q": {
+      "item": "minecraft:quartz"
+    },
+    "P": {
+      "item": "classicpipes:request_pipe"
+    },
+    "S": {
+      "item": "minecraft:stick"
+    }
   },
   "pattern": [
     "Q Q",

@@ -20,7 +20,6 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
@@ -59,7 +58,6 @@ public class ClassicPipes {
     public static final Block DARK_OAK_PIPE = createWoodenPipe("dark_oak_pipe", MapColor.COLOR_BROWN);
     public static final Block MANGROVE_PIPE = createWoodenPipe("mangrove_pipe", MapColor.COLOR_RED);
     public static final Block CHERRY_PIPE = createWoodenPipe("cherry_pipe", MapColor.TERRACOTTA_WHITE);
-    public static final Block PALE_OAK_PIPE = createWoodenPipe("pale_oak_pipe", MapColor.QUARTZ);
     public static final Block BAMBOO_PIPE = createWoodenPipe("bamboo_pipe", MapColor.COLOR_YELLOW);
     public static final Block CRIMSON_PIPE = createWoodenPipe("crimson_pipe", MapColor.CRIMSON_STEM);
     public static final Block WARPED_PIPE = createWoodenPipe("warped_pipe", MapColor.WARPED_STEM);
@@ -88,7 +86,6 @@ public class ClassicPipes {
     public static final Block DARK_OAK_FLUID_PIPE = createWoodenFluidPipe("dark_oak_fluid_pipe", MapColor.COLOR_BROWN);
     public static final Block MANGROVE_FLUID_PIPE = createWoodenFluidPipe("mangrove_fluid_pipe", MapColor.COLOR_RED);
     public static final Block CHERRY_FLUID_PIPE = createWoodenFluidPipe("cherry_fluid_pipe", MapColor.TERRACOTTA_WHITE);
-    public static final Block PALE_OAK_FLUID_PIPE = createWoodenFluidPipe("pale_oak_fluid_pipe", MapColor.QUARTZ);
     public static final Block BAMBOO_FLUID_PIPE = createWoodenFluidPipe("bamboo_fluid_pipe", MapColor.COLOR_YELLOW);
     public static final Block CRIMSON_FLUID_PIPE = createWoodenFluidPipe("crimson_fluid_pipe", MapColor.CRIMSON_STEM);
     public static final Block WARPED_FLUID_PIPE = createWoodenFluidPipe("warped_fluid_pipe", MapColor.WARPED_STEM);
@@ -100,7 +97,7 @@ public class ClassicPipes {
     public static final Block BRICK_FLUID_PIPE = createPipe("brick_fluid_pipe", BrickFluidPipeBlock::new, SoundType.DECORATED_POT, MapColor.COLOR_RED, 0.25F, translateDesc("brick_fluid_pipe"));
     public static final Block OBSIDIAN_FLUID_PIPE = createPipe("obsidian_fluid_pipe", ObsidianFluidPipeBlock::new, SoundType.DECORATED_POT, MapColor.COLOR_BLACK, 0.25F, translateDesc("obsidian_fluid_pipe"));
 
-    public static final BlockEntityType<RoundRobinPipeEntity> BASIC_PIPE_ENTITY = Services.LOADER_SERVICE.createBlockEntityType(RoundRobinPipeEntity::new, OAK_PIPE, SPRUCE_PIPE, BIRCH_PIPE, JUNGLE_PIPE, ACACIA_PIPE, DARK_OAK_PIPE, MANGROVE_PIPE, CHERRY_PIPE, PALE_OAK_PIPE, BAMBOO_PIPE, CRIMSON_PIPE, WARPED_PIPE, BRICK_PIPE);
+    public static final BlockEntityType<RoundRobinPipeEntity> BASIC_PIPE_ENTITY = Services.LOADER_SERVICE.createBlockEntityType(RoundRobinPipeEntity::new, OAK_PIPE, SPRUCE_PIPE, BIRCH_PIPE, JUNGLE_PIPE, ACACIA_PIPE, DARK_OAK_PIPE, MANGROVE_PIPE, CHERRY_PIPE, BAMBOO_PIPE, CRIMSON_PIPE, WARPED_PIPE, BRICK_PIPE);
     public static final BlockEntityType<GoldenPipeEntity> GOLDEN_PIPE_ENTITY = Services.LOADER_SERVICE.createBlockEntityType(GoldenPipeEntity::new, GOLDEN_PIPE);
     public static final BlockEntityType<CopperPipeEntity> COPPER_PIPE_ENTITY = Services.LOADER_SERVICE.createBlockEntityType(CopperPipeEntity::new, COPPER_PIPE);
     public static final BlockEntityType<IronPipeEntity> IRON_PIPE_ENTITY = Services.LOADER_SERVICE.createBlockEntityType(IronPipeEntity::new, IRON_PIPE);
@@ -116,7 +113,7 @@ public class ClassicPipes {
     public static final BlockEntityType<MatchingPipeEntity> MATCHING_PIPE_ENTITY = Services.LOADER_SERVICE.createBlockEntityType(MatchingPipeEntity::new, MATCHING_PIPE);
     public static final BlockEntityType<StoragePipeEntity> STORAGE_PIPE_ENTITY = Services.LOADER_SERVICE.createBlockEntityType(StoragePipeEntity::new, STORAGE_PIPE);
     public static final BlockEntityType<RecipePipeEntity> RECIPE_PIPE_ENTITY = Services.LOADER_SERVICE.createBlockEntityType(RecipePipeEntity::new, RECIPE_PIPE);
-    public static final BlockEntityType<FluidPipeEntity> FLUID_PIPE_ENTITY = Services.LOADER_SERVICE.createBlockEntityType(FluidPipeEntity::new, OAK_FLUID_PIPE, SPRUCE_FLUID_PIPE, BIRCH_FLUID_PIPE, JUNGLE_FLUID_PIPE, ACACIA_FLUID_PIPE, DARK_OAK_FLUID_PIPE, MANGROVE_FLUID_PIPE, CHERRY_FLUID_PIPE, PALE_OAK_FLUID_PIPE, BAMBOO_FLUID_PIPE, CRIMSON_FLUID_PIPE, WARPED_FLUID_PIPE, BRICK_FLUID_PIPE);
+    public static final BlockEntityType<FluidPipeEntity> FLUID_PIPE_ENTITY = Services.LOADER_SERVICE.createBlockEntityType(FluidPipeEntity::new, OAK_FLUID_PIPE, SPRUCE_FLUID_PIPE, BIRCH_FLUID_PIPE, JUNGLE_FLUID_PIPE, ACACIA_FLUID_PIPE, DARK_OAK_FLUID_PIPE, MANGROVE_FLUID_PIPE, CHERRY_FLUID_PIPE, BAMBOO_FLUID_PIPE, CRIMSON_FLUID_PIPE, WARPED_FLUID_PIPE, BRICK_FLUID_PIPE);
     public static final BlockEntityType<CopperFluidPipeEntity> COPPER_FLUID_PIPE_ENTITY = Services.LOADER_SERVICE.createBlockEntityType(CopperFluidPipeEntity::new, COPPER_FLUID_PIPE);
     public static final BlockEntityType<IronFluidPipeEntity> IRON_FLUID_PIPE_ENTITY = Services.LOADER_SERVICE.createBlockEntityType(IronFluidPipeEntity::new, IRON_FLUID_PIPE);
     public static final BlockEntityType<LapisFluidPipeEntity> LAPIS_FLUID_PIPE_ENTITY = Services.LOADER_SERVICE.createBlockEntityType(LapisFluidPipeEntity::new, LAPIS_FLUID_PIPE);
@@ -125,9 +122,9 @@ public class ClassicPipes {
     public static final BlockEntityType<AdvancedCopperPipeEntity> ADVANCED_COPPER_PIPE_ENTITY = Services.LOADER_SERVICE.createBlockEntityType(AdvancedCopperPipeEntity::new, ADVANCED_COPPER_PIPE);
     public static final BlockEntityType<AdvancedCopperFluidPipeEntity> ADVANCED_COPPER_FLUID_PIPE_ENTITY = Services.LOADER_SERVICE.createBlockEntityType(AdvancedCopperFluidPipeEntity::new, ADVANCED_COPPER_FLUID_PIPE);
 
-    public static final Item PIPE_SLICER = createItem("pipe_slicer", Item::new, 1, false, translateDesc("pipe_slicer"));
-    public static final Item TAG_LABEL = createItem("tag_label", TagLabelItem::new, 1, false);
-    public static final Item MOD_LABEL = createItem("mod_label", ModLabelItem::new, 1, false);
+    public static final Item PIPE_SLICER = createItem("pipe_slicer", Item::new, 1, translateDesc("pipe_slicer"));
+    public static final Item TAG_LABEL = createItem("tag_label", TagLabelItem::new, 1);
+    public static final Item MOD_LABEL = createItem("mod_label", ModLabelItem::new, 1);
 
     public static final DataComponentType<String> LABEL_COMPONENT = DataComponentType.<String>builder().persistent(Codec.STRING).networkSynchronized(ByteBufCodecs.STRING_UTF8).build();
     public static final ResourceKey<DataComponentType<?>> LABEL_COMPONENT_KEY = MiscUtil.makeKey(BuiltInRegistries.DATA_COMPONENT_TYPE.key(), "label");
@@ -157,16 +154,13 @@ public class ClassicPipes {
     public static final MenuType<AdvancedCopperPipeMenu> ADVANCED_COPPER_PIPE_MENU = Services.LOADER_SERVICE.createMenuType(AdvancedCopperPipeMenu::new, ClientBoundBoolPayload.STREAM_CODEC);
     public static final MenuType<AdvancedCopperFluidPipeMenu> ADVANCED_COPPER_FLUID_PIPE_MENU = Services.LOADER_SERVICE.createSimpleMenuType(AdvancedCopperFluidPipeMenu::new);
 
-    private static Item createItem(String name, Function<Item.Properties, Item> factory, int stackSize, boolean fashionable, Component... lore) {
-        Item.Properties props = new Item.Properties().setId(MiscUtil.makeKey(Registries.ITEM, name));
+    private static Item createItem(String name, Function<Item.Properties, Item> factory, int stackSize, Component... lore) {
+        Item.Properties props = new Item.Properties();
         if (stackSize < 64) {
             props.stacksTo(stackSize);
         }
         if (lore.length > 0) {
             props.component(DataComponents.LORE, new ItemLore(List.of(), Arrays.asList(lore)));
-        }
-        if (fashionable) {
-            props.equippableUnswappable(EquipmentSlot.HEAD);
         }
         Item item = factory.apply(props);
         ITEMS.put(name, item);
@@ -174,9 +168,9 @@ public class ClassicPipes {
     }
 
     private static Block createBlock(String name, Function<BlockBehaviour.Properties, Block> factory, BlockBehaviour.Properties props, Component... lore) {
-        Block block = factory.apply(props.setId(MiscUtil.makeKey(Registries.BLOCK, name)));
+        Block block = factory.apply(props);
         BLOCKS.put(name, block);
-        createItem(name, itemProps -> new BlockItem(block, itemProps), 64, true, lore);
+        createItem(name, itemProps -> new BlockItem(block, itemProps), 64, lore);
         return block;
     }
 

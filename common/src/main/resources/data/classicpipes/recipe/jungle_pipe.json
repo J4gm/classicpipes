@@ -2,8 +2,12 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "O": "minecraft:jungle_planks",
-    "W": "minecraft:glass"
+    "O": {
+      "item": "minecraft:jungle_planks"
+    },
+    "W": {
+      "item": "minecraft:glass"
+    }
   },
   "pattern": [
     "OWO"

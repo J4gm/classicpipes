@@ -46,7 +46,7 @@ public class FluidPipeRenderer implements BlockEntityRenderer<FluidPipeEntity> {
     }
 
     @Override
-    public void render(FluidPipeEntity pipe, float partialTicks, PoseStack poses, MultiBufferSource bufferSource, int light, int overlay, Vec3 cameraPos) {
+    public void render(FluidPipeEntity pipe, float partialTicks, PoseStack poses, MultiBufferSource bufferSource, int light, int overlay) {
         if (!this.lastWidths.containsKey(pipe)) {
             this.lastWidths.put(pipe, 0.0F);
         }
@@ -100,7 +100,8 @@ public class FluidPipeRenderer implements BlockEntityRenderer<FluidPipeEntity> {
                 for (FluidInPipe fluidPacket : pipe.getContents()) {
                     Direction direction = fluidPacket.getProgress() < ItemInPipe.HALFWAY ? fluidPacket.getFromDirection() : fluidPacket.getTargetDirection();
                     poses.pushPose();
-                    poses.translate(fluidPacket.getDebugRenderPosition(partialTicks));
+                    Vec3 vec = fluidPacket.getDebugRenderPosition(partialTicks);
+                    poses.translate(vec.x, vec.y, vec.z);
                     poses.scale(0.4375F, 0.4375F, 0.4375F);
                     if (direction.equals(Direction.EAST) || direction.equals(Direction.WEST)) {
                         poses.mulPose(Axis.YP.rotationDegrees(90.0F));

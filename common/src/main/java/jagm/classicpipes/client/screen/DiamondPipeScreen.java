@@ -9,7 +9,6 @@ import jagm.classicpipes.util.MiscUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Tooltip;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -54,7 +53,7 @@ public class DiamondPipeScreen extends FilterScreen<DiamondPipeMenu> {
     protected void renderBg(GuiGraphics graphics, float f, int x, int y) {
         int i = (this.width - 176) / 2 - 32;
         int j = (this.height - this.imageHeight) / 2;
-        graphics.blit(RenderType::guiTextured, BACKGROUND, i, j, 0.0F, 0.0F, this.imageWidth + 32, this.imageHeight, 256, 256);
+        graphics.blit(BACKGROUND, i, j, 0.0F, 0.0F, this.imageWidth + 32, this.imageHeight, 256, 256);
     }
 
     private void matchComponentsCheckboxChanged(SmallerCheckbox checkbox, boolean checked) {

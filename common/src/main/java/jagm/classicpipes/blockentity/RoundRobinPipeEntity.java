@@ -104,7 +104,7 @@ public class RoundRobinPipeEntity extends ItemPipeEntity {
     @Override
     protected void loadAdditional(CompoundTag valueInput, HolderLookup.Provider registries) {
         super.loadAdditional(valueInput, registries);
-        this.nextDirection = Direction.from3DDataValue(valueInput.getByteOr("next_direction", (byte) 0));
+        this.nextDirection = Direction.from3DDataValue(valueInput.getByte("next_direction"));
     }
 
     @Override

@@ -32,14 +32,12 @@ public class ProviderPipeEntity extends NetworkedPipeEntity implements MenuProvi
     private boolean leaveOne;
     private final List<ItemStack> cache;
     private boolean cacheInitialised = false;
-    private long lastCached;
 
     public ProviderPipeEntity(BlockPos pos, BlockState state) {
         super(ClassicPipes.PROVIDER_PIPE_ENTITY, pos, state);
         this.filter = new SingleItemFilterContainer(this, 9, false);
         this.leaveOne = false;
         this.cache = new ArrayList<>();
-        this.lastCached = 0;
     }
 
     @Override
@@ -65,15 +63,15 @@ public class ProviderPipeEntity extends NetworkedPipeEntity implements MenuProvi
         this.filter.clearContent();
         this.cacheInitialised = false;
         super.loadAdditional(valueInput, registries);
-        ListTag filterList = valueInput.getListOrEmpty("filter");
+        ListTag filterList = valueInput.getList("filter", ListTag.TAG_COMPOUND);
         filterList.forEach(tag -> {
             if (tag instanceof CompoundTag compoundTag) {
-                int slot = compoundTag.getIntOr("slot", 0);
+                int slot = compoundTag.getInt("slot");
                 MiscUtil.loadFromTag(tag, ItemStack.CODEC, registries, stack -> this.filter.setItem(slot, stack));
             }
         });
-        this.filter.setMatchComponents(valueInput.getBooleanOr("match_components", false));
-        this.leaveOne = valueInput.getBooleanOr("leave_one", false);
+        this.filter.setMatchComponents(valueInput.getBoolean("match_components"));
+        this.leaveOne = valueInput.getBoolean("leave_one");
     }
 
     @Override
@@ -121,27 +119,23 @@ public class ProviderPipeEntity extends NetworkedPipeEntity implements MenuProvi
 
     @Override
     public void updateCache(ServerLevel level, BlockPos pos, Direction facing) {
-        long time = level.getGameTime();
-        if (this.lastCached != time) {
-            this.lastCached = time;
-            this.cache.clear();
-            List<ItemStack> stacks = Services.LOADER_SERVICE.getContainerItems(level, pos.relative(facing), facing.getOpposite());
-            Iterator<ItemStack> iterator = stacks.iterator();
-            while (iterator.hasNext()) {
-                ItemStack stack = iterator.next();
-                if (!this.filter.isEmpty() && !this.filter.matches(stack)) {
+        this.cache.clear();
+        List<ItemStack> stacks = Services.LOADER_SERVICE.getContainerItems(level, pos.relative(facing), facing.getOpposite());
+        Iterator<ItemStack> iterator = stacks.iterator();
+        while (iterator.hasNext()) {
+            ItemStack stack = iterator.next();
+            if (!this.filter.isEmpty() && !this.filter.matches(stack)) {
+                iterator.remove();
+            } else if (this.shouldLeaveOne()) {
+                stack.shrink(1);
+                if (stack.isEmpty()) {
                     iterator.remove();
-                } else if (this.shouldLeaveOne()) {
-                    stack.shrink(1);
-                    if (stack.isEmpty()) {
-                        iterator.remove();
-                    }
                 }
             }
-            this.cache.addAll(stacks);
-            if (this.hasNetwork()) {
-                this.getNetwork().cacheUpdated();
-            }
+        }
+        this.cache.addAll(stacks);
+        if (this.hasNetwork()) {
+            this.getNetwork().cacheUpdated();
         }
     }
 

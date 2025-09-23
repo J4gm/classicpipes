@@ -3,7 +3,6 @@ package jagm.classicpipes.client.screen.widget;
 import jagm.classicpipes.util.MiscUtil;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.resources.ResourceLocation;
 
@@ -29,7 +28,7 @@ public class PageButton extends Button {
         ResourceLocation sprite = this.prev ?
                 (!this.active ? PREV_GREYED : (this.isHovered() ? PREV_SELECT : PREV_NORMAL)) :
                 (!this.active ? NEXT_GREYED : (this.isHovered() ? NEXT_SELECT : NEXT_NORMAL));
-        graphics.blitSprite(RenderType::guiTextured, sprite, this.getX(), this.getY(), this.width, this.height);
+        graphics.blitSprite(sprite, this.getX(), this.getY(), this.width, this.height);
     }
 
 }

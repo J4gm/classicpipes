@@ -2,8 +2,12 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "O": "minecraft:gold_nugget",
-    "W": "#classicpipes:pipes/networked"
+    "O": {
+      "item": "minecraft:gold_nugget"
+    },
+    "W": {
+      "tag": "classicpipes:pipes/networked"
+    }
   },
   "pattern": [
     "OWO"

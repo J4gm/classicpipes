@@ -6,14 +6,13 @@ import jagm.classicpipes.util.MiscUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
 
-import java.util.function.Consumer;
+import java.util.List;
 
 public class ModLabelItem extends LabelItem {
 
@@ -22,30 +21,30 @@ public class ModLabelItem extends LabelItem {
     }
 
     @Override
-    public InteractionResult use(Level level, Player player, InteractionHand hand) {
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+        ItemStack labelStack = player.getItemInHand(hand);
         ItemStack targetStack = player.getItemInHand(hand == InteractionHand.MAIN_HAND ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND);
         if (targetStack.isEmpty()) {
             if (level.isClientSide()) {
                 player.displayClientMessage(Component.translatable("chat." + ClassicPipes.MOD_ID + ".nothing_in_offhand"), false);
             }
         } else {
-            ItemStack labelStack = player.getItemInHand(hand);
             String mod = MiscUtil.modFromItem(targetStack);
             labelStack.set(ClassicPipes.LABEL_COMPONENT, mod);
             if (level.isClientSide()) {
                 player.displayClientMessage(Component.translatable("chat." + ClassicPipes.MOD_ID + ".mod_set", Component.literal(Services.LOADER_SERVICE.getModName(mod)).withStyle(ChatFormatting.LIGHT_PURPLE)), false);
             }
         }
-        return InteractionResult.SUCCESS;
+        return InteractionResultHolder.success(labelStack);
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> tooltipAdder, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         String mod = stack.get(ClassicPipes.LABEL_COMPONENT);
         if (mod != null) {
-            tooltipAdder.accept(Component.literal(Services.LOADER_SERVICE.getModName(mod)).withStyle(ChatFormatting.LIGHT_PURPLE));
+            tooltip.add(Component.literal(Services.LOADER_SERVICE.getModName(mod)).withStyle(ChatFormatting.LIGHT_PURPLE));
         } else {
-            tooltipAdder.accept(Component.translatable("item." + ClassicPipes.MOD_ID + ".mod_label.desc").withStyle(ChatFormatting.GRAY));
+            tooltip.add(Component.translatable("item." + ClassicPipes.MOD_ID + ".mod_label.desc").withStyle(ChatFormatting.GRAY));
         }
     }
 

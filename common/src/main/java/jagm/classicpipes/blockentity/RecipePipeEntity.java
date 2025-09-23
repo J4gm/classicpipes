@@ -277,7 +277,7 @@ public class RecipePipeEntity extends NetworkedPipeEntity implements MenuProvide
         this.filter.clearContent();
         this.heldItems.clear();
         super.loadAdditional(valueInput, registries);
-        byte[] directionsByteList = valueInput.getByteArray("slot_directions").orElse(new byte[0]);
+        byte[] directionsByteList = valueInput.getByteArray("slot_directions");
         int i = 0;
         for (byte directionByte : directionsByteList) {
             if (i >= 10) {
@@ -286,25 +286,25 @@ public class RecipePipeEntity extends NetworkedPipeEntity implements MenuProvide
             this.slotDirections[i] = Direction.from3DDataValue(directionByte);
             i++;
         }
-        ListTag filterList = valueInput.getListOrEmpty("filter");
+        ListTag filterList = valueInput.getList("filter", ListTag.TAG_COMPOUND);
         filterList.forEach(tag -> {
             if (tag instanceof CompoundTag compoundTag) {
-                int slot = compoundTag.getIntOr("slot", 0);
+                int slot = compoundTag.getInt("slot");
                 MiscUtil.loadFromTag(tag, ItemStack.CODEC, registries, stack -> this.filter.setItem(slot, stack));
             }
         });
-        ListTag heldItemList = valueInput.getListOrEmpty("held_items");
+        ListTag heldItemList = valueInput.getList("held_items", ListTag.TAG_COMPOUND);
         heldItemList.forEach(tag -> {
             if (tag instanceof CompoundTag compoundTag) {
-                int slot = compoundTag.getIntOr("slot", 0);
+                int slot = compoundTag.getInt("slot");
                 if (slot >= 0 && slot < 9) {
                     MiscUtil.loadFromTag(tag, ItemStack.CODEC, registries, stack -> this.heldItems.set(slot, stack));
                 }
             }
         });
-        this.waitingForCraft = valueInput.getIntOr("waiting_for_craft", 0);
-        this.crafterTicked = valueInput.getBooleanOr("crafter_ticked", false);
-        this.cooldown = valueInput.getByteOr("cooldown", DEFAULT_COOLDOWN);
+        this.waitingForCraft = valueInput.getInt("waiting_for_craft");
+        this.crafterTicked = valueInput.getBoolean("crafter_ticked");
+        this.cooldown = valueInput.getByte("cooldown");
     }
 
     @Override

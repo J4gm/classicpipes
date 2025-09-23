@@ -2,8 +2,12 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "O": "classicpipes:copper_fluid_pipe",
-    "W": "minecraft:netherite_ingot"
+    "O": {
+      "item": "classicpipes:copper_fluid_pipe"
+    },
+    "W": {
+      "item": "minecraft:netherite_ingot"
+    }
   },
   "pattern": [
     "OOO",

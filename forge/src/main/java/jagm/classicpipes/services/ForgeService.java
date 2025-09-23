@@ -7,7 +7,6 @@ import jagm.classicpipes.network.ForgePacketHandler;
 import jagm.classicpipes.util.FluidInPipe;
 import jagm.classicpipes.util.ItemInPipe;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -21,6 +20,7 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.ItemStack;
@@ -47,7 +47,6 @@ import org.apache.commons.lang3.function.TriFunction;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
@@ -55,7 +54,7 @@ public class ForgeService implements LoaderService {
 
     @Override
     public <B extends BlockEntity> BlockEntityType<B> createBlockEntityType(BiFunction<BlockPos, BlockState, B> blockEntitySupplier, Block... validBlocks) {
-        return new BlockEntityType<>(blockEntitySupplier::apply, Set.of(validBlocks));
+        return BlockEntityType.Builder.of(blockEntitySupplier::apply, validBlocks).build(null);
     }
 
     @Override
@@ -270,7 +269,7 @@ public class ForgeService implements LoaderService {
     public FluidRenderInfo getFluidRenderInfo(FluidState fluidState, BlockAndTintGetter level, BlockPos pos) {
         IClientFluidTypeExtensions fluidInfo = IClientFluidTypeExtensions.of(fluidState);
         int tint = fluidInfo.getTintColor(fluidState, level, pos);
-        TextureAtlasSprite sprite = Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(fluidInfo.getStillTexture(fluidState, level, pos));
+        TextureAtlasSprite sprite = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(fluidInfo.getStillTexture(fluidState, level, pos));
         return new FluidRenderInfo(tint, sprite);
     }
 
@@ -278,7 +277,7 @@ public class ForgeService implements LoaderService {
     public FluidRenderInfo getFluidRenderInfo(FluidState fluidState) {
         IClientFluidTypeExtensions fluidInfo = IClientFluidTypeExtensions.of(fluidState);
         int tint = fluidInfo.getTintColor();
-        TextureAtlasSprite sprite = Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(fluidInfo.getStillTexture());
+        TextureAtlasSprite sprite = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(fluidInfo.getStillTexture());
         return new FluidRenderInfo(tint, sprite);
     }
 

@@ -35,7 +35,16 @@ public class RecipePipeMenu extends FilterMenu {
             }
         }
         this.addSlot(new FilterSlot(filter, 9, 125, 35));
-        this.addStandardInventorySlots(playerInventory, 8, 89);
+        int x = 8;
+        int y = 89;
+        for (int i = 0; i < 3; ++i) {
+            for (int j = 0; j < 9; ++j) {
+                this.addSlot(new Slot(playerInventory, j + i * 9 + 9, x + j * 18, y + i * 18));
+            }
+        }
+        for (int i = 0; i < 9; ++i) {
+            this.addSlot(new Slot(playerInventory, i, x + i * 18, y + 58));
+        }
     }
 
     public void setSlotDirection(int slot, Direction direction) {

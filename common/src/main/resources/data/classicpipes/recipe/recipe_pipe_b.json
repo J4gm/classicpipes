@@ -2,8 +2,12 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "O": "#classicpipes:pipes/networked",
-    "W": "minecraft:crafter"
+    "O": {
+      "tag": "classicpipes:pipes/networked"
+    },
+    "W": {
+      "item": "minecraft:crafter"
+    }
   },
   "pattern": [
     "OOO",

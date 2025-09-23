@@ -2,8 +2,12 @@
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    "minecraft:name_tag",
-    "classicpipes:diamond_pipe"
+    {
+      "item": "minecraft:name_tag"
+    },
+    {
+      "item": "classicpipes:diamond_pipe"
+    }
   ],
   "result": {
     "count": 1,

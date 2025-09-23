@@ -1,19 +1,20 @@
 package jagm.classicpipes.client.screen;
 
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.*;
 import jagm.classicpipes.client.renderer.FluidRenderInfo;
 import jagm.classicpipes.inventory.container.Filter;
 import jagm.classicpipes.inventory.menu.FluidFilterMenu;
 import jagm.classicpipes.services.Services;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.ARGB;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
+import org.joml.Matrix4f;
 
 public abstract class FluidFilterScreen<T extends FluidFilterMenu> extends FilterScreen<T> {
 
@@ -27,8 +28,27 @@ public abstract class FluidFilterScreen<T extends FluidFilterMenu> extends Filte
             Fluid fluid = Services.LOADER_SERVICE.getFluidFromStack(slot.getItem());
             if (fluid != null) {
                 FluidRenderInfo info = Services.LOADER_SERVICE.getFluidRenderInfo(fluid.defaultFluidState());
-                graphics.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, ARGB.opaque(info.tint()));
-                graphics.blitSprite(RenderType::guiTextured, info.sprite(), slot.x, slot.y, 16, 16, info.tint());
+                graphics.fill(RenderType.gui(), slot.x, slot.y, slot.x + 16, slot.y + 16, info.tint() | 0xFF000000);
+                RenderSystem.setShaderTexture(0, info.sprite().atlasLocation());
+                RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
+                RenderSystem.enableBlend();
+                Matrix4f matrix4f = graphics.pose().last().pose();
+                BufferBuilder bufferbuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+                float x1 = slot.x;
+                float y1 = slot.y;
+                float x2 = slot.x + 16;
+                float y2 = slot.y + 16;
+                float minU = info.sprite().getU0();
+                float maxU = info.sprite().getU1();
+                float minV = info.sprite().getV0();
+                float maxV = info.sprite().getV1();
+                bufferbuilder.addVertex(matrix4f, x1, y1, 0).setUv(minU, minV).setColor(info.tint());
+                bufferbuilder.addVertex(matrix4f, x1, y2, 0).setUv(minU, maxV).setColor(info.tint());
+                bufferbuilder.addVertex(matrix4f, x2, y2, 0).setUv(maxU, maxV).setColor(info.tint());
+                bufferbuilder.addVertex(matrix4f, x2, y1, 0).setUv(maxU, minV).setColor(info.tint());
+                BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
+                RenderSystem.disableBlend();
+                //graphics.blitSprite(info.sprite().atlasLocation(), slot.x, slot.y, 16, 16);
                 return;
             }
         }
@@ -39,7 +59,7 @@ public abstract class FluidFilterScreen<T extends FluidFilterMenu> extends Filte
     protected void renderTooltip(GuiGraphics graphics, int mouseX, int mouseY) {
         if (this.hoveredSlot != null && this.hoveredSlot.hasItem()) {
             ItemStack stack = this.hoveredSlot.getItem();
-            if (this.menu.getCarried().isEmpty() || stack.getTooltipImage().map(ClientTooltipComponent::create).map(ClientTooltipComponent::showTooltipWithItemInHand).orElse(false)) {
+            if (this.menu.getCarried().isEmpty()) {
                 if (this.hoveredSlot.container instanceof Filter) {
                     Fluid fluid = Services.LOADER_SERVICE.getFluidFromStack(stack);
                     if (fluid != null) {
@@ -47,7 +67,7 @@ public abstract class FluidFilterScreen<T extends FluidFilterMenu> extends Filte
                         return;
                     }
                 }
-                graphics.renderTooltip(this.font, this.getTooltipFromContainerItem(stack), stack.getTooltipImage(), mouseX, mouseY, stack.get(DataComponents.TOOLTIP_STYLE));
+                graphics.renderTooltip(this.font, this.getTooltipFromContainerItem(stack), stack.getTooltipImage(), mouseX, mouseY);
             }
         }
     }

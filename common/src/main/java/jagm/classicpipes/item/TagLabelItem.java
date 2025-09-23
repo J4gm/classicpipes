@@ -6,17 +6,15 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 public class TagLabelItem extends LabelItem {
 
@@ -25,7 +23,8 @@ public class TagLabelItem extends LabelItem {
     }
 
     @Override
-    public InteractionResult use(Level level, Player player, InteractionHand hand) {
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+        ItemStack labelStack = player.getItemInHand(hand);
         ItemStack targetStack = player.getItemInHand(hand == InteractionHand.MAIN_HAND ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND);
         List<String> tags = new ArrayList<>();
         for (TagKey<Item> tagKey : targetStack.getTags().toList()) {
@@ -40,7 +39,6 @@ public class TagLabelItem extends LabelItem {
                 player.displayClientMessage(Component.translatable("chat." + ClassicPipes.MOD_ID + ".no_tags_in_hand"), false);
             }
         } else {
-            ItemStack labelStack = player.getItemInHand(hand);
             String currentTag = labelStack.get(ClassicPipes.LABEL_COMPONENT);
             if (currentTag == null || !tags.contains(currentTag)) {
                 labelStack.set(ClassicPipes.LABEL_COMPONENT, tags.getFirst());
@@ -60,7 +58,7 @@ public class TagLabelItem extends LabelItem {
                 }
             }
         }
-        return InteractionResult.SUCCESS;
+        return InteractionResultHolder.success(labelStack);
     }
 
     private Component tagSetMessage(String tag) {
@@ -82,16 +80,16 @@ public class TagLabelItem extends LabelItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> tooltipAdder, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         String tag = stack.get(ClassicPipes.LABEL_COMPONENT);
         if (tag != null) {
             MutableComponent tagTranslation = Component.translatableWithFallback(labelToTranslationKey(tag), "");
             if (!tagTranslation.getString().isEmpty()) {
-                tooltipAdder.accept(tagTranslation.withStyle(ChatFormatting.YELLOW));
+                tooltip.add(tagTranslation.withStyle(ChatFormatting.YELLOW));
             }
-            tooltipAdder.accept(Component.literal("#" + tag).withStyle(ChatFormatting.YELLOW));
+            tooltip.add(Component.literal("#" + tag).withStyle(ChatFormatting.YELLOW));
         } else {
-            tooltipAdder.accept(Component.translatable("item." + ClassicPipes.MOD_ID + ".tag_label.desc").withStyle(ChatFormatting.GRAY));
+            tooltip.add(Component.translatable("item." + ClassicPipes.MOD_ID + ".tag_label.desc").withStyle(ChatFormatting.GRAY));
         }
     }
 

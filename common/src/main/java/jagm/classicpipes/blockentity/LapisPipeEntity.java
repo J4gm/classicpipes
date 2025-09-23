@@ -55,7 +55,7 @@ public class LapisPipeEntity extends RoundRobinPipeEntity {
     @Override
     protected void loadAdditional(CompoundTag valueInput, HolderLookup.Provider registries) {
         super.loadAdditional(valueInput, registries);
-        this.entryDirection = Direction.from3DDataValue(valueInput.getByteOr("entry_direction", (byte) 0));
+        this.entryDirection = Direction.from3DDataValue(valueInput.getByte("entry_direction"));
     }
 
     @Override

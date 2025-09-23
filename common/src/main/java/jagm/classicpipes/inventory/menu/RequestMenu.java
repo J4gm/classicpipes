@@ -226,7 +226,7 @@ public class RequestMenu extends AbstractContainerMenu {
             }
         }
         search = normalise(search);
-        String itemName = normalise(stack.getItemName().getString());
+        String itemName = normalise(stack.getDisplayName().getString());
         return itemName.contains(search);
     }
 

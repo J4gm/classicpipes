@@ -2,9 +2,15 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "O": "minecraft:lapis_lazuli",
-    "W": "minecraft:glass",
-    "X": "minecraft:honeycomb"
+    "O": {
+      "item": "minecraft:lapis_lazuli"
+    },
+    "W": {
+      "item": "minecraft:glass"
+    },
+    "X": {
+      "item": "minecraft:honeycomb"
+    }
   },
   "pattern": [
     "OWO",

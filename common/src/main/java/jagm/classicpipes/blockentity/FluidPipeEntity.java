@@ -11,6 +11,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -179,9 +180,9 @@ public class FluidPipeEntity extends PipeEntity {
         this.contents.clear();
         this.tickAdded.clear();
         super.loadAdditional(valueInput, registries);
-        ListTag fluidPacketList = valueInput.getListOrEmpty("fluid_packets");
+        ListTag fluidPacketList = valueInput.getList("fluid_packets", ListTag.TAG_COMPOUND);
         fluidPacketList.forEach(tag -> MiscUtil.loadFromTag(tag, FluidInPipe.CODEC, registries, this.contents::add));
-        this.setFluid(valueInput.read("fluid", BuiltInRegistries.FLUID.byNameCodec()).orElse(Fluids.WATER));
+        MiscUtil.loadFromTag(valueInput.get("fluid"), BuiltInRegistries.FLUID.byNameCodec(), registries, this::setFluid);
     }
 
     @Override
@@ -194,7 +195,7 @@ public class FluidPipeEntity extends PipeEntity {
             }
         }
         valueOutput.put("fluid_packets", fluidPacketList);
-        valueOutput.store("fluid", BuiltInRegistries.FLUID.byNameCodec(), this.fluid);
+        valueOutput.put("fluid", BuiltInRegistries.FLUID.byNameCodec().encodeStart(NbtOps.INSTANCE, this.fluid).getOrThrow());
     }
 
     public void addQueuedPackets(Level level, boolean waitForNextTick) {

@@ -6,6 +6,7 @@ import jagm.classicpipes.network.ClientBoundThreeBoolsPayload;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 public class StoragePipeMenu extends AbstractContainerMenu {
@@ -21,7 +22,16 @@ public class StoragePipeMenu extends AbstractContainerMenu {
 
     public StoragePipeMenu(int id, Inventory playerInventory, boolean defaultRoute, boolean matchComponents, boolean leaveOne, StoragePipeEntity pipe) {
         super(ClassicPipes.STORAGE_PIPE_MENU, id);
-        this.addStandardInventorySlots(playerInventory, 8, 84);
+        int x = 8;
+        int y = 84;
+        for (int i = 0; i < 3; ++i) {
+            for (int j = 0; j < 9; ++j) {
+                this.addSlot(new Slot(playerInventory, j + i * 9 + 9, x + j * 18, y + i * 18));
+            }
+        }
+        for (int i = 0; i < 9; ++i) {
+            this.addSlot(new Slot(playerInventory, i, x + i * 18, y + 58));
+        }
         this.defaultRoute = defaultRoute;
         this.matchComponents = matchComponents;
         this.leaveOne = leaveOne;

@@ -2,9 +2,15 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "O": "minecraft:quartz_block",
-    "W": "minecraft:tinted_glass",
-    "X": "minecraft:copper_ingot"
+    "O": {
+      "item": "minecraft:quartz_block"
+    },
+    "W": {
+      "item": "minecraft:tinted_glass"
+    },
+    "X": {
+      "item": "minecraft:copper_ingot"
+    }
   },
   "pattern": [
     "OWO",

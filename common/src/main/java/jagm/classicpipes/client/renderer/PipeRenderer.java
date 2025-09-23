@@ -2,7 +2,6 @@ package jagm.classicpipes.client.renderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import jagm.classicpipes.ClassicPipes;
 import jagm.classicpipes.blockentity.ItemPipeEntity;
 import jagm.classicpipes.blockentity.NetworkedPipeEntity;
 import jagm.classicpipes.util.ItemInPipe;
@@ -27,17 +26,17 @@ public class PipeRenderer implements BlockEntityRenderer<ItemPipeEntity> {
     }
 
     @Override
-    public void render(ItemPipeEntity pipe, float partialTicks, PoseStack poses, MultiBufferSource bufferSource, int light, int overlay, Vec3 cameraPos) {
+    public void render(ItemPipeEntity pipe, float partialTicks, PoseStack poses, MultiBufferSource bufferSource, int light, int overlay) {
         renderPipeItems(this.context, pipe, partialTicks, poses, bufferSource, light, overlay);
     }
 
     public static void renderPipeItems(BlockEntityRendererProvider.Context context, ItemPipeEntity pipe, float partialTicks, PoseStack poses, MultiBufferSource bufferSource, int light, int overlay) {
         if (!pipe.isEmpty()){
-            ClassicPipes.LOGGER.info("Rendering pipe items");
             for (ItemInPipe item : pipe.getContents()) {
                 Direction direction = item.getProgress() < ItemInPipe.HALFWAY ? item.getFromDirection() : item.getTargetDirection();
                 poses.pushPose();
-                poses.translate(item.getRenderPosition(partialTicks));
+                Vec3 renderPos = item.getRenderPosition(partialTicks);
+                poses.translate(renderPos.x, renderPos.y, renderPos.z);
                 poses.scale(0.4375F, 0.4375F, 0.4375F);
                 if (direction.equals(Direction.EAST) || direction.equals(Direction.WEST)) {
                     poses.mulPose(Axis.YP.rotationDegrees(90.0F));

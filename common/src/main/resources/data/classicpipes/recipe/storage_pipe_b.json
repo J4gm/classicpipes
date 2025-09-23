@@ -2,8 +2,12 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "O": "#classicpipes:pipes/networked",
-    "W": "#c:chests/wooden"
+    "O": {
+      "tag": "classicpipes:pipes/networked"
+    },
+    "W": {
+      "tag": "c:chests/wooden"
+    }
   },
   "pattern": [
     "OOO",

@@ -2,8 +2,12 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "O": "classicpipes:diamond_pipe",
-    "W": "minecraft:honeycomb"
+    "O": {
+      "item": "classicpipes:diamond_pipe"
+    },
+    "W": {
+      "item": "minecraft:honeycomb"
+    }
   },
   "pattern": [
     "OOO",

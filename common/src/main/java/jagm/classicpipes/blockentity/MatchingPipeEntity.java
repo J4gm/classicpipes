@@ -80,7 +80,7 @@ public class MatchingPipeEntity extends NetworkedPipeEntity implements MenuProvi
     protected void loadAdditional(CompoundTag valueInput, HolderLookup.Provider registries) {
         this.cacheInitialised = false;
         super.loadAdditional(valueInput, registries);
-        this.matchComponents = valueInput.getBooleanOr("match_components", false);
+        this.matchComponents = valueInput.getBoolean("match_components");
     }
 
     @Override

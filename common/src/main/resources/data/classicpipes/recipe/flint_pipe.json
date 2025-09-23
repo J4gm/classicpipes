@@ -2,8 +2,12 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "O": "minecraft:flint",
-    "W": "minecraft:glass"
+    "O": {
+      "item": "minecraft:flint"
+    },
+    "W": {
+      "item": "minecraft:glass"
+    }
   },
   "pattern": [
     "OWO"

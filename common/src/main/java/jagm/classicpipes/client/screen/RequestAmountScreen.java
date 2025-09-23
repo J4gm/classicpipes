@@ -9,10 +9,8 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.ARGB;
 import net.minecraft.world.item.ItemStack;
 
 public class RequestAmountScreen extends Screen {
@@ -82,13 +80,13 @@ public class RequestAmountScreen extends Screen {
             int i = ITEM_X + 2;
             int j = ITEM_Y + 13;
             graphics.fill(RenderType.gui(), i, j, i + 13, j + 2, -16777216);
-            graphics.fill(RenderType.gui(), i, j, i + stack.getBarWidth(), j + 1, ARGB.opaque(stack.getBarColor()));
+            graphics.fill(RenderType.gui(), i, j, i + this.stack.getBarWidth(), j + 1, this.stack.getBarColor() | 0xFF000000);
         }
         graphics.drawString(this.font, this.title, (IMAGE_WIDTH - this.font.width(this.title)) / 2, 6, -12566464, false);
         Component countComponent = Component.literal(String.valueOf(this.count));
         graphics.drawString(this.font, countComponent, ITEM_X + 45 - this.font.width(countComponent) / 2, ITEM_Y + 4, -12566464, false);
         if (this.isHovering(ITEM_X, ITEM_Y, 16, 16, mouseX, mouseY) && this.minecraft != null) {
-            graphics.renderTooltip(this.font, getTooltipFromItem(this.minecraft, this.stack), this.stack.getTooltipImage(), mouseX, mouseY, this.stack.get(DataComponents.TOOLTIP_STYLE));
+            graphics.renderTooltip(this.font, getTooltipFromItem(this.minecraft, this.stack), this.stack.getTooltipImage(), mouseX, mouseY);
         }
         graphics.pose().popPose();
     }
@@ -104,7 +102,7 @@ public class RequestAmountScreen extends Screen {
         this.renderTransparentBackground(graphics);
         int i = (this.width - IMAGE_WIDTH) / 2;
         int j = (this.height - IMAGE_HEIGHT) / 2;
-        graphics.blit(RenderType::guiTextured, BACKGROUND, i, j, 0.0F, 0.0F, IMAGE_WIDTH, IMAGE_HEIGHT, 256, 256);
+        graphics.blit(BACKGROUND, i, j, 0.0F, 0.0F, IMAGE_WIDTH, IMAGE_HEIGHT, 256, 256);
     }
 
     @Override

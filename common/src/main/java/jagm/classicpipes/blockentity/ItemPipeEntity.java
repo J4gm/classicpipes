@@ -11,6 +11,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Container;
@@ -288,7 +289,7 @@ public abstract class ItemPipeEntity extends PipeEntity {
             );
             ejectedItem.setDefaultPickUpDelay();
             level.addFreshEntity(ejectedItem);
-            level.playSound(ejectedItem, pos, ClassicPipes.PIPE_EJECT_SOUND, SoundSource.BLOCKS);
+            level.playSound(null, pos, ClassicPipes.PIPE_EJECT_SOUND, SoundSource.BLOCKS);
         }
     }
 
@@ -317,11 +318,14 @@ public abstract class ItemPipeEntity extends PipeEntity {
         this.networkDistances.clear();
         this.tickAdded.clear();
         super.loadAdditional(valueInput, registries);
-        ListTag itemsList = valueInput.getListOrEmpty("items");
+        ListTag itemsList = valueInput.getList("items", ListTag.TAG_COMPOUND);
         itemsList.forEach(tag -> MiscUtil.loadFromTag(tag, ItemInPipe.CODEC, registries, this.contents::add));
         for (Direction direction : Direction.values()) {
-            BlockPos pos = valueInput.read(direction.getName() + "_pos", BlockPos.CODEC).orElse(BlockPos.ZERO);
-            valueInput.getInt(direction.getName() + "_distance").ifPresent(distance -> this.networkDistances.put(direction, new Tuple<>(pos, distance)));
+            MiscUtil.loadFromTag(valueInput.get(direction.getName() + "_pos"), BlockPos.CODEC, registries, pos -> {
+                if (valueInput.contains(direction.getName() + "_distance")) {
+                    this.networkDistances.put(direction, new Tuple<>(pos, valueInput.getInt(direction.getName() + "_distance")));
+                }
+            });
         }
     }
 
@@ -337,7 +341,7 @@ public abstract class ItemPipeEntity extends PipeEntity {
         valueOutput.put("items", itemsList);
         for (Direction direction : this.networkDistances.keySet()) {
             Tuple<BlockPos, Integer> tuple = this.networkDistances.get(direction);
-            valueOutput.store(direction.getName() + "_pos", BlockPos.CODEC, tuple.a());
+            valueOutput.put(direction.getName() + "_pos", BlockPos.CODEC.encodeStart(NbtOps.INSTANCE, tuple.a()).getOrThrow());
             valueOutput.putInt(direction.getName() + "_distance", tuple.b());
         }
     }

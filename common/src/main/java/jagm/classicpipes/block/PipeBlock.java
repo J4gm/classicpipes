@@ -6,13 +6,17 @@ import jagm.classicpipes.services.Services;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.RandomSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Equipable;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.ScheduledTickAccess;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.SimpleWaterloggedBlock;
@@ -30,30 +34,52 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-import java.util.Map;
-import java.util.function.Function;
-
-public abstract class PipeBlock extends TransparentBlock implements SimpleWaterloggedBlock, EntityBlock {
+public abstract class PipeBlock extends TransparentBlock implements SimpleWaterloggedBlock, EntityBlock, Equipable {
 
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 
-    private final Function<BlockState, VoxelShape> shapes;
+    protected final VoxelShape[] shapeByIndex;
 
     public PipeBlock(BlockBehaviour.Properties properties) {
         super(properties);
         this.registerDefaultState(this.stateDefinition.any()
                 .setValue(WATERLOGGED, false)
         );
-        Map<Direction, VoxelShape> map = Shapes.rotateAll(Block.boxZ(8.0F, 0.0F, 8.0F));
-        this.shapes = this.getShapeForEachState(state -> {
-            VoxelShape shape = Block.cube(8.0F);
-            for (Direction direction : Direction.values()) {
-                if (this.isPipeConnected(state, direction)) {
-                    shape = Shapes.or(map.get(direction), shape);
+        this.shapeByIndex = this.makeShapes();
+    }
+
+    private VoxelShape[] makeShapes() {
+        float a = 0.25F;
+        float f = 0.5F - a;
+        float f1 = 0.5F + a;
+        VoxelShape voxelshape = Block.box(
+                f * 16.0F, f * 16.0F, f * 16.0F, f1 * 16.0F, f1 * 16.0F, f1 * 16.0F
+        );
+        VoxelShape[] avoxelshape = new VoxelShape[6];
+        for (int i = 0; i < 6; i++) {
+            Direction direction = Direction.from3DDataValue(i);
+            avoxelshape[i] = Shapes.box(
+                    0.5 + Math.min(-a, (double)direction.getStepX() * 0.5),
+                    0.5 + Math.min(-a, (double)direction.getStepY() * 0.5),
+                    0.5 + Math.min(-a, (double)direction.getStepZ() * 0.5),
+                    0.5 + Math.max(a, (double)direction.getStepX() * 0.5),
+                    0.5 + Math.max(a, (double)direction.getStepY() * 0.5),
+                    0.5 + Math.max(a, (double)direction.getStepZ() * 0.5)
+            );
+        }
+        VoxelShape[] avoxelshape1 = new VoxelShape[64];
+        for (int k = 0; k < 64; k++) {
+            VoxelShape voxelshape1 = voxelshape;
+
+            for (int j = 0; j < 6; j++) {
+                if ((k & 1 << j) != 0) {
+                    voxelshape1 = Shapes.or(voxelshape1, avoxelshape[j]);
                 }
             }
-            return shape;
-        });
+
+            avoxelshape1[k] = voxelshape1;
+        }
+        return avoxelshape1;
     }
 
     public abstract boolean isPipeConnected(BlockState state, Direction direction);
@@ -82,9 +108,9 @@ public abstract class PipeBlock extends TransparentBlock implements SimpleWaterl
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess scheduledTickAccess, BlockPos pipePos, Direction direction, BlockPos neighborPos, BlockState neighborState, RandomSource random) {
+    protected BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor level, BlockPos pipePos, BlockPos neighborPos) {
         if (state.getValue(WATERLOGGED)) {
-            scheduledTickAccess.scheduleTick(pipePos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
+            level.scheduleTick(pipePos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
         }
         boolean wasConnected = this.isPipeConnected(state, direction);
         boolean willConnect = this.canConnect((Level) level, pipePos, direction);
@@ -111,13 +137,23 @@ public abstract class PipeBlock extends TransparentBlock implements SimpleWaterl
     }
 
     @Override
-    protected boolean propagatesSkylightDown(BlockState state) {
+    protected boolean propagatesSkylightDown(BlockState state, BlockGetter level, BlockPos pos) {
         return false;
     }
 
     @Override
     protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        return this.shapes.apply(state);
+        return this.shapeByIndex[this.getAABBIndex(state)];
+    }
+
+    protected int getAABBIndex(BlockState state) {
+        int i = 0;
+        for (int j = 0; j < 6; j++) {
+            if (this.isPipeConnected(state, Direction.from3DDataValue(j))) {
+                i |= 1 << j;
+            }
+        }
+        return i;
     }
 
     @Override
@@ -143,6 +179,16 @@ public abstract class PipeBlock extends TransparentBlock implements SimpleWaterl
             return pipe.getComparatorOutput();
         }
         return 0;
+    }
+
+    @Override
+    public EquipmentSlot getEquipmentSlot() {
+        return EquipmentSlot.HEAD;
+    }
+
+    @Override
+    public InteractionResultHolder<ItemStack> swapWithEquipmentSlot(Item item, Level level, Player player, InteractionHand hand) {
+        return InteractionResultHolder.fail(player.getItemInHand(hand));
     }
 
 }

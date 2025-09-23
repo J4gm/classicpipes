@@ -2,9 +2,15 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "O": "minecraft:copper_ingot",
-    "W": "minecraft:glass",
-    "X": "minecraft:netherite_ingot"
+    "O": {
+      "item": "minecraft:copper_ingot"
+    },
+    "W": {
+      "item": "minecraft:glass"
+    },
+    "X": {
+      "item": "minecraft:netherite_ingot"
+    }
   },
   "pattern": [
     "OWO",

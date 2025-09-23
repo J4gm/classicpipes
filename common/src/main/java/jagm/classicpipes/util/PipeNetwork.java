@@ -133,7 +133,7 @@ public class PipeNetwork {
                 if (ItemStack.isSameItemSameComponents(result, stack)) {
                     if (foundCraftingPipe) {
                         if (player != null) {
-                            player.displayClientMessage(Component.translatable("chat." + ClassicPipes.MOD_ID + ".multiple_recipes", stack.getItemName()).withStyle(ChatFormatting.YELLOW), false);
+                            player.displayClientMessage(Component.translatable("chat." + ClassicPipes.MOD_ID + ".multiple_recipes", stack.getItem().getDescription()).withStyle(ChatFormatting.YELLOW), false);
                         }
                         break;
                     }
@@ -195,7 +195,7 @@ public class PipeNetwork {
                 if (tuple.a() != null && !tuple.a().extractItem(level, tuple.b().getStack())) {
                     cancelled = true;
                     if (!partialRequest) {
-                        tuple.b().sendMessage(level, Component.translatable("chat." + ClassicPipes.MOD_ID + ".could_not_extract", stack.getCount(), stack.getItemName(), tuple.a().getProviderPipePos().toShortString()).withStyle(ChatFormatting.RED));
+                        tuple.b().sendMessage(level, Component.translatable("chat." + ClassicPipes.MOD_ID + ".could_not_extract", stack.getCount(), stack.getItem().getDescription(), tuple.a().getProviderPipePos().toShortString()).withStyle(ChatFormatting.RED));
                     }
                     break;
                 }
@@ -204,16 +204,16 @@ public class PipeNetwork {
                 this.queue.forEach(tuple -> this.removeRequestedItem(tuple.b()));
             } else if (player != null) {
                 ClassicPipes.REQUEST_ITEM_TRIGGER.trigger((ServerPlayer) player, stack, this.craftedItemsForAdvancement.size());
-                player.displayClientMessage(Component.translatable("chat." + ClassicPipes.MOD_ID + ".requested", stack.getCount(), stack.getItemName()).withStyle(ChatFormatting.GREEN), false);
+                player.displayClientMessage(Component.translatable("chat." + ClassicPipes.MOD_ID + ".requested", stack.getCount(), stack.getItem().getDescription()).withStyle(ChatFormatting.GREEN), false);
             }
         } else if (partialRequest && missingItem.getCount() < stack.getCount()) {
             this.resetForNewRequest();
             this.request(level, stack.copyWithCount(stack.getCount() - missingItem.getCount()), requestPos, player, false);
             return;
         } else if (player != null) {
-            player.displayClientMessage(Component.translatable("chat." + ClassicPipes.MOD_ID + ".missing_item.a", stack.getCount(), stack.getItemName()).withStyle(ChatFormatting.RED), false);
+            player.displayClientMessage(Component.translatable("chat." + ClassicPipes.MOD_ID + ".missing_item.a", stack.getCount(), stack.getItem().getDescription()).withStyle(ChatFormatting.RED), false);
             for (ItemStack missing : missingItem.getBaseItems(new ArrayList<>())) {
-                player.displayClientMessage(Component.translatable("chat." + ClassicPipes.MOD_ID + ".missing_item.b", missing.getCount(), missing.getItemName()).withStyle(ChatFormatting.YELLOW), false);
+                player.displayClientMessage(Component.translatable("chat." + ClassicPipes.MOD_ID + ".missing_item.b", missing.getCount(), missing.getItem().getDescription()).withStyle(ChatFormatting.YELLOW), false);
             }
         }
         this.resetForNewRequest();
@@ -261,7 +261,7 @@ public class PipeNetwork {
         }
         this.getRequestedItems().removeIf(requestedItem -> {
             if (requestedItem.timedOut()) {
-                requestedItem.sendMessage(level, Component.translatable("chat." + ClassicPipes.MOD_ID + ".timed_out", requestedItem.getAmountRemaining(), requestedItem.getStack().getItemName()).withStyle(ChatFormatting.RED));
+                requestedItem.sendMessage(level, Component.translatable("chat." + ClassicPipes.MOD_ID + ".timed_out", requestedItem.getAmountRemaining(), requestedItem.getStack().getItem().getDescription()).withStyle(ChatFormatting.RED));
                 for (RecipePipeEntity craftingPipe : this.recipePipes) {
                     if (requestedItem.matches(craftingPipe.getResult())) {
                         craftingPipe.dropHeldItems(level, craftingPipe.getBlockPos());
@@ -342,7 +342,7 @@ public class PipeNetwork {
         }
         this.requestedItems.removeIf(requestedItem -> {
             if (requestedItem.getDestination().equals(pipe.getBlockPos())) {
-                requestedItem.sendMessage(level, Component.translatable("chat." + ClassicPipes.MOD_ID + ".destination_removed", requestedItem.getAmountRemaining(), requestedItem.getStack().getItemName(), pipe.getBlockPos().toShortString()).withStyle(ChatFormatting.RED));
+                requestedItem.sendMessage(level, Component.translatable("chat." + ClassicPipes.MOD_ID + ".destination_removed", requestedItem.getAmountRemaining(), requestedItem.getStack().getItem().getDescription(), pipe.getBlockPos().toShortString()).withStyle(ChatFormatting.RED));
                 return true;
             }
             return false;

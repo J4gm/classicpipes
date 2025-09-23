@@ -9,7 +9,6 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.phys.Vec3;
 
 public class RecipePipeRenderer implements BlockEntityRenderer<RecipePipeEntity> {
 
@@ -20,7 +19,7 @@ public class RecipePipeRenderer implements BlockEntityRenderer<RecipePipeEntity>
     }
 
     @Override
-    public void render(RecipePipeEntity pipe, float partialTicks, PoseStack poses, MultiBufferSource bufferSource, int light, int overlay, Vec3 cameraPos) {
+    public void render(RecipePipeEntity pipe, float partialTicks, PoseStack poses, MultiBufferSource bufferSource, int light, int overlay) {
         PipeRenderer.renderPipeItems(this.context, pipe, partialTicks, poses, bufferSource, light, overlay);
         NonNullList<ItemStack> heldItems = pipe.getHeldItems();
         for (int i = 0; i < heldItems.size(); i++) {

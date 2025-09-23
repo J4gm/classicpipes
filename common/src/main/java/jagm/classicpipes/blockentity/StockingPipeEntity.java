@@ -53,7 +53,8 @@ public class StockingPipeEntity extends NetworkedPipeEntity implements MenuProvi
         Direction facing = this.getBlockState().getValue(StockingPipeBlock.FACING).getDirection();
         if (facing != null) {
             List<ItemStack> filterItems = new ArrayList<>();
-            for (ItemStack stack : this.filter) {
+            for (int i = 0; i < this.filter.getContainerSize(); i++) {
+                ItemStack stack = this.filter.getItem(i);
                 if (stack.isEmpty()) {
                     continue;
                 }
@@ -144,15 +145,15 @@ public class StockingPipeEntity extends NetworkedPipeEntity implements MenuProvi
     protected void loadAdditional(CompoundTag valueInput, HolderLookup.Provider registries) {
         this.filter.clearContent();
         super.loadAdditional(valueInput, registries);
-        ListTag filterList = valueInput.getListOrEmpty("filter");
+        ListTag filterList = valueInput.getList("filter", ListTag.TAG_COMPOUND);
         filterList.forEach(tag -> {
             if (tag instanceof CompoundTag compoundTag) {
-                int slot = compoundTag.getIntOr("slot", 0);
+                int slot = compoundTag.getInt("slot");
                 MiscUtil.loadFromTag(tag, ItemStack.CODEC, registries, stack -> this.filter.setItem(slot, stack));
             }
         });
-        this.filter.setMatchComponents(valueInput.getBooleanOr("match_components", true));
-        this.activeStocking = valueInput.getBooleanOr("active_stocking", false);
+        this.filter.setMatchComponents(valueInput.getBoolean("match_components"));
+        this.activeStocking = valueInput.getBoolean("active_stocking");
     }
 
     @Override

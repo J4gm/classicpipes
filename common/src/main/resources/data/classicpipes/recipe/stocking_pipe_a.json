@@ -2,9 +2,15 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "O": "minecraft:quartz_block",
-    "W": "minecraft:tinted_glass",
-    "X": "minecraft:lapis_lazuli"
+    "O": {
+      "item": "minecraft:quartz_block"
+    },
+    "W": {
+      "item": "minecraft:tinted_glass"
+    },
+    "X": {
+      "item": "minecraft:lapis_lazuli"
+    }
   },
   "pattern": [
     "OWO",

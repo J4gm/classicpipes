@@ -52,10 +52,10 @@ public class AdvancedCopperFluidPipeEntity extends CopperFluidPipeEntity impleme
     protected void loadAdditional(CompoundTag valueInput, HolderLookup.Provider registries) {
         this.filter.clearContent();
         super.loadAdditional(valueInput, registries);
-        ListTag filterList = valueInput.getListOrEmpty("filter");
+        ListTag filterList = valueInput.getList("filter", ListTag.TAG_COMPOUND);
         filterList.forEach(tag -> {
             if (tag instanceof CompoundTag compoundTag) {
-                int slot = compoundTag.getIntOr("slot", 0);
+                int slot = compoundTag.getInt("slot");
                 MiscUtil.loadFromTag(tag, ItemStack.CODEC, registries, stack -> this.filter.setItem(slot, stack));
             }
         });

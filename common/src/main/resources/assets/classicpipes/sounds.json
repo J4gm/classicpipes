@@ -1,7 +1,7 @@
 {
   "pipe_eject": {
     "subtitle": "subtitle.classicpipes.pipe_eject",
-    "sounds": [ "minecraft:ui/hud/hud_bubble" ]
+    "sounds": [ "classicpipes:pop" ]
   },
   "pipe_adjust": {
     "subtitle": "subtitle.classicpipes.pipe_adjust",

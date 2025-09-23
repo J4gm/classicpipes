@@ -7,11 +7,9 @@ import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.ARGB;
 
 public class SmallerCheckbox extends AbstractButton {
 
@@ -64,7 +62,7 @@ public class SmallerCheckbox extends AbstractButton {
     @Override
     public void renderWidget(GuiGraphics graphics, int x, int y, float f) {
         ResourceLocation spriteLocation = this.selected() ? CHECKBOX_SELECTED_SPRITE : CHECKBOX_SPRITE;
-        graphics.blitSprite(RenderType::guiTextured, spriteLocation, this.getX(), this.getY(), SIZE, SIZE, ARGB.white(this.alpha));
+        graphics.blitSprite(spriteLocation, this.getX(), this.getY(), SIZE, SIZE);
         graphics.drawString(this.font, this.label, this.getX() + SIZE + 2, this.getY() + 3, -12566464, false);
     }
 

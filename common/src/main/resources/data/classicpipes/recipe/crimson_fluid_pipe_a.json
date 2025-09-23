@@ -2,9 +2,15 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "O": "minecraft:crimson_planks",
-    "W": "minecraft:glass",
-    "X": "minecraft:honeycomb"
+    "O": {
+      "item": "minecraft:crimson_planks"
+    },
+    "W": {
+      "item": "minecraft:glass"
+    },
+    "X": {
+      "item": "minecraft:honeycomb"
+    }
   },
   "pattern": [
     "OWO",

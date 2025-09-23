@@ -2,7 +2,9 @@
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    "classicpipes:tag_label"
+    {
+      "item": "classicpipes:tag_label"
+    }
   ],
   "result": {
     "count": 1,

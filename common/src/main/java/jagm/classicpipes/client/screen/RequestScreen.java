@@ -17,7 +17,6 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.ARGB;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -28,8 +27,6 @@ public class RequestScreen extends AbstractContainerScreen<RequestMenu> {
 
     private static final ResourceLocation BACKGROUND = MiscUtil.resourceLocation("textures/gui/container/request.png");
     private static final WidgetSprites X_BUTTON = new WidgetSprites(MiscUtil.resourceLocation("widget/x"), MiscUtil.resourceLocation("widget/x_hovered"));
-    private static final ResourceLocation SLOT_HIGHLIGHT_BACK_SPRITE = ResourceLocation.withDefaultNamespace("container/slot_highlight_back");
-    private static final ResourceLocation SLOT_HIGHLIGHT_FRONT_SPRITE = ResourceLocation.withDefaultNamespace("container/slot_highlight_front");
 
     private EditBox searchBar;
     private PageButton prev_page;
@@ -79,12 +76,9 @@ public class RequestScreen extends AbstractContainerScreen<RequestMenu> {
         graphics.pose().pushPose();
         graphics.pose().translate(this.leftPos, this.topPos, 0.0F);
         this.hoveredSlot = this.getHoveredSlot(mouseX, mouseY);
+        this.renderSlots(graphics);
         if (this.hoveredSlot != null && this.hoveredSlot.isHighlightable()) {
-            graphics.blitSprite(RenderType::guiTextured, SLOT_HIGHLIGHT_BACK_SPRITE, this.hoveredSlot.x - 4, this.hoveredSlot.y - 4, 24, 24);
-        }
-        this.renderSlotsReal(graphics);
-        if (this.hoveredSlot != null && this.hoveredSlot.isHighlightable()) {
-            graphics.blitSprite(RenderType::guiTexturedOverlay, SLOT_HIGHLIGHT_FRONT_SPRITE, this.hoveredSlot.x - 4, this.hoveredSlot.y - 4, 24, 24);
+            renderSlotHighlight(graphics, this.hoveredSlot.x, this.hoveredSlot.y, 0);
         }
         graphics.pose().popPose();
         this.renderTooltip(graphics, mouseX, mouseY);
@@ -102,10 +96,7 @@ public class RequestScreen extends AbstractContainerScreen<RequestMenu> {
         return slot;
     }
 
-    @Override
-    protected void renderSlots(GuiGraphics graphics) {}
-
-    protected void renderSlotsReal(GuiGraphics graphics) {
+    protected void renderSlots(GuiGraphics graphics) {
         for (Slot slot : this.menu.displaySlots) {
             if (slot.isActive()) {
                 this.renderSlot(graphics, slot);
@@ -117,7 +108,7 @@ public class RequestScreen extends AbstractContainerScreen<RequestMenu> {
     protected void renderBg(GuiGraphics graphics, float f, int x, int y) {
         int i = (this.width - this.imageWidth) / 2;
         int j = (this.height - this.imageHeight) / 2;
-        graphics.blit(RenderType::guiTextured, BACKGROUND, i, j, 0.0F, 0.0F, this.imageWidth, this.imageHeight, 256, 256);
+        graphics.blit(BACKGROUND, i, j, 0.0F, 0.0F, this.imageWidth, this.imageHeight, 256, 256);
     }
 
     @Override
@@ -135,11 +126,11 @@ public class RequestScreen extends AbstractContainerScreen<RequestMenu> {
         int seed = slot.x + slot.y * this.imageWidth;
         graphics.renderItem(stack, slot.x, slot.y, seed);
         if (!stack.isEmpty()) {
-            graphics.pose().pushPose();
-            graphics.pose().translate(0, 0, 200.0F);
+            //graphics.pose().pushPose();
+            //graphics.pose().translate(0, 0, 200.0F);
             this.renderItemBar(graphics, stack, slot.x, slot.y);
             this.renderItemCount(graphics, this.font, stack, slot.x, slot.y, this.menu.itemCraftable(stack));
-            graphics.pose().popPose();
+            //graphics.pose().popPose();
         }
     }
 
@@ -147,8 +138,8 @@ public class RequestScreen extends AbstractContainerScreen<RequestMenu> {
         if (stack.isBarVisible()) {
             int i = x + 2;
             int j = y + 13;
-            graphics.fill(RenderType.gui(), i, j, i + 13, j + 2, -16777216);
-            graphics.fill(RenderType.gui(), i, j, i + stack.getBarWidth(), j + 1, ARGB.opaque(stack.getBarColor()));
+            graphics.fill(RenderType.guiOverlay(), i, j, i + 13, j + 2, -16777216);
+            graphics.fill(RenderType.guiOverlay(), i, j, i + stack.getBarWidth(), j + 1, stack.getBarColor() | 0xFF000000);
         }
     }
 
@@ -167,7 +158,7 @@ public class RequestScreen extends AbstractContainerScreen<RequestMenu> {
         }
         int slotOffset = countScale == 1.0F ? 17 : 16;
         graphics.pose().pushPose();
-        graphics.pose().translate(x + slotOffset, y + slotOffset, 0.0F);
+        graphics.pose().translate(x + slotOffset, y + slotOffset, 200.0F);
         graphics.pose().scale(countScale, countScale, 1.0F);
         graphics.drawString(font, s, -font.width(s), -8, colour, true);
         graphics.pose().popPose();

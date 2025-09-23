@@ -2,8 +2,12 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "O": "minecraft:iron_ingot",
-    "W": "minecraft:glass"
+    "O": {
+      "item": "minecraft:iron_ingot"
+    },
+    "W": {
+      "item": "minecraft:glass"
+    }
   },
   "pattern": [
     "OWO"

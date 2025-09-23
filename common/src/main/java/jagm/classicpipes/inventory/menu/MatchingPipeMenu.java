@@ -6,6 +6,7 @@ import jagm.classicpipes.network.ClientBoundBoolPayload;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 public class MatchingPipeMenu extends AbstractContainerMenu {
@@ -19,7 +20,16 @@ public class MatchingPipeMenu extends AbstractContainerMenu {
 
     public MatchingPipeMenu(int id, Inventory playerInventory, boolean matchComponents, MatchingPipeEntity pipe) {
         super(ClassicPipes.MATCHING_PIPE_MENU, id);
-        this.addStandardInventorySlots(playerInventory, 8, 66);
+        int x = 8;
+        int y = 66;
+        for (int i = 0; i < 3; ++i) {
+            for (int j = 0; j < 9; ++j) {
+                this.addSlot(new Slot(playerInventory, j + i * 9 + 9, x + j * 18, y + i * 18));
+            }
+        }
+        for (int i = 0; i < 9; ++i) {
+            this.addSlot(new Slot(playerInventory, i, x + i * 18, y + 58));
+        }
         this.matchComponents = matchComponents;
         this.pipe = pipe;
     }
