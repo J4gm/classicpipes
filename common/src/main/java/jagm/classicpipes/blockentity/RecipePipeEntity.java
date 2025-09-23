@@ -2,6 +2,7 @@ package jagm.classicpipes.blockentity;
 
 import jagm.classicpipes.ClassicPipes;
 import jagm.classicpipes.block.NetworkedPipeBlock;
+import jagm.classicpipes.block.RecipePipeBlock;
 import jagm.classicpipes.inventory.container.FilterContainer;
 import jagm.classicpipes.inventory.menu.RecipePipeMenu;
 import jagm.classicpipes.services.Services;
@@ -73,6 +74,8 @@ public class RecipePipeEntity extends NetworkedPipeEntity implements MenuProvide
             this.getNetwork().resetRequests(level);
             this.crafterTicked = false;
             this.waitingForCraft = 0;
+            this.setChanged();
+            level.sendBlockUpdated(pos, state, state, 2);
         } else if (this.waitingForCraft > 0) {
             BlockEntity container = level.getBlockEntity(crafterPos);
             if (container instanceof CrafterBlockEntity crafter) {
@@ -153,6 +156,24 @@ public class RecipePipeEntity extends NetworkedPipeEntity implements MenuProvide
             for (int slot = 0; slot < 9; slot++) {
                 if (this.heldItems.get(slot).getCount() < this.filter.getItem(slot).getCount()) {
                     readyToCraft = false;
+                    break;
+                }
+                BlockState state = this.getBlockState();
+                if (!this.filter.getItem(slot).isEmpty() && !state.getValue(RecipePipeBlock.PROPERTY_BY_DIRECTION.get(this.slotDirections[slot])).equals(NetworkedPipeBlock.ConnectionState.UNLINKED)) {
+                    readyToCraft = false;
+                    if (this.getLevel() instanceof ServerLevel serverLevel && this.hasNetwork()) {
+                        for (RequestedItem requestedItem : this.getNetwork().getRequestedItems()) {
+                            if (requestedItem.matches(this.getResult())) {
+                                requestedItem.sendMessage(serverLevel, Component.translatable("chat." + ClassicPipes.MOD_ID + ".missing_recipe_pipe_direction", this.getBlockPos().toShortString()).withStyle(ChatFormatting.RED));
+                            }
+                        }
+                        this.crafterTicked = false;
+                        this.waitingForCraft = 0;
+                        this.getNetwork().resetRequests(serverLevel);
+                        this.setChanged();
+                        serverLevel.sendBlockUpdated(this.getBlockPos(),state, state, 2);
+                    }
+                    break;
                 }
             }
             if (readyToCraft) {
