@@ -232,6 +232,14 @@ public class RecipePipeEntity extends NetworkedPipeEntity implements MenuProvide
     }
 
     @Override
+    public void setRemoved() {
+        if (this.getLevel() instanceof ServerLevel serverLevel) {
+            super.disconnect(serverLevel);
+        }
+        super.setRemoved();
+    }
+
+    @Override
     public void insertPipeItem(Level level, ItemInPipe item) {
         ItemStack stack = item.getStack();
         if (!stack.isEmpty() && this.waitingForCraft > 0 && item.getFromDirection().equals(this.slotDirections[9]) && ItemStack.isSameItemSameTags(this.getResult(), stack)) {
