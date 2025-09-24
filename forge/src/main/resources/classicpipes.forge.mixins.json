@@ -2,8 +2,10 @@
   "required": true,
   "minVersion": "0.8",
   "package": "jagm.classicpipes.mixin",
-  "compatibilityLevel": "JAVA_18",
-  "mixins": [],
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "CrafterInsertionMixin"
+  ],
   "client": [],
   "server": [],
   "injectors": {
