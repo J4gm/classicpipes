@@ -264,7 +264,7 @@ public class RecipePipeEntity extends NetworkedPipeEntity implements MenuProvide
         if (this.getLevel() instanceof ServerLevel serverLevel) {
             super.disconnect(serverLevel);
         }
-        super.setRemoved();
+        this.remove = true;
     }
 
     @Override
