@@ -1,7 +1,6 @@
 {
   "values": [
     "#minecraft:water",
-    "#c:water",
-    "#c:milk"
+    "#c:water"
   ]
 }
