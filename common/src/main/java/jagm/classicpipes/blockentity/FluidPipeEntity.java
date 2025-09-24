@@ -7,11 +7,9 @@ import jagm.classicpipes.util.ItemInPipe;
 import jagm.classicpipes.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -176,26 +174,26 @@ public class FluidPipeEntity extends PipeEntity {
     }
 
     @Override
-    protected void loadAdditional(CompoundTag valueInput, HolderLookup.Provider registries) {
+    public void load(CompoundTag valueInput) {
         this.contents.clear();
         this.tickAdded.clear();
-        super.loadAdditional(valueInput, registries);
+        super.load(valueInput);
         ListTag fluidPacketList = valueInput.getList("fluid_packets", ListTag.TAG_COMPOUND);
-        fluidPacketList.forEach(tag -> MiscUtil.loadFromTag(tag, FluidInPipe.CODEC, registries, this.contents::add));
-        MiscUtil.loadFromTag(valueInput.get("fluid"), BuiltInRegistries.FLUID.byNameCodec(), registries, this::setFluid);
+        fluidPacketList.forEach(tag -> MiscUtil.loadFromTag(tag, FluidInPipe.CODEC, this.contents::add));
+        MiscUtil.loadFromTag(valueInput.get("fluid"), BuiltInRegistries.FLUID.byNameCodec(), this::setFluid);
     }
 
     @Override
-    protected void saveAdditional(CompoundTag valueOutput, HolderLookup.Provider registries) {
-        super.saveAdditional(valueOutput, registries);
+    protected void saveAdditional(CompoundTag valueOutput) {
+        super.saveAdditional(valueOutput);
         ListTag fluidPacketList = new ListTag();
         for (FluidInPipe fluidPacket : this.contents) {
             if (fluidPacket.getAmount() > 0) {
-                MiscUtil.saveToTag(new CompoundTag(), fluidPacket, FluidInPipe.CODEC, registries, fluidPacketList::add);
+                MiscUtil.saveToTag(fluidPacket, FluidInPipe.CODEC, fluidPacketList::add);
             }
         }
         valueOutput.put("fluid_packets", fluidPacketList);
-        valueOutput.put("fluid", BuiltInRegistries.FLUID.byNameCodec().encodeStart(NbtOps.INSTANCE, this.fluid).getOrThrow());
+        MiscUtil.saveToTag(this.fluid, BuiltInRegistries.FLUID.byNameCodec(), tag -> valueOutput.put("fluid", tag));
     }
 
     public void addQueuedPackets(Level level, boolean waitForNextTick) {
@@ -253,7 +251,7 @@ public class FluidPipeEntity extends PipeEntity {
         if (numDirections == 0) {
             fluidPacket.setTargetDirection(fluidPacket.getFromDirection());
         } else if (numDirections == 1) {
-            fluidPacket.setTargetDirection(validDirections.getFirst());
+            fluidPacket.setTargetDirection(validDirections.get(0));
         } else {
             if (fluidPacket.getAmount() > MIN_PACKET_SIZE) {
                 int splitAmount = fluidPacket.getAmount() / numDirections;

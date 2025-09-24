@@ -1,39 +1,49 @@
 package jagm.classicpipes.util;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.google.gson.JsonObject;
 import net.minecraft.advancements.critereon.*;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
-import java.util.Optional;
-
 public class RequestItemTrigger extends SimpleCriterionTrigger<RequestItemTrigger.RequestItemTriggerInstance> {
+
+    private static final ResourceLocation TYPE = MiscUtil.resourceLocation("request_item");
 
     public void trigger(ServerPlayer player, ItemStack stack, int uniqueItemsCrafted) {
         this.trigger(player, instance -> instance.matches(stack, uniqueItemsCrafted));
     }
 
     @Override
-    public Codec<RequestItemTriggerInstance> codec() {
-        return RequestItemTriggerInstance.CODEC;
+    protected RequestItemTriggerInstance createInstance(JsonObject json, ContextAwarePredicate player, DeserializationContext context) {
+        ItemPredicate item = json.has("item") ? ItemPredicate.fromJson(json.get("item")) : null;
+        MinMaxBounds.Ints uniqueItemsCrafted = json.has("unique_items_crafted") ? MinMaxBounds.Ints.fromJson(json.get("unique_items_crafted")) : null;
+        return new RequestItemTriggerInstance(TYPE, player, item, uniqueItemsCrafted);
     }
 
-    public record RequestItemTriggerInstance(Optional<ContextAwarePredicate> player, Optional<ItemPredicate> item, Optional<MinMaxBounds.Ints> uniqueItemsCrafted) implements SimpleCriterionTrigger.SimpleInstance {
+    @Override
+    public ResourceLocation getId() {
+        return TYPE;
+    }
 
-        public static final Codec<RequestItemTriggerInstance> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("player").forGetter(RequestItemTriggerInstance::player),
-                ItemPredicate.CODEC.optionalFieldOf("item").forGetter(RequestItemTriggerInstance::item),
-                MinMaxBounds.Ints.CODEC.optionalFieldOf("unique_items_crafted").forGetter(RequestItemTriggerInstance::uniqueItemsCrafted)
+    public static class RequestItemTriggerInstance extends AbstractCriterionTriggerInstance {
 
-        ).apply(instance, RequestItemTriggerInstance::new));
+        private final ItemPredicate item;
+        private final MinMaxBounds.Ints uniqueItemsCrafted;
+
+        public RequestItemTriggerInstance(ResourceLocation criterion, ContextAwarePredicate player, ItemPredicate item, MinMaxBounds.Ints uniqueItemsCrafted) {
+            super(criterion, player);
+            this.item = item;
+            this.uniqueItemsCrafted = uniqueItemsCrafted;
+        }
 
         public boolean matches(ItemStack stack, int uniqueItemsCrafted) {
-            if (this.item().isEmpty() || this.item().get().test(stack)) {
-                return this.uniqueItemsCrafted().isEmpty() || this.uniqueItemsCrafted().get().matches(uniqueItemsCrafted);
+            if (this.item == null || this.item.matches(stack)) {
+                return this.uniqueItemsCrafted == null || this.uniqueItemsCrafted.matches(uniqueItemsCrafted);
             }
             return false;
         }
+
     }
 
 }

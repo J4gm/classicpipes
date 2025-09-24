@@ -5,7 +5,6 @@ import jagm.classicpipes.util.ItemInPipe;
 import jagm.classicpipes.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -52,7 +51,7 @@ public class RoundRobinPipeEntity extends ItemPipeEntity {
     public void routeItem(BlockState state, ItemInPipe item) {
         List<Direction> validDirections = this.getValidDirections(state, item);
         if (validDirections.size() == 1) {
-            item.setTargetDirection(validDirections.getFirst());
+            item.setTargetDirection(validDirections.get(0));
             item.setEjecting(false);
         } else if (validDirections.isEmpty() || this.nextDirection == null) {
             item.setTargetDirection(item.getFromDirection().getOpposite());
@@ -102,14 +101,14 @@ public class RoundRobinPipeEntity extends ItemPipeEntity {
     }
 
     @Override
-    protected void loadAdditional(CompoundTag valueInput, HolderLookup.Provider registries) {
-        super.loadAdditional(valueInput, registries);
+    public void load(CompoundTag valueInput) {
+        super.load(valueInput);
         this.nextDirection = Direction.from3DDataValue(valueInput.getByte("next_direction"));
     }
 
     @Override
-    protected void saveAdditional(CompoundTag valueOutput, HolderLookup.Provider registries) {
-        super.saveAdditional(valueOutput, registries);
+    protected void saveAdditional(CompoundTag valueOutput) {
+        super.saveAdditional(valueOutput);
         valueOutput.putByte("next_direction", (byte) this.nextDirection.get3DDataValue());
     }
 

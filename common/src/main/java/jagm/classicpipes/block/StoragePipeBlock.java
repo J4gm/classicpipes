@@ -8,6 +8,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -35,15 +36,15 @@ public class StoragePipeBlock extends ContainerAdjacentNetworkedPipeBlock {
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
-        if (super.useWithoutItem(state, level, pos, player, hitResult).equals(InteractionResult.SUCCESS)) {
+    public InteractionResult use(BlockState state, Level level, BlockPos pipePos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+        if (super.use(state, level, pipePos, player, hand, hitResult).equals(InteractionResult.SUCCESS)) {
             return InteractionResult.SUCCESS;
-        } else if (level instanceof ServerLevel && level.getBlockEntity(pos) instanceof StoragePipeEntity storagePipe) {
+        } else if (level instanceof ServerLevel && level.getBlockEntity(pipePos) instanceof StoragePipeEntity storagePipe) {
             Services.LOADER_SERVICE.openMenu(
                     (ServerPlayer) player,
                     storagePipe,
                     new ClientBoundThreeBoolsPayload(storagePipe.isDefaultRoute(), storagePipe.shouldMatchComponents(), storagePipe.shouldLeaveOne()),
-                    ClientBoundThreeBoolsPayload.STREAM_CODEC
+                    ClientBoundThreeBoolsPayload.HANDLER
             );
         }
         return InteractionResult.SUCCESS;

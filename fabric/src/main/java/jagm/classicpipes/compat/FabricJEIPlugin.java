@@ -71,7 +71,7 @@ public class FabricJEIPlugin implements IModPlugin {
                         recipePipeMenu.getSlot(i).set(stack);
                     }
                     List<IRecipeSlotView> outputs = recipeSlots.getSlotViews(RecipeIngredientRole.OUTPUT);
-                    ItemStack stack = outputs.getFirst().getDisplayedItemStack().orElse(ItemStack.EMPTY);
+                    ItemStack stack = outputs.get(0).getDisplayedItemStack().orElse(ItemStack.EMPTY);
                     if (!stack.isEmpty()) {
                         recipeToSend.add(stack);
                         slotsToSend.add(9);
@@ -97,7 +97,7 @@ public class FabricJEIPlugin implements IModPlugin {
                     if (filterScreen instanceof FluidFilterScreen<?>) {
                         Fluid fluid;
                         if (ingredient.getIngredient() instanceof IJeiFluidIngredient fluidStack) {
-                            fluid = fluidStack.getFluidVariant().getFluid();
+                            fluid = fluidStack.getFluid();
                         } else {
                             fluid = Services.LOADER_SERVICE.getFluidFromStack(stack);
                         }

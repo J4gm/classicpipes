@@ -4,6 +4,7 @@ import jagm.classicpipes.ClassicPipes;
 import jagm.classicpipes.services.Services;
 import jagm.classicpipes.util.MiscUtil;
 import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -29,8 +30,10 @@ public class ModLabelItem extends LabelItem {
                 player.displayClientMessage(Component.translatable("chat." + ClassicPipes.MOD_ID + ".nothing_in_offhand"), false);
             }
         } else {
+            CompoundTag compoundTag = labelStack.getOrCreateTag();
             String mod = MiscUtil.modFromItem(targetStack);
-            labelStack.set(ClassicPipes.LABEL_COMPONENT, mod);
+            compoundTag.putString("classic_pipes_label", mod);
+            labelStack.setTag(compoundTag);
             if (level.isClientSide()) {
                 player.displayClientMessage(Component.translatable("chat." + ClassicPipes.MOD_ID + ".mod_set", Component.literal(Services.LOADER_SERVICE.getModName(mod)).withStyle(ChatFormatting.LIGHT_PURPLE)), false);
             }
@@ -39,9 +42,10 @@ public class ModLabelItem extends LabelItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
-        String mod = stack.get(ClassicPipes.LABEL_COMPONENT);
-        if (mod != null) {
+    public void appendHoverText(ItemStack stack, Level level, List<Component> tooltip, TooltipFlag flag) {
+        CompoundTag compoundTag = stack.getOrCreateTag();
+        String mod = compoundTag.contains("classic_pipes_label", CompoundTag.TAG_STRING) ? compoundTag.getString("classic_pipes_label") : "";
+        if (!mod.isEmpty()) {
             tooltip.add(Component.literal(Services.LOADER_SERVICE.getModName(mod)).withStyle(ChatFormatting.LIGHT_PURPLE));
         } else {
             tooltip.add(Component.translatable("item." + ClassicPipes.MOD_ID + ".mod_label.desc").withStyle(ChatFormatting.GRAY));
@@ -50,8 +54,9 @@ public class ModLabelItem extends LabelItem {
 
     @Override
     public boolean itemMatches(ItemStack tagStack, ItemStack compareStack) {
-        String mod = tagStack.get(ClassicPipes.LABEL_COMPONENT);
-        return mod != null && mod.equals(MiscUtil.modFromItem(compareStack));
+        CompoundTag compoundTag = tagStack.getOrCreateTag();
+        String mod = compoundTag.contains("classic_pipes_label", CompoundTag.TAG_STRING) ? compoundTag.getString("classic_pipes_label") : "";
+        return !mod.isEmpty() && mod.equals(MiscUtil.modFromItem(compareStack));
     }
 
 }

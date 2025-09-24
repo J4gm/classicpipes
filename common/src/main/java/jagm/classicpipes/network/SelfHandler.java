@@ -1,10 +1,14 @@
 package jagm.classicpipes.network;
 
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
 
-public interface SelfHandler extends CustomPacketPayload {
+public abstract class SelfHandler<T> {
 
-    void handle(Player player);
+    public abstract FriendlyByteBuf encode(T payload, FriendlyByteBuf buffer);
+
+    public abstract T decode(FriendlyByteBuf buffer);
+
+    public abstract void handle(T payload, Player player);
 
 }

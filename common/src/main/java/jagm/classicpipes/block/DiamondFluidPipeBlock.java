@@ -4,6 +4,7 @@ import jagm.classicpipes.ClassicPipes;
 import jagm.classicpipes.blockentity.DiamondFluidPipeEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -30,8 +31,8 @@ public class DiamondFluidPipeBlock extends FluidPipeBlock {
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
-        if (level instanceof ServerLevel && level.getBlockEntity(pos) instanceof DiamondFluidPipeEntity diamondFluidPipe) {
+    public InteractionResult use(BlockState state, Level level, BlockPos pipePos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+        if (level instanceof ServerLevel && level.getBlockEntity(pipePos) instanceof DiamondFluidPipeEntity diamondFluidPipe) {
             player.openMenu(diamondFluidPipe);
         }
         return InteractionResult.SUCCESS;

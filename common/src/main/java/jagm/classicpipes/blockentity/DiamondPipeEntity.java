@@ -7,7 +7,6 @@ import jagm.classicpipes.util.ItemInPipe;
 import jagm.classicpipes.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
@@ -64,29 +63,29 @@ public class DiamondPipeEntity extends RoundRobinPipeEntity implements MenuProvi
     }
 
     @Override
-    protected void loadAdditional(CompoundTag valueInput, HolderLookup.Provider registries) {
+    public void load(CompoundTag valueInput) {
         this.filter.clearContent();
-        super.loadAdditional(valueInput, registries);
+        super.load(valueInput);
         ListTag filterList = valueInput.getList("filter", ListTag.TAG_COMPOUND);
         filterList.forEach(tag -> {
             if (tag instanceof CompoundTag compoundTag) {
                 int slot = compoundTag.getInt("slot");
-                MiscUtil.loadFromTag(tag, ItemStack.CODEC, registries, stack -> this.filter.setItem(slot, stack));
+                MiscUtil.loadFromTag(tag, ItemStack.CODEC, stack -> this.filter.setItem(slot, stack));
             }
         });
         this.filter.setMatchComponents(valueInput.getBoolean("match_components"));
     }
 
     @Override
-    protected void saveAdditional(CompoundTag valueOutput, HolderLookup.Provider registries) {
-        super.saveAdditional(valueOutput, registries);
+    protected void saveAdditional(CompoundTag valueOutput) {
+        super.saveAdditional(valueOutput);
         ListTag filterList = new ListTag();
         for (int slot = 0; slot < this.filter.getContainerSize(); slot++) {
             ItemStack stack = this.filter.getItem(slot);
             if (!stack.isEmpty()) {
                 CompoundTag tag = new CompoundTag();
                 tag.putInt("slot", slot);
-                MiscUtil.saveToTag(tag, stack, ItemStack.CODEC, registries, filterList::add);
+                MiscUtil.saveToTag(tag, stack, ItemStack.CODEC, filterList::add);
             }
         }
         valueOutput.put("filter", filterList);

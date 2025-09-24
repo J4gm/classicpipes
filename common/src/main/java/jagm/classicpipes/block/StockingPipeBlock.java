@@ -8,6 +8,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -35,15 +36,15 @@ public class StockingPipeBlock extends ContainerAdjacentNetworkedPipeBlock {
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
-        if (super.useWithoutItem(state, level, pos, player, hitResult).equals(InteractionResult.SUCCESS)) {
+    public InteractionResult use(BlockState state, Level level, BlockPos pipePos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+        if (super.use(state, level, pipePos, player, hand, hitResult).equals(InteractionResult.SUCCESS)) {
             return InteractionResult.SUCCESS;
-        } else if (level instanceof ServerLevel && level.getBlockEntity(pos) instanceof StockingPipeEntity stockingPipe) {
+        } else if (level instanceof ServerLevel && level.getBlockEntity(pipePos) instanceof StockingPipeEntity stockingPipe) {
             Services.LOADER_SERVICE.openMenu(
                     (ServerPlayer) player,
                     stockingPipe,
                     new ClientBoundTwoBoolsPayload(stockingPipe.shouldMatchComponents(), stockingPipe.isActiveStocking()),
-                    ClientBoundTwoBoolsPayload.STREAM_CODEC
+                    ClientBoundTwoBoolsPayload.HANDLER
             );
         }
         return InteractionResult.SUCCESS;

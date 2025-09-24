@@ -37,7 +37,7 @@ public class MissingItem {
 
     public void addMissingIngredient(MissingItem ingredient) {
         for (MissingItem alreadyThere : this.missingIngredients) {
-            if (ItemStack.isSameItemSameComponents(ingredient.stack, alreadyThere.stack)) {
+            if (ItemStack.isSameItemSameTags(ingredient.stack, alreadyThere.stack)) {
                 alreadyThere.grow(ingredient.getCount());
                 for (MissingItem ingredientIngredient : ingredient.missingIngredients) {
                     alreadyThere.addMissingIngredient(ingredientIngredient);
@@ -56,7 +56,7 @@ public class MissingItem {
         } else {
             boolean matched = false;
             for (ItemStack alreadyThere : baseItems) {
-                if (ItemStack.isSameItemSameComponents(this.stack, alreadyThere)) {
+                if (ItemStack.isSameItemSameTags(this.stack, alreadyThere)) {
                     alreadyThere.grow(this.stack.getCount());
                     matched = true;
                     break;

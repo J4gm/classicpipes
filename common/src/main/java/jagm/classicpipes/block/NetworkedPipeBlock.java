@@ -18,7 +18,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -110,23 +109,11 @@ public class NetworkedPipeBlock extends PipeBlock {
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
-        if (level instanceof ServerLevel && level.getBlockEntity(pos) instanceof RoutingPipeEntity routingPipe) {
-            Services.LOADER_SERVICE.openMenu(
-                    (ServerPlayer) player,
-                    routingPipe,
-                    new ClientBoundTwoBoolsPayload(routingPipe.shouldMatchComponents(), routingPipe.isDefaultRoute()),
-                    ClientBoundTwoBoolsPayload.STREAM_CODEC
-            );
-        }
-        return InteractionResult.SUCCESS;
-    }
-
-    @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
-        if (stack.getItem().equals(ClassicPipes.PIPE_SLICER)) {
-            if (player instanceof ServerPlayer serverPlayer && level.getBlockEntity(pos) instanceof NetworkedPipeEntity networkedPipe && networkedPipe.hasNetwork()) {
-                ClientBoundItemListPayload payload = networkedPipe.getNetwork().requestItemList(pos);
+    public InteractionResult use(BlockState state, Level level, BlockPos pipePos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+        ItemStack handStack = player.getItemInHand(hand);
+        if (handStack.getItem().equals(ClassicPipes.PIPE_SLICER)) {
+            if (player instanceof ServerPlayer serverPlayer && level.getBlockEntity(pipePos) instanceof NetworkedPipeEntity networkedPipe && networkedPipe.hasNetwork()) {
+                ClientBoundItemListPayload payload = networkedPipe.getNetwork().requestItemList(pipePos);
                 Services.LOADER_SERVICE.openMenu(
                         serverPlayer,
                         new MenuProvider() {
@@ -143,12 +130,18 @@ public class NetworkedPipeBlock extends PipeBlock {
 
                         },
                         payload,
-                        ClientBoundItemListPayload.STREAM_CODEC
+                        ClientBoundItemListPayload.HANDLER
                 );
-                return ItemInteractionResult.SUCCESS;
             }
+        } else if (level instanceof ServerLevel && level.getBlockEntity(pipePos) instanceof RoutingPipeEntity routingPipe) {
+            Services.LOADER_SERVICE.openMenu(
+                    (ServerPlayer) player,
+                    routingPipe,
+                    new ClientBoundTwoBoolsPayload(routingPipe.shouldMatchComponents(), routingPipe.isDefaultRoute()),
+                    ClientBoundTwoBoolsPayload.HANDLER
+            );
         }
-        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        return InteractionResult.SUCCESS;
     }
 
     public enum ConnectionState implements StringRepresentable {

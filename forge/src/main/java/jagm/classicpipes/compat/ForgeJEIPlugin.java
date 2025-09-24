@@ -71,7 +71,7 @@ public class ForgeJEIPlugin implements IModPlugin {
                         recipePipeMenu.getSlot(i).set(stack);
                     }
                     List<IRecipeSlotView> outputs = recipeSlots.getSlotViews(RecipeIngredientRole.OUTPUT);
-                    ItemStack stack = outputs.getFirst().getDisplayedItemStack().orElse(ItemStack.EMPTY);
+                    ItemStack stack = outputs.get(0).getDisplayedItemStack().orElse(ItemStack.EMPTY);
                     if (!stack.isEmpty()) {
                         recipeToSend.add(stack);
                         slotsToSend.add(9);

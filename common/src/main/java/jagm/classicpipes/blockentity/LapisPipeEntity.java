@@ -7,7 +7,6 @@ import jagm.classicpipes.util.ItemInPipe;
 import jagm.classicpipes.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -53,14 +52,14 @@ public class LapisPipeEntity extends RoundRobinPipeEntity {
     }
 
     @Override
-    protected void loadAdditional(CompoundTag valueInput, HolderLookup.Provider registries) {
-        super.loadAdditional(valueInput, registries);
+    public void load(CompoundTag valueInput) {
+        super.load(valueInput);
         this.entryDirection = Direction.from3DDataValue(valueInput.getByte("entry_direction"));
     }
 
     @Override
-    protected void saveAdditional(CompoundTag valueOutput, HolderLookup.Provider registries) {
-        super.saveAdditional(valueOutput, registries);
+    protected void saveAdditional(CompoundTag valueOutput) {
+        super.saveAdditional(valueOutput);
         valueOutput.putByte("entry_direction", (byte) this.entryDirection.get3DDataValue());
     }
 

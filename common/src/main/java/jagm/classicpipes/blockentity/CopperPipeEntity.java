@@ -6,7 +6,6 @@ import jagm.classicpipes.services.Services;
 import jagm.classicpipes.util.FacingOrNone;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
@@ -54,14 +53,14 @@ public class CopperPipeEntity extends RoundRobinPipeEntity {
     }
 
     @Override
-    protected void loadAdditional(CompoundTag valueInput, HolderLookup.Provider registries) {
-        super.loadAdditional(valueInput, registries);
+    public void load(CompoundTag valueInput) {
+        super.load(valueInput);
         this.cooldown = valueInput.getByte("cooldown");
     }
 
     @Override
-    protected void saveAdditional(CompoundTag valueOutput, HolderLookup.Provider registries) {
-        super.saveAdditional(valueOutput, registries);
+    protected void saveAdditional(CompoundTag valueOutput) {
+        super.saveAdditional(valueOutput);
         valueOutput.putByte("cooldown", this.cooldown);
     }
 

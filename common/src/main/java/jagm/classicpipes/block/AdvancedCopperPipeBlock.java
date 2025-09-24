@@ -7,6 +7,7 @@ import jagm.classicpipes.services.Services;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -33,18 +34,18 @@ public class AdvancedCopperPipeBlock extends CopperPipeBlock {
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
+    public InteractionResult use(BlockState state, Level level, BlockPos pipePos, Player player, InteractionHand hand, BlockHitResult hitResult) {
         if (player.isCrouching()) {
-            if (super.useWithoutItem(state, level, pos, player, hitResult).equals(InteractionResult.SUCCESS)) {
+            if (super.use(state, level, pipePos, player, hand, hitResult).equals(InteractionResult.SUCCESS)) {
                 return InteractionResult.SUCCESS;
             }
         }
-        if (level instanceof ServerLevel && level.getBlockEntity(pos) instanceof AdvancedCopperPipeEntity pipe) {
+        if (level instanceof ServerLevel && level.getBlockEntity(pipePos) instanceof AdvancedCopperPipeEntity pipe) {
             Services.LOADER_SERVICE.openMenu(
                     (ServerPlayer) player,
                     pipe,
                     new ClientBoundBoolPayload(pipe.shouldMatchComponents()),
-                    ClientBoundBoolPayload.STREAM_CODEC
+                    ClientBoundBoolPayload.HANDLER
             );
         }
         return InteractionResult.SUCCESS;

@@ -12,7 +12,6 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.ImageButton;
-import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
@@ -26,7 +25,7 @@ import java.util.Iterator;
 public class RequestScreen extends AbstractContainerScreen<RequestMenu> {
 
     private static final ResourceLocation BACKGROUND = MiscUtil.resourceLocation("textures/gui/container/request.png");
-    private static final WidgetSprites X_BUTTON = new WidgetSprites(MiscUtil.resourceLocation("widget/x"), MiscUtil.resourceLocation("widget/x_hovered"));
+    private static final ResourceLocation X_BUTTON = MiscUtil.resourceLocation("textures/gui/sprites/widget/x.png");
 
     private EditBox searchBar;
     private PageButton prev_page;
@@ -65,7 +64,9 @@ public class RequestScreen extends AbstractContainerScreen<RequestMenu> {
         this.addRenderableWidget(this.searchBar);
         this.addRenderableWidget(this.prev_page);
         this.addRenderableWidget(this.next_page);
-        this.addRenderableWidget(new ImageButton(this.leftPos + this.imageWidth - 12, this.topPos + 5, 7, 7, X_BUTTON, button -> this.onClose()));
+        this.addRenderableWidget(new ImageButton(this.leftPos + this.imageWidth - 12, this.topPos + 5, 7, 7, 0, 0, 7, X_BUTTON, 7, 7, button -> this.onClose()));
+
+        this.setInitialFocus(this.searchBar);
 
     }
 
@@ -120,17 +121,13 @@ public class RequestScreen extends AbstractContainerScreen<RequestMenu> {
         graphics.drawString(this.font, sortBy, this.imageWidth / 2 - 29 - this.font.width(sortBy), 202, -12566464, false);
     }
 
-    @Override
-    protected void renderSlot(GuiGraphics graphics, Slot slot) {
+    private void renderSlot(GuiGraphics graphics, Slot slot) {
         ItemStack stack = slot.getItem();
         int seed = slot.x + slot.y * this.imageWidth;
         graphics.renderItem(stack, slot.x, slot.y, seed);
         if (!stack.isEmpty()) {
-            //graphics.pose().pushPose();
-            //graphics.pose().translate(0, 0, 200.0F);
             this.renderItemBar(graphics, stack, slot.x, slot.y);
             this.renderItemCount(graphics, this.font, stack, slot.x, slot.y, this.menu.itemCraftable(stack));
-            //graphics.pose().popPose();
         }
     }
 
@@ -211,11 +208,6 @@ public class RequestScreen extends AbstractContainerScreen<RequestMenu> {
     }
 
     @Override
-    protected void setInitialFocus() {
-        this.setInitialFocus(this.searchBar);
-    }
-
-    @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (keyCode == 256 && this.minecraft != null && this.minecraft.player != null) {
             this.minecraft.player.closeContainer();
@@ -224,8 +216,8 @@ public class RequestScreen extends AbstractContainerScreen<RequestMenu> {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-        this.menu.changePage((int) -scrollY);
+    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
+        this.menu.changePage((int) -delta);
         return true;
     }
 

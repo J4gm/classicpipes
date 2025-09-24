@@ -1,20 +1,20 @@
 package jagm.classicpipes.util;
 
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import jagm.classicpipes.ClassicPipes;
 import jagm.classicpipes.block.PipeBlock;
 import jagm.classicpipes.services.Services;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
-import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.Comparator;
@@ -28,14 +28,38 @@ public class MiscUtil {
     public static final Comparator<Tuple<ItemStack, Boolean>> MOD = Comparator.comparing(tuple -> Services.LOADER_SERVICE.getModName(modFromItem(tuple.a())));
     public static final Comparator<Tuple<ItemStack, Boolean>> CRAFTABLE = Comparator.comparing(Tuple::b);
 
-    public static final Codec<ItemStack> UNLIMITED_STACK_CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ItemStack.ITEM_NON_AIR_CODEC.fieldOf("id").forGetter(ItemStack::getItemHolder),
-            Codec.INT.fieldOf("count").forGetter(ItemStack::getCount),
-            DataComponentPatch.CODEC.optionalFieldOf("components", DataComponentPatch.EMPTY).forGetter(ItemStack::getComponentsPatch)
-    ).apply(instance, ItemStack::new));
+    // Uses int instead of byte for stack size.
+    public static void writeStackToBuffer(FriendlyByteBuf buffer, ItemStack stack) {
+        if (stack.isEmpty()) {
+            buffer.writeBoolean(false);
+        } else {
+            buffer.writeBoolean(true);
+            Item item = stack.getItem();
+            buffer.writeId(BuiltInRegistries.ITEM, item);
+            buffer.writeInt(stack.getCount());
+            CompoundTag compoundtag = null;
+            if (item.canBeDepleted() || item.shouldOverrideMultiplayerNbt()) {
+                compoundtag = stack.getTag();
+            }
+            buffer.writeNbt(compoundtag);
+        }
+    }
+
+    public static ItemStack readStackFromBuffer(FriendlyByteBuf buffer) {
+        if (buffer.readBoolean()) {
+            Item item = buffer.readById(BuiltInRegistries.ITEM);
+            if (item != null) {
+                int count = buffer.readInt();
+                ItemStack stack = new ItemStack(item, count);
+                stack.setTag(buffer.readNbt());
+                return stack;
+            }
+        }
+        return ItemStack.EMPTY;
+    }
 
     public static ResourceLocation resourceLocation(String name) {
-        return ResourceLocation.fromNamespaceAndPath(ClassicPipes.MOD_ID, name);
+        return new ResourceLocation(ClassicPipes.MOD_ID, name);
     }
 
     public static <T> ResourceKey<T> makeKey(ResourceKey<? extends Registry<T>> registry, String name) {
@@ -61,12 +85,16 @@ public class MiscUtil {
         return BuiltInRegistries.ITEM.getKey(stack.getItem()).toString().split(":")[0];
     }
 
-    public static <T> void loadFromTag(Tag tag, Codec<T> codec, HolderLookup.Provider registries, Consumer<? super T> resultConsumer) {
-        codec.parse(registries.createSerializationContext(NbtOps.INSTANCE), tag).result().ifPresent(resultConsumer);
+    public static <T> void loadFromTag(Tag tag, Codec<T> codec, Consumer<? super T> resultConsumer) {
+        codec.parse(NbtOps.INSTANCE, tag).result().ifPresent(resultConsumer);
     }
 
-    public static <T> void saveToTag(Tag tag, T thing, Codec<T> codec, HolderLookup.Provider registries, Consumer<? super Tag> resultConsumer) {
-        codec.encode(thing, registries.createSerializationContext(NbtOps.INSTANCE), tag).result().ifPresent(resultConsumer);
+    public static <T> void saveToTag(Tag tag, T thing, Codec<T> codec, Consumer<? super Tag> resultConsumer) {
+        codec.encode(thing, NbtOps.INSTANCE, tag).result().ifPresent(resultConsumer);
+    }
+
+    public static <T> void saveToTag(T thing, Codec<T> codec, Consumer<? super Tag> resultConsumer) {
+        codec.encodeStart(NbtOps.INSTANCE, thing).result().ifPresent(resultConsumer);
     }
 
 }

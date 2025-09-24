@@ -2,24 +2,15 @@ package jagm.classicpipes.network;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.entity.player.Player;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public record ClientBoundRecipePipePayload(Direction[] slotDirections, List<Direction> availableDirections, BlockPos pos) {
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, ClientBoundRecipePipePayload> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.byteArray(10),
-            ClientBoundRecipePipePayload::getDirectionBytes,
-            ByteBufCodecs.collection(ArrayList::new, Direction.STREAM_CODEC),
-            ClientBoundRecipePipePayload::availableDirections,
-            BlockPos.STREAM_CODEC,
-            ClientBoundRecipePipePayload::pos,
-            ClientBoundRecipePipePayload::makePayload
-    );
+    public static final SelfHandler<ClientBoundRecipePipePayload> HANDLER = new Handler();
 
     private byte[] getDirectionBytes() {
         byte[] directionBytes = new byte[this.slotDirections().length];
@@ -35,6 +26,29 @@ public record ClientBoundRecipePipePayload(Direction[] slotDirections, List<Dire
             directions[i] = Direction.from3DDataValue(directionBytes[i]);
         }
         return new ClientBoundRecipePipePayload(directions, availableDirections, pos);
+    }
+
+    private static class Handler extends SelfHandler<ClientBoundRecipePipePayload> {
+
+        @Override
+        public FriendlyByteBuf encode(ClientBoundRecipePipePayload payload, FriendlyByteBuf buffer) {
+            buffer.writeByteArray(payload.getDirectionBytes());
+            buffer.writeCollection(payload.availableDirections(), (buf, direction) -> buf.writeByte(direction.get3DDataValue()));
+            buffer.writeBlockPos(payload.pos());
+            return buffer;
+        }
+
+        @Override
+        public ClientBoundRecipePipePayload decode(FriendlyByteBuf buffer) {
+            byte[] directionBytes = buffer.readByteArray();
+            List<Direction> availableDirections = buffer.readCollection(ArrayList::new, buf -> Direction.from3DDataValue(buf.readByte()));
+            BlockPos pos = buffer.readBlockPos();
+            return makePayload(directionBytes, availableDirections, pos);
+        }
+
+        @Override
+        public void handle(ClientBoundRecipePipePayload payload, Player player) {}
+
     }
 
 }

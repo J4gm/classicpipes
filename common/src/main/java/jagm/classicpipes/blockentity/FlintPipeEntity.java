@@ -1,9 +1,10 @@
 package jagm.classicpipes.blockentity;
 
 import jagm.classicpipes.ClassicPipes;
+import jagm.classicpipes.services.Services;
 import jagm.classicpipes.util.ItemInPipe;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.dispenser.BlockSource;
+import net.minecraft.core.BlockSource;
 import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
 import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.server.level.ServerLevel;
@@ -28,7 +29,44 @@ public class FlintPipeEntity extends RoundRobinPipeEntity {
         } else {
             BlockState state = Blocks.DISPENSER.defaultBlockState().setValue(DispenserBlock.FACING, item.getTargetDirection());
             DispenserBlockEntity fakeDispenser = new DispenserBlockEntity(pos, state);
-            BlockSource blockSource = new BlockSource(level, pos, state, fakeDispenser);
+            BlockSource blockSource = new BlockSource() {
+
+                @Override
+                public double x() {
+                    return pos.getX();
+                }
+
+                @Override
+                public double y() {
+                    return pos.getY();
+                }
+
+                @Override
+                public double z() {
+                    return pos.getZ();
+                }
+
+                @Override
+                public BlockPos getPos() {
+                    return pos;
+                }
+
+                @Override
+                public BlockState getBlockState() {
+                    return state;
+                }
+
+                @Override
+                public DispenserBlockEntity getEntity() {
+                    return fakeDispenser;
+                }
+
+                @Override
+                public ServerLevel getLevel() {
+                    return level;
+                }
+
+            };
             ItemStack leftover = dispenseBehavior.dispense(blockSource, item.getStack());
             if (!leftover.isEmpty()) {
                 item.setStack(leftover);
@@ -41,7 +79,7 @@ public class FlintPipeEntity extends RoundRobinPipeEntity {
 
     private static DispenseItemBehavior getDispenser(Level level, ItemStack stack) {
         DispenseItemBehavior defaultBehavior = new DefaultDispenseItemBehavior();
-        return !stack.isItemEnabled(level.enabledFeatures()) ? defaultBehavior : DispenserBlock.DISPENSER_REGISTRY.get(stack.getItem());
+        return !stack.isItemEnabled(level.enabledFeatures()) ? defaultBehavior : Services.LOADER_SERVICE.getDispenserBehaviour(stack);
     }
 
 }

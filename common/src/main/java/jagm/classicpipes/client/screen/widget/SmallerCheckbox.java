@@ -13,8 +13,8 @@ import net.minecraft.resources.ResourceLocation;
 
 public class SmallerCheckbox extends AbstractButton {
 
-    private static final ResourceLocation CHECKBOX_SELECTED_SPRITE = MiscUtil.resourceLocation("widget/checkbox_selected");
-    private static final ResourceLocation CHECKBOX_SPRITE = MiscUtil.resourceLocation("widget/checkbox");
+    private static final ResourceLocation CHECKBOX_SELECTED_SPRITE = MiscUtil.resourceLocation("textures/gui/sprites/widget/checkbox_selected.png");
+    private static final ResourceLocation CHECKBOX_SPRITE = MiscUtil.resourceLocation("textures/gui/sprites/widget/checkbox.png");
     public static final int SIZE = 12;
 
     private boolean selected;
@@ -62,7 +62,7 @@ public class SmallerCheckbox extends AbstractButton {
     @Override
     public void renderWidget(GuiGraphics graphics, int x, int y, float f) {
         ResourceLocation spriteLocation = this.selected() ? CHECKBOX_SELECTED_SPRITE : CHECKBOX_SPRITE;
-        graphics.blitSprite(spriteLocation, this.getX(), this.getY(), SIZE, SIZE);
+        this.renderTexture(graphics, spriteLocation, this.getX(), this.getY(), 0, 0, SIZE, SIZE, SIZE, SIZE, SIZE);
         graphics.drawString(this.font, this.label, this.getX() + SIZE + 2, this.getY() + 3, -12566464, false);
     }
 

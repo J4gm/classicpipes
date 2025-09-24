@@ -10,6 +10,7 @@ import jagm.classicpipes.client.renderer.RecipePipeRenderer;
 import jagm.classicpipes.client.screen.*;
 import jagm.classicpipes.network.*;
 import jagm.classicpipes.util.MiscUtil;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
@@ -48,8 +49,6 @@ public class ForgeEntrypoint {
             event.register(ForgeRegistries.Keys.ITEMS, helper -> ClassicPipes.ITEMS.forEach(helper::register));
             event.register(ForgeRegistries.Keys.SOUND_EVENTS, helper -> ClassicPipes.SOUNDS.forEach(helper::register));
             event.register(Registries.CREATIVE_MODE_TAB, helper -> helper.register(ClassicPipes.PIPES_TAB_KEY, ClassicPipes.PIPES_TAB));
-            event.register(Registries.DATA_COMPONENT_TYPE, helper -> helper.register(ClassicPipes.LABEL_COMPONENT_KEY, ClassicPipes.LABEL_COMPONENT));
-            event.register(Registries.TRIGGER_TYPE, helper -> helper.register(MiscUtil.resourceLocation("request_item"), ClassicPipes.REQUEST_ITEM_TRIGGER));
 
             event.register(ForgeRegistries.Keys.BLOCK_ENTITY_TYPES, helper -> {
                 helper.register("basic_pipe", ClassicPipes.BASIC_PIPE_ENTITY);
@@ -97,16 +96,17 @@ public class ForgeEntrypoint {
         @SubscribeEvent
         public static void onCommonSetup(FMLCommonSetupEvent event) {
             event.enqueueWork(() -> {
-                ForgePacketHandler.registerServerPayload(ServerBoundMatchComponentsPayload.class, ServerBoundMatchComponentsPayload.STREAM_CODEC);
-                ForgePacketHandler.registerServerPayload(ServerBoundDefaultRoutePayload.class, ServerBoundDefaultRoutePayload.STREAM_CODEC);
-                ForgePacketHandler.registerServerPayload(ServerBoundLeaveOnePayload.class, ServerBoundLeaveOnePayload.STREAM_CODEC);
-                ForgePacketHandler.registerServerPayload(ServerBoundSortingModePayload.class, ServerBoundSortingModePayload.STREAM_CODEC);
-                ForgePacketHandler.registerServerPayload(ServerBoundRequestPayload.class, ServerBoundRequestPayload.STREAM_CODEC);
-                ForgePacketHandler.registerServerPayload(ServerBoundActiveStockingPayload.class, ServerBoundActiveStockingPayload.STREAM_CODEC);
-                ForgePacketHandler.registerServerPayload(ServerBoundSlotDirectionPayload.class, ServerBoundSlotDirectionPayload.STREAM_CODEC);
-                ForgePacketHandler.registerServerPayload(ServerBoundTransferRecipePayload.class, ServerBoundTransferRecipePayload.STREAM_CODEC);
-                ForgePacketHandler.registerServerPayload(ServerBoundSetFilterPayload.class, ServerBoundSetFilterPayload.STREAM_CODEC);
-                ForgePacketHandler.registerClientPayload(ClientBoundItemListPayload.class, ClientBoundItemListPayload.STREAM_CODEC);
+                CriteriaTriggers.register(ClassicPipes.REQUEST_ITEM_TRIGGER);
+                ForgePacketHandler.registerServerPayload(ServerBoundMatchComponentsPayload.class, ServerBoundMatchComponentsPayload.HANDLER);
+                ForgePacketHandler.registerServerPayload(ServerBoundDefaultRoutePayload.class, ServerBoundDefaultRoutePayload.HANDLER);
+                ForgePacketHandler.registerServerPayload(ServerBoundLeaveOnePayload.class, ServerBoundLeaveOnePayload.HANDLER);
+                ForgePacketHandler.registerServerPayload(ServerBoundSortingModePayload.class, ServerBoundSortingModePayload.HANDLER);
+                ForgePacketHandler.registerServerPayload(ServerBoundRequestPayload.class, ServerBoundRequestPayload.HANDLER);
+                ForgePacketHandler.registerServerPayload(ServerBoundActiveStockingPayload.class, ServerBoundActiveStockingPayload.HANDLER);
+                ForgePacketHandler.registerServerPayload(ServerBoundSlotDirectionPayload.class, ServerBoundSlotDirectionPayload.HANDLER);
+                ForgePacketHandler.registerServerPayload(ServerBoundTransferRecipePayload.class, ServerBoundTransferRecipePayload.HANDLER);
+                ForgePacketHandler.registerServerPayload(ServerBoundSetFilterPayload.class, ServerBoundSetFilterPayload.HANDLER);
+                ForgePacketHandler.registerClientPayload(ClientBoundItemListPayload.class, ClientBoundItemListPayload.HANDLER);
             });
         }
 

@@ -6,12 +6,14 @@ import jagm.classicpipes.client.renderer.PipeRenderer;
 import jagm.classicpipes.client.renderer.RecipePipeRenderer;
 import jagm.classicpipes.client.screen.*;
 import jagm.classicpipes.network.ClientBoundItemListPayload;
+import jagm.classicpipes.network.SelfHandler;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
+import net.minecraft.resources.ResourceLocation;
 
 @SuppressWarnings("unused")
 public class FabricClientEntrypoint implements ClientModInitializer {
@@ -58,8 +60,15 @@ public class FabricClientEntrypoint implements ClientModInitializer {
         MenuScreens.register(ClassicPipes.ADVANCED_COPPER_PIPE_MENU, AdvancedCopperPipeScreen::new);
         MenuScreens.register(ClassicPipes.ADVANCED_COPPER_FLUID_PIPE_MENU, AdvancedCopperFluidPipeScreen::new);
 
-        ClientPlayNetworking.registerGlobalReceiver(ClientBoundItemListPayload.TYPE, (payload, context) -> payload.handle(context.player()));
+        registerClientPayload(ClientBoundItemListPayload.TYPE, ClientBoundItemListPayload.HANDLER);
 
+    }
+
+    private static <T> void registerClientPayload(ResourceLocation type, SelfHandler<T> packet) {
+        ClientPlayNetworking.registerGlobalReceiver(type, (client, handler, buffer, sender) -> {
+            T payload = packet.decode(buffer);
+            client.execute(() -> packet.handle(payload, client.player));
+        });
     }
 
 }

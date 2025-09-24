@@ -122,16 +122,16 @@ public class FluidPipeRenderer implements BlockEntityRenderer<FluidPipeEntity> {
         float v1 = fluidSprite.getV(z1);
         float v2 = fluidSprite.getV(z2);
         if (renderSide[Direction.DOWN.get3DDataValue()]) {
-            vertexBuffer.addVertex(matrix, x1, y1, z2).setColor(tint).setUv(u1, v2).setLight(light);
-            vertexBuffer.addVertex(matrix, x1, y1, z1).setColor(tint).setUv(u1, v1).setLight(light);
-            vertexBuffer.addVertex(matrix, x2, y1, z1).setColor(tint).setUv(u2, v1).setLight(light);
-            vertexBuffer.addVertex(matrix, x2, y1, z2).setColor(tint).setUv(u2, v2).setLight(light);
+            vertexBuffer.vertex(matrix, x1, y1, z2).color(tint).uv(u1, v2);
+            vertexBuffer.vertex(matrix, x1, y1, z1).color(tint).uv(u1, v1);
+            vertexBuffer.vertex(matrix, x2, y1, z1).color(tint).uv(u2, v1);
+            vertexBuffer.vertex(matrix, x2, y1, z2).color(tint).uv(u2, v2);
         }
         if (renderSide[Direction.UP.get3DDataValue()]) {
-            vertexBuffer.addVertex(matrix, x1, y2, z1).setColor(tint).setUv(u1, v2).setLight(light);
-            vertexBuffer.addVertex(matrix, x1, y2, z2).setColor(tint).setUv(u1, v1).setLight(light);
-            vertexBuffer.addVertex(matrix, x2, y2, z2).setColor(tint).setUv(u2, v1).setLight(light);
-            vertexBuffer.addVertex(matrix, x2, y2, z1).setColor(tint).setUv(u2, v2).setLight(light);
+            vertexBuffer.vertex(matrix, x1, y2, z1).color(tint).uv(u1, v2);
+            vertexBuffer.vertex(matrix, x1, y2, z2).color(tint).uv(u1, v1);
+            vertexBuffer.vertex(matrix, x2, y2, z2).color(tint).uv(u2, v1);
+            vertexBuffer.vertex(matrix, x2, y2, z1).color(tint).uv(u2, v2);
         }
         // x-axis
         u1 = fluidSprite.getU(y1);
@@ -139,16 +139,16 @@ public class FluidPipeRenderer implements BlockEntityRenderer<FluidPipeEntity> {
         v1 = fluidSprite.getV(z1);
         v2 = fluidSprite.getV(z2);
         if (renderSide[Direction.WEST.get3DDataValue()]) {
-            vertexBuffer.addVertex(matrix, x1, y2, z2).setColor(tint).setUv(u1, v2).setLight(light);
-            vertexBuffer.addVertex(matrix, x1, y2, z1).setColor(tint).setUv(u1, v1).setLight(light);
-            vertexBuffer.addVertex(matrix, x1, y1, z1).setColor(tint).setUv(u2, v1).setLight(light);
-            vertexBuffer.addVertex(matrix, x1, y1, z2).setColor(tint).setUv(u2, v2).setLight(light);
+            vertexBuffer.vertex(matrix, x1, y2, z2).color(tint).uv(u1, v2);
+            vertexBuffer.vertex(matrix, x1, y2, z1).color(tint).uv(u1, v1);
+            vertexBuffer.vertex(matrix, x1, y1, z1).color(tint).uv(u2, v1);
+            vertexBuffer.vertex(matrix, x1, y1, z2).color(tint).uv(u2, v2);
         }
         if (renderSide[Direction.EAST.get3DDataValue()]) {
-            vertexBuffer.addVertex(matrix, x2, y2, z1).setColor(tint).setUv(u1, v2).setLight(light);
-            vertexBuffer.addVertex(matrix, x2, y2, z2).setColor(tint).setUv(u1, v1).setLight(light);
-            vertexBuffer.addVertex(matrix, x2, y1, z2).setColor(tint).setUv(u2, v1).setLight(light);
-            vertexBuffer.addVertex(matrix, x2, y1, z1).setColor(tint).setUv(u2, v2).setLight(light);
+            vertexBuffer.vertex(matrix, x2, y2, z1).color(tint).uv(u1, v2);
+            vertexBuffer.vertex(matrix, x2, y2, z2).color(tint).uv(u1, v1);
+            vertexBuffer.vertex(matrix, x2, y1, z2).color(tint).uv(u2, v1);
+            vertexBuffer.vertex(matrix, x2, y1, z1).color(tint).uv(u2, v2);
         }
         // z-axis
         u1 = fluidSprite.getU(y1);
@@ -156,16 +156,16 @@ public class FluidPipeRenderer implements BlockEntityRenderer<FluidPipeEntity> {
         v1 = fluidSprite.getV(x1);
         v2 = fluidSprite.getV(x2);
         if (renderSide[Direction.NORTH.get3DDataValue()]) {
-            vertexBuffer.addVertex(matrix, x1, y2, z1).setColor(tint).setUv(u1, v2).setLight(light);
-            vertexBuffer.addVertex(matrix, x2, y2, z1).setColor(tint).setUv(u1, v1).setLight(light);
-            vertexBuffer.addVertex(matrix, x2, y1, z1).setColor(tint).setUv(u2, v1).setLight(light);
-            vertexBuffer.addVertex(matrix, x1, y1, z1).setColor(tint).setUv(u2, v2).setLight(light);
+            vertexBuffer.vertex(matrix, x1, y2, z1).color(tint).uv(u1, v2);
+            vertexBuffer.vertex(matrix, x2, y2, z1).color(tint).uv(u1, v1);
+            vertexBuffer.vertex(matrix, x2, y1, z1).color(tint).uv(u2, v1);
+            vertexBuffer.vertex(matrix, x1, y1, z1).color(tint).uv(u2, v2);
         }
         if (renderSide[Direction.SOUTH.get3DDataValue()]) {
-            vertexBuffer.addVertex(matrix, x2, y2, z2).setColor(tint).setUv(u1, v2).setLight(light);
-            vertexBuffer.addVertex(matrix, x1, y2, z2).setColor(tint).setUv(u1, v1).setLight(light);
-            vertexBuffer.addVertex(matrix, x1, y1, z2).setColor(tint).setUv(u2, v1).setLight(light);
-            vertexBuffer.addVertex(matrix, x2, y1, z2).setColor(tint).setUv(u2, v2).setLight(light);
+            vertexBuffer.vertex(matrix, x2, y2, z2).color(tint).uv(u1, v2);
+            vertexBuffer.vertex(matrix, x1, y2, z2).color(tint).uv(u1, v1);
+            vertexBuffer.vertex(matrix, x1, y1, z2).color(tint).uv(u2, v1);
+            vertexBuffer.vertex(matrix, x2, y1, z2).color(tint).uv(u2, v2);
         }
     }
 

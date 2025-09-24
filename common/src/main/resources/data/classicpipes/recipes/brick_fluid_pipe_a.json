@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "O": {
+      "item": "minecraft:bricks"
+    },
+    "W": {
+      "item": "minecraft:glass"
+    },
+    "X": {
+      "item": "minecraft:honeycomb"
+    }
+  },
+  "pattern": [
+    "OWO",
+    " X "
+  ],
+  "result": {
+    "count": 8,
+    "item": "classicpipes:brick_fluid_pipe"
+  }
+}

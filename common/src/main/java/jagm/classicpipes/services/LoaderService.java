@@ -3,14 +3,14 @@ package jagm.classicpipes.services;
 import jagm.classicpipes.blockentity.FluidPipeEntity;
 import jagm.classicpipes.blockentity.ItemPipeEntity;
 import jagm.classicpipes.client.renderer.FluidRenderInfo;
+import jagm.classicpipes.network.PayloadWrapper;
+import jagm.classicpipes.network.SelfHandler;
 import jagm.classicpipes.util.FluidInPipe;
 import jagm.classicpipes.util.ItemInPipe;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
@@ -36,15 +36,15 @@ public interface LoaderService {
 
     <B extends BlockEntity> BlockEntityType<B> createBlockEntityType(BiFunction<BlockPos, BlockState, B> blockEntitySupplier, Block... validBlocks);
 
-    <M extends AbstractContainerMenu, D> MenuType<M> createMenuType(TriFunction<Integer, Inventory, D, M> menuSupplier, StreamCodec<RegistryFriendlyByteBuf, D> codec);
+    <M extends AbstractContainerMenu, D> MenuType<M> createMenuType(TriFunction<Integer, Inventory, D, M> menuSupplier, SelfHandler<D> handler);
 
     <M extends AbstractContainerMenu> MenuType<M> createSimpleMenuType(BiFunction<Integer, Inventory, M> menuSupplier);
 
-    <D> void openMenu(ServerPlayer player, MenuProvider menuProvider, D payload, StreamCodec<RegistryFriendlyByteBuf, D> codec);
+    <D> void openMenu(ServerPlayer player, MenuProvider menuProvider, D payload, SelfHandler<D> handler);
 
-    void sendToServer(CustomPacketPayload payload);
+    <T extends PayloadWrapper<T>> void sendToServer(T payload);
 
-    void sendToClient(ServerPlayer player, CustomPacketPayload payload);
+    <T extends PayloadWrapper<T>> void sendToClient(ServerPlayer player, T payload);
 
     boolean canAccessContainer(Level level, BlockPos containerPos, Direction face);
 
@@ -71,5 +71,7 @@ public interface LoaderService {
     Fluid getFluidFromStack(ItemStack stack);
 
     Component getFluidName(Fluid fluid);
+
+    DispenseItemBehavior getDispenserBehaviour(ItemStack stack);
 
 }

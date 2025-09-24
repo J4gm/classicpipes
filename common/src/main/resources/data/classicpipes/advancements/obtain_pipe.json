@@ -1,0 +1,31 @@
+{
+  "parent": "minecraft:story/upgrade_tools",
+  "criteria": {
+    "pipe": {
+      "conditions": {
+        "items": [
+          {
+            "tag": "classicpipes:pipes/item"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.classicpipes.obtain_pipe.description"
+    },
+    "icon": {
+      "item": "classicpipes:copper_pipe"
+    },
+    "title": {
+      "translate": "advancements.classicpipes.obtain_pipe.title"
+    }
+  },
+  "requirements": [
+    [
+      "pipe"
+    ]
+  ]
+}

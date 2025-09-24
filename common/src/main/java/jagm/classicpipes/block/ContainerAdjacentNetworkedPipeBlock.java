@@ -8,6 +8,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -50,7 +51,7 @@ public abstract class ContainerAdjacentNetworkedPipeBlock extends NetworkedPipeB
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, Direction initialDirection, BlockState neighborState, LevelAccessor level, BlockPos pipePos, BlockPos neighborPos) {
+    public BlockState updateShape(BlockState state, Direction initialDirection, BlockState neighborState, LevelAccessor level, BlockPos pipePos, BlockPos neighborPos) {
         BlockState superState = super.updateShape(state, initialDirection, neighborState, level, pipePos, neighborPos);
         Direction direction = state.getValue(FACING) == FacingOrNone.NONE ? Direction.DOWN : state.getValue(FACING).getDirection();
         for (int i = 0; i < 6; i++) {
@@ -63,18 +64,18 @@ public abstract class ContainerAdjacentNetworkedPipeBlock extends NetworkedPipeB
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
+    public InteractionResult use(BlockState state, Level level, BlockPos pipePos, Player player, InteractionHand hand, BlockHitResult hitResult) {
         Direction facing = state.getValue(FACING).getDirection();
         if (player.getAbilities().mayBuild && player.isCrouching() && !MiscUtil.itemIsPipe(player.getMainHandItem()) && facing != null) {
             Direction direction = MiscUtil.nextDirection(facing);
             for (int i = 0; i < 5; i++) {
-                BlockPos nextPos = pos.relative(direction);
+                BlockPos nextPos = pipePos.relative(direction);
                 if (this.isPipeConnected(state, direction) && Services.LOADER_SERVICE.canAccessContainer(level, nextPos, direction.getOpposite())) {
                     BlockState newState = state.setValue(FACING, FacingOrNone.with(direction));
-                    level.setBlock(pos, newState, 3);
+                    level.setBlock(pipePos, newState, 3);
                     if (level instanceof ServerLevel serverLevel) {
-                        serverLevel.playSound(null, pos, ClassicPipes.PIPE_ADJUST_SOUND, SoundSource.BLOCKS);
-                        this.onNeighborChange(newState, serverLevel, pos, nextPos);
+                        serverLevel.playSound(null, pipePos, ClassicPipes.PIPE_ADJUST_SOUND, SoundSource.BLOCKS);
+                        this.onNeighborChange(newState, serverLevel, pipePos, nextPos);
                     }
                     return InteractionResult.SUCCESS;
                 }

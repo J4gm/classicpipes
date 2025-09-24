@@ -1,39 +1,40 @@
 package jagm.classicpipes.network;
 
 import jagm.classicpipes.util.MiscUtil;
-import net.minecraft.client.Minecraft;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.ChannelBuilder;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.PacketDistributor;
-import net.minecraftforge.network.SimpleChannel;
+import net.minecraftforge.network.simple.SimpleChannel;
 
 public class ForgePacketHandler {
 
-    private static final SimpleChannel INSTANCE = ChannelBuilder.named(MiscUtil.resourceLocation("main")).simpleChannel();
+    private static final String VERSION = "1";
+    private static final SimpleChannel INSTANCE = NetworkRegistry.newSimpleChannel(MiscUtil.resourceLocation("main"), () -> VERSION, VERSION::equals, VERSION::equals);
 
-    public static <T extends SelfHandler> void registerServerPayload(Class<T> clazz, StreamCodec<RegistryFriendlyByteBuf, T> codec) {
-        INSTANCE.play().serverbound().add(clazz, codec, (payload, context) -> {
-            context.enqueueWork(() -> payload.handle(context.getSender()));
-            context.setPacketHandled(true);
+    private static int id = 0;
+
+    public static <T> void registerServerPayload(Class<T> clazz, SelfHandler<T> packet) {
+        INSTANCE.registerMessage(id++, clazz, packet::encode, packet::decode, (payload, context) -> {
+            context.get().enqueueWork(() -> packet.handle(payload, context.get().getSender()));
+            context.get().setPacketHandled(true);
         });
     }
 
-    public static <T extends SelfHandler> void registerClientPayload(Class<T> clazz, StreamCodec<RegistryFriendlyByteBuf, T> codec) {
-        INSTANCE.play().clientbound().add(clazz, codec, (payload, context) -> {
-            context.enqueueWork(() -> payload.handle(Minecraft.getInstance().player));
-            context.setPacketHandled(true);
+    public static <T> void registerClientPayload(Class<T> clazz, SelfHandler<T> packet) {
+        INSTANCE.registerMessage(id++, clazz, packet::encode, packet::decode, (message, context) -> {
+            context.get().enqueueWork(() -> DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> packet.handle(message, context.get().getSender())));
+            context.get().setPacketHandled(true);
         });
     }
 
-    public static void sendToServer(CustomPacketPayload payload) {
-        INSTANCE.send(payload, PacketDistributor.SERVER.noArg());
+    public static <T> void sendToServer(T payload) {
+        INSTANCE.sendToServer(payload);
     }
 
-    public static void sendToClient(ServerPlayer player, CustomPacketPayload payload) {
-        INSTANCE.send(payload, PacketDistributor.PLAYER.with(player));
+    public static <T> void sendToClient(ServerPlayer player, T payload) {
+        INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), payload);
     }
 
 }

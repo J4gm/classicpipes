@@ -2,6 +2,7 @@ package jagm.classicpipes.item;
 
 import jagm.classicpipes.ClassicPipes;
 import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.tags.TagKey;
@@ -39,17 +40,18 @@ public class TagLabelItem extends LabelItem {
                 player.displayClientMessage(Component.translatable("chat." + ClassicPipes.MOD_ID + ".no_tags_in_hand"), false);
             }
         } else {
-            String currentTag = labelStack.get(ClassicPipes.LABEL_COMPONENT);
-            if (currentTag == null || !tags.contains(currentTag)) {
-                labelStack.set(ClassicPipes.LABEL_COMPONENT, tags.getFirst());
+            CompoundTag compoundTag = labelStack.getOrCreateTag();
+            String currentTag = compoundTag.contains("classic_pipes_label", CompoundTag.TAG_STRING) ? compoundTag.getString("classic_pipes_label") : "";
+            if (!currentTag.isEmpty() && !tags.contains(currentTag)) {
+                compoundTag.putString("classic_pipes_label", tags.get(0));
                 if (level.isClientSide()) {
-                    player.displayClientMessage(tagSetMessage(tags.getFirst()), false);
+                    player.displayClientMessage(tagSetMessage(tags.get(0)), false);
                 }
             } else {
                 for (int i = 0; i < tags.size(); i++) {
                     if (tags.get(i).equals(currentTag)) {
                         String tag = tags.get((i + 1) % tags.size());
-                        labelStack.set(ClassicPipes.LABEL_COMPONENT, tag);
+                        compoundTag.putString("classic_pipes_label", tag);
                         if (level.isClientSide()) {
                             player.displayClientMessage(tagSetMessage(tag), false);
                         }
@@ -57,6 +59,7 @@ public class TagLabelItem extends LabelItem {
                     }
                 }
             }
+            labelStack.setTag(compoundTag);
         }
         return InteractionResultHolder.success(labelStack);
     }
@@ -80,9 +83,10 @@ public class TagLabelItem extends LabelItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
-        String tag = stack.get(ClassicPipes.LABEL_COMPONENT);
-        if (tag != null) {
+    public void appendHoverText(ItemStack stack, Level level, List<Component> tooltip, TooltipFlag flag) {
+        CompoundTag compoundTag = stack.getOrCreateTag();
+        String tag = compoundTag.contains("classic_pipes_label", CompoundTag.TAG_STRING) ? compoundTag.getString("classic_pipes_label") : "";
+        if (!tag.isEmpty()) {
             MutableComponent tagTranslation = Component.translatableWithFallback(labelToTranslationKey(tag), "");
             if (!tagTranslation.getString().isEmpty()) {
                 tooltip.add(tagTranslation.withStyle(ChatFormatting.YELLOW));
@@ -95,8 +99,9 @@ public class TagLabelItem extends LabelItem {
 
     @Override
     public boolean itemMatches(ItemStack tagStack, ItemStack compareStack) {
-        String tag = tagStack.get(ClassicPipes.LABEL_COMPONENT);
-        if (tag != null) {
+        CompoundTag compoundTag = tagStack.getOrCreateTag();
+        String tag = compoundTag.contains("classic_pipes_label", CompoundTag.TAG_STRING) ? compoundTag.getString("classic_pipes_label") : "";
+        if (!tag.isEmpty()) {
             for (TagKey<Item> tagKey : compareStack.getTags().toList()) {
                 if (tag.equals(tagKey.location().toString())) {
                     return true;

@@ -109,7 +109,7 @@ public class RecipePipeMenu extends FilterMenu {
                         if (stack.isEmpty()) {
                             slot.set(ItemStack.EMPTY);
                         }
-                    } else if (ItemStack.isSameItemSameComponents(stack, this.getCarried())) {
+                    } else if (ItemStack.isSameItemSameTags(stack, this.getCarried())) {
                         stack.grow(1);
                     } else {
                         slot.set(this.getCarried().copyWithCount(1));

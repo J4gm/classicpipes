@@ -47,5 +47,4 @@ plugins {
 rootProject.name = 'classicpipes'
 include('common')
 include('fabric')
-include('neoforge')
 include('forge')

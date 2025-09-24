@@ -35,12 +35,12 @@ public enum FacingOrNone implements StringRepresentable {
 
     public static FacingOrNone with(Direction direction) {
         return switch (direction) {
-            case Direction.NORTH -> NORTH;
-            case Direction.EAST -> EAST;
-            case Direction.SOUTH -> SOUTH;
-            case Direction.WEST -> WEST;
-            case Direction.UP -> UP;
-            case Direction.DOWN -> DOWN;
+            case NORTH -> NORTH;
+            case EAST -> EAST;
+            case SOUTH -> SOUTH;
+            case WEST -> WEST;
+            case UP -> UP;
+            case DOWN -> DOWN;
         };
     }
 

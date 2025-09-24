@@ -4,16 +4,16 @@ import jagm.classicpipes.blockentity.FluidPipeEntity;
 import jagm.classicpipes.blockentity.ItemPipeEntity;
 import jagm.classicpipes.client.renderer.FluidRenderInfo;
 import jagm.classicpipes.network.ForgePacketHandler;
+import jagm.classicpipes.network.PayloadWrapper;
+import jagm.classicpipes.network.SelfHandler;
 import jagm.classicpipes.util.FluidInPipe;
 import jagm.classicpipes.util.ItemInPipe;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
@@ -27,6 +27,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -42,6 +43,7 @@ import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.forgespi.language.IModInfo;
 import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.network.NetworkHooks;
 import org.apache.commons.lang3.function.TriFunction;
 
 import java.util.ArrayList;
@@ -58,8 +60,8 @@ public class ForgeService implements LoaderService {
     }
 
     @Override
-    public <M extends AbstractContainerMenu, D> MenuType<M> createMenuType(TriFunction<Integer, Inventory, D, M> menuSupplier, StreamCodec<RegistryFriendlyByteBuf, D> codec) {
-        return IForgeMenuType.create((id, inventory, buffer) -> menuSupplier.apply(id, inventory, codec.decode(new RegistryFriendlyByteBuf(buffer, inventory.player.registryAccess()))));
+    public <M extends AbstractContainerMenu, D> MenuType<M> createMenuType(TriFunction<Integer, Inventory, D, M> menuSupplier, SelfHandler<D> handler) {
+        return IForgeMenuType.create((id, inventory, buffer) -> menuSupplier.apply(id, inventory, handler.decode(buffer)));
     }
 
     @Override
@@ -68,17 +70,17 @@ public class ForgeService implements LoaderService {
     }
 
     @Override
-    public <D> void openMenu(ServerPlayer player, MenuProvider menuProvider, D payload, StreamCodec<RegistryFriendlyByteBuf, D> codec) {
-        player.openMenu(menuProvider, buffer -> codec.encode(new RegistryFriendlyByteBuf(buffer, player.registryAccess()), payload));
+    public <D> void openMenu(ServerPlayer player, MenuProvider menuProvider, D payload, SelfHandler<D> handler) {
+        NetworkHooks.openScreen(player, menuProvider, buffer -> handler.encode(payload, buffer));
     }
 
     @Override
-    public void sendToServer(CustomPacketPayload payload) {
+    public <T extends PayloadWrapper<T>> void sendToServer(T payload) {
         ForgePacketHandler.sendToServer(payload);
     }
 
     @Override
-    public void sendToClient(ServerPlayer player, CustomPacketPayload payload) {
+    public <T extends PayloadWrapper<T>> void sendToClient(ServerPlayer player, T payload) {
         ForgePacketHandler.sendToClient(player, payload);
     }
 
@@ -165,7 +167,7 @@ public class ForgeService implements LoaderService {
                     }
                     boolean matched = false;
                     for (ItemStack stack : stacks) {
-                        if (ItemStack.isSameItemSameComponents(stack, slotStack)) {
+                        if (ItemStack.isSameItemSameTags(stack, slotStack)) {
                             stack.setCount(stack.getCount() + slotStack.getCount());
                             matched = true;
                             break;
@@ -190,7 +192,7 @@ public class ForgeService implements LoaderService {
             if (itemHandlerOptional.isPresent()) {
                 IItemHandler itemHandler = itemHandlerOptional.get();
                 for (int slot = itemHandler.getSlots() - 1; slot >= 0; slot--) {
-                    if (ItemStack.isSameItemSameComponents(stack, itemHandler.getStackInSlot(slot))) {
+                    if (ItemStack.isSameItemSameTags(stack, itemHandler.getStackInSlot(slot))) {
                         ItemStack extracted = itemHandler.extractItem(slot, target.getCount(), false);
                         if (!extracted.isEmpty()) {
                             target.shrink(extracted.getCount());
@@ -296,6 +298,11 @@ public class ForgeService implements LoaderService {
     @Override
     public Component getFluidName(Fluid fluid) {
         return fluid.getFluidType().getDescription();
+    }
+
+    @Override
+    public DispenseItemBehavior getDispenserBehaviour(ItemStack stack) {
+        return DispenserBlock.DISPENSER_REGISTRY.get(stack.getItem());
     }
 
 }

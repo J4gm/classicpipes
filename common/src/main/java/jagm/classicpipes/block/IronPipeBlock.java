@@ -9,6 +9,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -76,7 +77,7 @@ public class IronPipeBlock extends BooleanDirectionsPipeBlock {
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, Direction initialDirection, BlockState neighborState, LevelAccessor level, BlockPos pipePos, BlockPos neighborPos) {
+    public BlockState updateShape(BlockState state, Direction initialDirection, BlockState neighborState, LevelAccessor level, BlockPos pipePos, BlockPos neighborPos) {
         BlockState superState = super.updateShape(state, initialDirection, neighborState, level, pipePos, neighborPos);
         Direction direction = superState.getValue(FACING);
         for (int i = 0; i < 6; i++) {
@@ -89,16 +90,16 @@ public class IronPipeBlock extends BooleanDirectionsPipeBlock {
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
+    public InteractionResult use(BlockState state, Level level, BlockPos pipePos, Player player, InteractionHand hand, BlockHitResult hitResult) {
         if (player.getAbilities().mayBuild && !MiscUtil.itemIsPipe(player.getMainHandItem())) {
             Direction direction = MiscUtil.nextDirection(state.getValue(FACING));
             for (int i = 0; i < 5; i++) {
                 if (this.isPipeConnected(state, direction)) {
-                    level.setBlock(pos, state.setValue(FACING, direction), 3);
+                    level.setBlock(pipePos, state.setValue(FACING, direction), 3);
                     if (level instanceof ServerLevel serverLevel) {
-                        serverLevel.playSound(null, pos, ClassicPipes.PIPE_ADJUST_SOUND, SoundSource.BLOCKS);
+                        serverLevel.playSound(null, pipePos, ClassicPipes.PIPE_ADJUST_SOUND, SoundSource.BLOCKS);
                     }
-                    if (level.getBlockEntity(pos) instanceof ItemPipeEntity pipe) {
+                    if (level.getBlockEntity(pipePos) instanceof ItemPipeEntity pipe) {
                         for (ItemInPipe item : pipe.getContents()) {
                             if (item.getProgress() < ItemInPipe.HALFWAY) {
                                 pipe.routeItem(state, item);
@@ -116,7 +117,7 @@ public class IronPipeBlock extends BooleanDirectionsPipeBlock {
     }
 
     @Override
-    protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean isMoving) {
+    public void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean isMoving) {
         if (!oldState.is(state.getBlock())) {
             this.checkPoweredState(level, pos, state);
         }
@@ -140,7 +141,7 @@ public class IronPipeBlock extends BooleanDirectionsPipeBlock {
     }
 
     @Override
-    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos neighborPos, boolean b) {
+    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos neighborPos, boolean b) {
         this.checkPoweredState(level, pos, state);
     }
 

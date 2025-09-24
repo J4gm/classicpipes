@@ -6,9 +6,12 @@ import jagm.classicpipes.block.PipeBlock;
 import jagm.classicpipes.blockentity.FluidPipeEntity;
 import jagm.classicpipes.blockentity.ItemPipeEntity;
 import jagm.classicpipes.client.renderer.FluidRenderInfo;
+import jagm.classicpipes.network.PayloadWrapper;
+import jagm.classicpipes.network.SelfHandler;
 import jagm.classicpipes.util.FluidInPipe;
 import jagm.classicpipes.util.ItemInPipe;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerType;
@@ -28,10 +31,9 @@ import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.core.dispenser.DispenseItemBehavior;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
@@ -45,6 +47,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -63,12 +66,12 @@ public class FabricService implements LoaderService {
 
     @Override
     public <B extends BlockEntity> BlockEntityType<B> createBlockEntityType(BiFunction<BlockPos, BlockState, B> blockEntitySupplier, Block... validBlocks) {
-        return BlockEntityType.Builder.of(blockEntitySupplier::apply, validBlocks).build();
+        return BlockEntityType.Builder.of(blockEntitySupplier::apply, validBlocks).build(null);
     }
 
     @Override
-    public <M extends AbstractContainerMenu, D> MenuType<M> createMenuType(TriFunction<Integer, Inventory, D, M> menuSupplier, StreamCodec<RegistryFriendlyByteBuf, D> codec) {
-        return new ExtendedScreenHandlerType<>(menuSupplier::apply, codec);
+    public <M extends AbstractContainerMenu, D> MenuType<M> createMenuType(TriFunction<Integer, Inventory, D, M> menuSupplier, SelfHandler<D> handler) {
+        return new ExtendedScreenHandlerType<>((id, inventory, buffer) -> menuSupplier.apply(id, inventory, handler.decode(buffer)));
     }
 
     @Override
@@ -77,8 +80,13 @@ public class FabricService implements LoaderService {
     }
 
     @Override
-    public <D> void openMenu(ServerPlayer player, MenuProvider menuProvider, D payload, StreamCodec<RegistryFriendlyByteBuf, D> codec) {
-        player.openMenu(new ExtendedScreenHandlerFactory<D>() {
+    public <D> void openMenu(ServerPlayer player, MenuProvider menuProvider, D payload, SelfHandler<D> handler) {
+        player.openMenu(new ExtendedScreenHandlerFactory() {
+
+            @Override
+            public void writeScreenOpeningData(ServerPlayer player, FriendlyByteBuf buffer) {
+                handler.encode(payload, buffer);
+            }
 
             @Override
             public AbstractContainerMenu createMenu(int id, Inventory inventory, Player player) {
@@ -88,11 +96,6 @@ public class FabricService implements LoaderService {
             @Override
             public Component getDisplayName() {
                 return menuProvider.getDisplayName();
-            }
-
-            @Override
-            public D getScreenOpeningData(ServerPlayer serverPlayer) {
-                return payload;
             }
 
         });
@@ -112,13 +115,13 @@ public class FabricService implements LoaderService {
     }
 
     @Override
-    public void sendToServer(CustomPacketPayload payload) {
-        ClientPlayNetworking.send(payload);
+    public <T extends PayloadWrapper<T>> void sendToServer(T payload) {
+        ClientPlayNetworking.send(payload.getType(), payload.getHandler().encode(payload, PacketByteBufs.create()));
     }
 
     @Override
-    public void sendToClient(ServerPlayer player, CustomPacketPayload payload) {
-        ServerPlayNetworking.send(player, payload);
+    public <T extends PayloadWrapper<T>> void sendToClient(ServerPlayer player, T payload) {
+        ServerPlayNetworking.send(player, payload.getType(), payload.getHandler().encode(payload, PacketByteBufs.create()));
     }
 
     @Override
@@ -341,6 +344,11 @@ public class FabricService implements LoaderService {
     @Override
     public Component getFluidName(Fluid fluid) {
         return FluidVariantAttributes.getName(FluidVariant.of(fluid));
+    }
+
+    @Override
+    public DispenseItemBehavior getDispenserBehaviour(ItemStack stack) {
+        return DispenserBlock.DISPENSER_REGISTRY.get(stack.getItem());
     }
 
 }

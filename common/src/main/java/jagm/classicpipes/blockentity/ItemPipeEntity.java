@@ -8,10 +8,8 @@ import jagm.classicpipes.util.MiscUtil;
 import jagm.classicpipes.util.Tuple;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Container;
@@ -313,15 +311,15 @@ public abstract class ItemPipeEntity extends PipeEntity {
     }
 
     @Override
-    protected void loadAdditional(CompoundTag valueInput, HolderLookup.Provider registries) {
+    public void load(CompoundTag valueInput) {
         this.clearContent();
         this.networkDistances.clear();
         this.tickAdded.clear();
-        super.loadAdditional(valueInput, registries);
+        super.load(valueInput);
         ListTag itemsList = valueInput.getList("items", ListTag.TAG_COMPOUND);
-        itemsList.forEach(tag -> MiscUtil.loadFromTag(tag, ItemInPipe.CODEC, registries, this.contents::add));
+        itemsList.forEach(tag -> MiscUtil.loadFromTag(tag, ItemInPipe.CODEC, this.contents::add));
         for (Direction direction : Direction.values()) {
-            MiscUtil.loadFromTag(valueInput.get(direction.getName() + "_pos"), BlockPos.CODEC, registries, pos -> {
+            MiscUtil.loadFromTag(valueInput.get(direction.getName() + "_pos"), BlockPos.CODEC, pos -> {
                 if (valueInput.contains(direction.getName() + "_distance")) {
                     this.networkDistances.put(direction, new Tuple<>(pos, valueInput.getInt(direction.getName() + "_distance")));
                 }
@@ -330,18 +328,18 @@ public abstract class ItemPipeEntity extends PipeEntity {
     }
 
     @Override
-    protected void saveAdditional(CompoundTag valueOutput, HolderLookup.Provider registries) {
-        super.saveAdditional(valueOutput, registries);
+    protected void saveAdditional(CompoundTag valueOutput) {
+        super.saveAdditional(valueOutput);
         ListTag itemsList = new ListTag();
         for (ItemInPipe item : this.contents) {
             if (!item.getStack().isEmpty()) {
-                MiscUtil.saveToTag(new CompoundTag(), item, ItemInPipe.CODEC, registries, itemsList::add);
+                MiscUtil.saveToTag(item, ItemInPipe.CODEC, itemsList::add);
             }
         }
         valueOutput.put("items", itemsList);
         for (Direction direction : this.networkDistances.keySet()) {
             Tuple<BlockPos, Integer> tuple = this.networkDistances.get(direction);
-            valueOutput.put(direction.getName() + "_pos", BlockPos.CODEC.encodeStart(NbtOps.INSTANCE, tuple.a()).getOrThrow());
+            MiscUtil.saveToTag(tuple.a(), BlockPos.CODEC, tag -> valueOutput.put(direction.getName() + "_pos", tag));
             valueOutput.putInt(direction.getName() + "_distance", tuple.b());
         }
     }

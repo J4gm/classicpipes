@@ -3,35 +3,49 @@ package jagm.classicpipes.network;
 import jagm.classicpipes.inventory.menu.ProviderPipeMenu;
 import jagm.classicpipes.inventory.menu.StoragePipeMenu;
 import jagm.classicpipes.util.MiscUtil;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 
-public record ServerBoundLeaveOnePayload(boolean leaveOne) implements SelfHandler {
+public record ServerBoundLeaveOnePayload(boolean leaveOne) implements PayloadWrapper<ServerBoundLeaveOnePayload> {
 
-    public static final Type<ServerBoundLeaveOnePayload> TYPE = new Type<>(MiscUtil.resourceLocation("leave_one"));
-    public static final StreamCodec<RegistryFriendlyByteBuf, ServerBoundLeaveOnePayload> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.BOOL,
-            ServerBoundLeaveOnePayload::leaveOne,
-            ServerBoundLeaveOnePayload::new
-    );
+    public static final ResourceLocation TYPE = MiscUtil.resourceLocation("leave_one");
+    public static final SelfHandler<ServerBoundLeaveOnePayload> HANDLER = new Handler();
 
     @Override
-    public Type<? extends CustomPacketPayload> type() {
-        return TYPE;
+    public SelfHandler<ServerBoundLeaveOnePayload> getHandler() {
+        return HANDLER;
     }
 
     @Override
-    public void handle(Player player) {
-        if (player != null) {
-            if (player.containerMenu instanceof ProviderPipeMenu menu) {
-                menu.setLeaveOne(this.leaveOne());
-            } else if (player.containerMenu instanceof StoragePipeMenu menu) {
-                menu.setLeaveOne(this.leaveOne());
+    public ResourceLocation getType() {
+        return TYPE;
+    }
+
+    private static class Handler extends SelfHandler<ServerBoundLeaveOnePayload> {
+
+        @Override
+        public FriendlyByteBuf encode(ServerBoundLeaveOnePayload payload, FriendlyByteBuf buffer) {
+            buffer.writeBoolean(payload.leaveOne());
+            return buffer;
+        }
+
+        @Override
+        public ServerBoundLeaveOnePayload decode(FriendlyByteBuf buffer) {
+            return new ServerBoundLeaveOnePayload(buffer.readBoolean());
+        }
+
+        @Override
+        public void handle(ServerBoundLeaveOnePayload payload, Player player) {
+            if (player != null) {
+                if (player.containerMenu instanceof ProviderPipeMenu menu) {
+                    menu.setLeaveOne(payload.leaveOne());
+                } else if (player.containerMenu instanceof StoragePipeMenu menu) {
+                    menu.setLeaveOne(payload.leaveOne());
+                }
             }
         }
+
     }
 
 }

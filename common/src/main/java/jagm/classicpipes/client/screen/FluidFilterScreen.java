@@ -23,7 +23,24 @@ public abstract class FluidFilterScreen<T extends FluidFilterMenu> extends Filte
     }
 
     @Override
-    protected void renderSlot(GuiGraphics graphics, Slot slot) {
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        int i = this.leftPos;
+        int j = this.topPos;
+        super.render(graphics, mouseX, mouseY, partialTicks);
+        RenderSystem.disableDepthTest();
+        graphics.pose().pushPose();
+        graphics.pose().translate((float)i, (float)j, 0.0F);
+        for(int k = 0; k < this.menu.slots.size(); ++k) {
+            Slot slot = this.menu.slots.get(k);
+            if (slot.isActive()) {
+                this.renderSlot(graphics, slot);
+            }
+        }
+        graphics.pose().popPose();
+        RenderSystem.enableDepthTest();
+    }
+
+    private void renderSlot(GuiGraphics graphics, Slot slot) {
         if (slot.container instanceof Filter && slot.hasItem()) {
             Fluid fluid = Services.LOADER_SERVICE.getFluidFromStack(slot.getItem());
             if (fluid != null) {
@@ -33,7 +50,7 @@ public abstract class FluidFilterScreen<T extends FluidFilterMenu> extends Filte
                 RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
                 RenderSystem.enableBlend();
                 Matrix4f matrix4f = graphics.pose().last().pose();
-                BufferBuilder bufferbuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+                BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
                 float x1 = slot.x;
                 float y1 = slot.y;
                 float x2 = slot.x + 16;
@@ -42,17 +59,15 @@ public abstract class FluidFilterScreen<T extends FluidFilterMenu> extends Filte
                 float maxU = info.sprite().getU1();
                 float minV = info.sprite().getV0();
                 float maxV = info.sprite().getV1();
-                bufferbuilder.addVertex(matrix4f, x1, y1, 0).setUv(minU, minV).setColor(info.tint());
-                bufferbuilder.addVertex(matrix4f, x1, y2, 0).setUv(minU, maxV).setColor(info.tint());
-                bufferbuilder.addVertex(matrix4f, x2, y2, 0).setUv(maxU, maxV).setColor(info.tint());
-                bufferbuilder.addVertex(matrix4f, x2, y1, 0).setUv(maxU, minV).setColor(info.tint());
-                BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
+                bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+                bufferbuilder.vertex(matrix4f, x1, y1, 0).uv(minU, minV).color(info.tint());
+                bufferbuilder.vertex(matrix4f, x1, y2, 0).uv(minU, maxV).color(info.tint());
+                bufferbuilder.vertex(matrix4f, x2, y2, 0).uv(maxU, maxV).color(info.tint());
+                bufferbuilder.vertex(matrix4f, x2, y1, 0).uv(maxU, minV).color(info.tint());
+                BufferUploader.drawWithShader(bufferbuilder.end());
                 RenderSystem.disableBlend();
-                //graphics.blitSprite(info.sprite().atlasLocation(), slot.x, slot.y, 16, 16);
-                return;
             }
         }
-        super.renderSlot(graphics, slot);
     }
 
     @Override

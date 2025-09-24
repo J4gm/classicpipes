@@ -3,35 +3,49 @@ package jagm.classicpipes.network;
 import jagm.classicpipes.inventory.menu.RoutingPipeMenu;
 import jagm.classicpipes.inventory.menu.StoragePipeMenu;
 import jagm.classicpipes.util.MiscUtil;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 
-public record ServerBoundDefaultRoutePayload(boolean defaultRoute) implements SelfHandler {
+public record ServerBoundDefaultRoutePayload(boolean defaultRoute) implements PayloadWrapper<ServerBoundDefaultRoutePayload> {
 
-    public static final Type<ServerBoundDefaultRoutePayload> TYPE = new Type<>(MiscUtil.resourceLocation("default_route"));
-    public static final StreamCodec<RegistryFriendlyByteBuf, ServerBoundDefaultRoutePayload> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.BOOL,
-            ServerBoundDefaultRoutePayload::defaultRoute,
-            ServerBoundDefaultRoutePayload::new
-    );
+    public static final ResourceLocation TYPE = MiscUtil.resourceLocation("default_route");
+    public static final SelfHandler<ServerBoundDefaultRoutePayload> HANDLER = new Handler();
 
     @Override
-    public Type<? extends CustomPacketPayload> type() {
-        return TYPE;
+    public SelfHandler<ServerBoundDefaultRoutePayload> getHandler() {
+        return HANDLER;
     }
 
     @Override
-    public void handle(Player player) {
-        if (player != null) {
-            if (player.containerMenu instanceof RoutingPipeMenu menu) {
-                menu.setDefaultRoute(this.defaultRoute());
-            } else if (player.containerMenu instanceof StoragePipeMenu menu) {
-                menu.setDefaultRoute(this.defaultRoute());
+    public ResourceLocation getType() {
+        return TYPE;
+    }
+
+    private static class Handler extends SelfHandler<ServerBoundDefaultRoutePayload> {
+
+        @Override
+        public FriendlyByteBuf encode(ServerBoundDefaultRoutePayload payload, FriendlyByteBuf buffer) {
+            buffer.writeBoolean(payload.defaultRoute());
+            return buffer;
+        }
+
+        @Override
+        public ServerBoundDefaultRoutePayload decode(FriendlyByteBuf buffer) {
+            return new ServerBoundDefaultRoutePayload(buffer.readBoolean());
+        }
+
+        @Override
+        public void handle(ServerBoundDefaultRoutePayload payload, Player player) {
+            if (player != null) {
+                if (player.containerMenu instanceof RoutingPipeMenu menu) {
+                    menu.setDefaultRoute(payload.defaultRoute());
+                } else if (player.containerMenu instanceof StoragePipeMenu menu) {
+                    menu.setDefaultRoute(payload.defaultRoute());
+                }
             }
         }
+
     }
 
 }

@@ -7,7 +7,6 @@ import jagm.classicpipes.services.Services;
 import jagm.classicpipes.util.FacingOrNone;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -54,12 +53,12 @@ public class MatchingPipeEntity extends NetworkedPipeEntity implements MenuProvi
     @Override
     public boolean matches(ItemStack stack) {
         for (ItemStack cannotFitStack : this.cannotFit) {
-            if (ItemStack.isSameItemSameComponents(cannotFitStack, stack)) {
+            if (ItemStack.isSameItemSameTags(cannotFitStack, stack)) {
                 return false;
             }
         }
         for (ItemStack containerStack : this.cache) {
-            if (stack.is(containerStack.getItem()) && (!this.shouldMatchComponents() || ItemStack.isSameItemSameComponents(stack, containerStack))) {
+            if (stack.is(containerStack.getItem()) && (!this.shouldMatchComponents() || ItemStack.isSameItemSameTags(stack, containerStack))) {
                 return true;
             }
         }
@@ -77,15 +76,15 @@ public class MatchingPipeEntity extends NetworkedPipeEntity implements MenuProvi
     }
 
     @Override
-    protected void loadAdditional(CompoundTag valueInput, HolderLookup.Provider registries) {
+    public void load(CompoundTag valueInput) {
         this.cacheInitialised = false;
-        super.loadAdditional(valueInput, registries);
+        super.load(valueInput);
         this.matchComponents = valueInput.getBoolean("match_components");
     }
 
     @Override
-    protected void saveAdditional(CompoundTag valueOutput, HolderLookup.Provider registries) {
-        super.saveAdditional(valueOutput, registries);
+    protected void saveAdditional(CompoundTag valueOutput) {
+        super.saveAdditional(valueOutput);
         valueOutput.putBoolean("match_components", this.shouldMatchComponents());
     }
 

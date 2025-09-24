@@ -2,31 +2,46 @@ package jagm.classicpipes.network;
 
 import jagm.classicpipes.inventory.menu.StockingPipeMenu;
 import jagm.classicpipes.util.MiscUtil;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 
-public record ServerBoundActiveStockingPayload(boolean activeStocking) implements SelfHandler {
+public record ServerBoundActiveStockingPayload(boolean activeStocking) implements PayloadWrapper<ServerBoundActiveStockingPayload> {
 
-    public static final Type<ServerBoundActiveStockingPayload> TYPE = new Type<>(MiscUtil.resourceLocation("active_stocking"));
-    public static final StreamCodec<RegistryFriendlyByteBuf, ServerBoundActiveStockingPayload> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.BOOL,
-            ServerBoundActiveStockingPayload::activeStocking,
-            ServerBoundActiveStockingPayload::new
-    );
+    public static final ResourceLocation TYPE = MiscUtil.resourceLocation("active_stocking");
+
+    public static final Handler HANDLER = new Handler();
 
     @Override
-    public Type<? extends CustomPacketPayload> type() {
-        return TYPE;
+    public SelfHandler<ServerBoundActiveStockingPayload> getHandler() {
+        return HANDLER;
     }
 
     @Override
-    public void handle(Player player) {
-        if (player != null && player.containerMenu instanceof StockingPipeMenu menu) {
-            menu.setActiveStocking(this.activeStocking());
+    public ResourceLocation getType() {
+        return TYPE;
+    }
+
+    public static class Handler extends SelfHandler<ServerBoundActiveStockingPayload> {
+
+        @Override
+        public FriendlyByteBuf encode(ServerBoundActiveStockingPayload payload, FriendlyByteBuf buffer) {
+            buffer.writeBoolean(payload.activeStocking());
+            return buffer;
         }
+
+        @Override
+        public ServerBoundActiveStockingPayload decode(FriendlyByteBuf buffer) {
+            return new ServerBoundActiveStockingPayload(buffer.readBoolean());
+        }
+
+        @Override
+        public void handle(ServerBoundActiveStockingPayload payload, Player player) {
+            if (player != null && player.containerMenu instanceof StockingPipeMenu menu) {
+                menu.setActiveStocking(payload.activeStocking());
+            }
+        }
+
     }
 
 }

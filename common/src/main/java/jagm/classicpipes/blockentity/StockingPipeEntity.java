@@ -10,7 +10,6 @@ import jagm.classicpipes.util.MiscUtil;
 import jagm.classicpipes.util.RequestedItem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
@@ -60,7 +59,7 @@ public class StockingPipeEntity extends NetworkedPipeEntity implements MenuProvi
                 }
                 boolean matched = false;
                 for (ItemStack filterStack : filterItems) {
-                    if (ItemStack.isSameItemSameComponents(stack, filterStack)) {
+                    if (ItemStack.isSameItemSameTags(stack, filterStack)) {
                         filterStack.grow(stack.getCount());
                         matched = true;
                         break;
@@ -75,7 +74,7 @@ public class StockingPipeEntity extends NetworkedPipeEntity implements MenuProvi
                 for (ItemStack filterStack : filterItems) {
                     boolean matched = false;
                     for (ItemStack containerStack : containerItems) {
-                        if (ItemStack.isSameItemSameComponents(filterStack, containerStack)) {
+                        if (ItemStack.isSameItemSameTags(filterStack, containerStack)) {
                             matched = true;
                             int missing = filterStack.getCount() - containerStack.getCount();
                             if (missing > 0) {
@@ -106,7 +105,7 @@ public class StockingPipeEntity extends NetworkedPipeEntity implements MenuProvi
             for (ItemStack stack : this.missingItemsCache) {
                 int alreadyRequested = 0;
                 for (ItemInPipe item : this.contents) {
-                    if (ItemStack.isSameItemSameComponents(stack, item.getStack())) {
+                    if (ItemStack.isSameItemSameTags(stack, item.getStack())) {
                         alreadyRequested += item.getStack().getCount();
                     }
                 }
@@ -142,14 +141,14 @@ public class StockingPipeEntity extends NetworkedPipeEntity implements MenuProvi
     }
 
     @Override
-    protected void loadAdditional(CompoundTag valueInput, HolderLookup.Provider registries) {
+    public void load(CompoundTag valueInput) {
         this.filter.clearContent();
-        super.loadAdditional(valueInput, registries);
+        super.load(valueInput);
         ListTag filterList = valueInput.getList("filter", ListTag.TAG_COMPOUND);
         filterList.forEach(tag -> {
             if (tag instanceof CompoundTag compoundTag) {
                 int slot = compoundTag.getInt("slot");
-                MiscUtil.loadFromTag(tag, ItemStack.CODEC, registries, stack -> this.filter.setItem(slot, stack));
+                MiscUtil.loadFromTag(tag, ItemStack.CODEC, stack -> this.filter.setItem(slot, stack));
             }
         });
         this.filter.setMatchComponents(valueInput.getBoolean("match_components"));
@@ -157,15 +156,15 @@ public class StockingPipeEntity extends NetworkedPipeEntity implements MenuProvi
     }
 
     @Override
-    protected void saveAdditional(CompoundTag valueOutput, HolderLookup.Provider registries) {
-        super.saveAdditional(valueOutput, registries);
+    protected void saveAdditional(CompoundTag valueOutput) {
+        super.saveAdditional(valueOutput);
         ListTag filterList = new ListTag();
         for (int slot = 0; slot < this.filter.getContainerSize(); slot++) {
             ItemStack stack = this.filter.getItem(slot);
             if (!stack.isEmpty()) {
                 CompoundTag tag = new CompoundTag();
                 tag.putInt("slot", slot);
-                MiscUtil.saveToTag(tag, stack, ItemStack.CODEC, registries, filterList::add);
+                MiscUtil.saveToTag(tag, stack, ItemStack.CODEC, filterList::add);
             }
         }
         valueOutput.put("filter", filterList);

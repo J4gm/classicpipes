@@ -1,0 +1,24 @@
+{
+  "parent": "minecraft:story/enter_the_nether",
+  "criteria": {
+    "request": {
+      "trigger": "classicpipes:request_item"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.classicpipes.request_item.description"
+    },
+    "icon": {
+      "item": "classicpipes:request_pipe"
+    },
+    "title": {
+      "translate": "advancements.classicpipes.request_item.title"
+    }
+  },
+  "requirements": [
+    [
+      "request"
+    ]
+  ]
+}

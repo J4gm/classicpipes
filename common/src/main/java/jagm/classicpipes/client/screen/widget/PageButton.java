@@ -8,12 +8,12 @@ import net.minecraft.resources.ResourceLocation;
 
 public class PageButton extends Button {
 
-    private static final ResourceLocation PREV_GREYED = MiscUtil.resourceLocation("widget/prev_page_greyed");
-    private static final ResourceLocation PREV_NORMAL = MiscUtil.resourceLocation("widget/prev_page");
-    private static final ResourceLocation PREV_SELECT = MiscUtil.resourceLocation("widget/prev_page_hovered");
-    private static final ResourceLocation NEXT_GREYED = MiscUtil.resourceLocation("widget/next_page_greyed");
-    private static final ResourceLocation NEXT_NORMAL = MiscUtil.resourceLocation("widget/next_page");
-    private static final ResourceLocation NEXT_SELECT = MiscUtil.resourceLocation("widget/next_page_hovered");
+    private static final ResourceLocation PREV_GREYED = MiscUtil.resourceLocation("textures/gui/sprites/widget/prev_page_greyed.png");
+    private static final ResourceLocation PREV_NORMAL = MiscUtil.resourceLocation("textures/gui/sprites/widget/prev_page.png");
+    private static final ResourceLocation PREV_SELECT = MiscUtil.resourceLocation("textures/gui/sprites/widget/prev_page_hovered.png");
+    private static final ResourceLocation NEXT_GREYED = MiscUtil.resourceLocation("textures/gui/sprites/widget/next_page_greyed.png");
+    private static final ResourceLocation NEXT_NORMAL = MiscUtil.resourceLocation("textures/gui/sprites/widget/next_page.png");
+    private static final ResourceLocation NEXT_SELECT = MiscUtil.resourceLocation("textures/gui/sprites/widget/next_page_hovered.png");
 
     private final boolean prev;
 
@@ -28,7 +28,7 @@ public class PageButton extends Button {
         ResourceLocation sprite = this.prev ?
                 (!this.active ? PREV_GREYED : (this.isHovered() ? PREV_SELECT : PREV_NORMAL)) :
                 (!this.active ? NEXT_GREYED : (this.isHovered() ? NEXT_SELECT : NEXT_NORMAL));
-        graphics.blitSprite(sprite, this.getX(), this.getY(), this.width, this.height);
+        this.renderTexture(graphics, sprite, this.getX(), this.getY(), 0, 0, this.height, this.width, this.height, this.width, this.height);
     }
 
 }

@@ -77,7 +77,7 @@ public class RequestMenu extends AbstractContainerMenu {
         for (ItemStack stack : existingItems) {
             boolean matched = false;
             for (int i = 0; i < craftableCount; i++) {
-                if (ItemStack.isSameItemSameComponents(stack, networkItems.get(i).a())) {
+                if (ItemStack.isSameItemSameTags(stack, networkItems.get(i).a())) {
                     // Since the game doesn't like handling empty stacks, craftable stacks get one extra item, which is accounted for by the client screen.
                     networkItems.set(i, new Tuple<>(stack.copyWithCount(stack.getCount() + 1), true));
                     matched = true;

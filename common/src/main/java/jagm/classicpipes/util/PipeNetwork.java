@@ -80,7 +80,7 @@ public class PipeNetwork {
         Iterator<ItemStack> iterator = this.spareItems.listIterator();
         while (iterator.hasNext()) {
             ItemStack spareItem = iterator.next();
-            if (ItemStack.isSameItemSameComponents(spareItem, stack)) {
+            if (ItemStack.isSameItemSameTags(spareItem, stack)) {
                 int amount = Math.min(spareItem.getCount(), missingItem.getCount());
                 spareItem.shrink(amount);
                 missingItem.shrink(amount);
@@ -98,12 +98,12 @@ public class PipeNetwork {
                 }
                 List<ItemStack> alreadyTaken = this.takenFromCache.containsKey(providerPipe) ? this.takenFromCache.get(providerPipe) : new ArrayList<>();
                 for (ItemStack cacheStack : providerPipe.getCache()) {
-                    if (ItemStack.isSameItemSameComponents(stack, cacheStack)) {
+                    if (ItemStack.isSameItemSameTags(stack, cacheStack)) {
                         int cacheCount = cacheStack.getCount();
                         int takenIndex = -1;
                         for (int i = 0; i < alreadyTaken.size(); i++) {
                             ItemStack takenStack = alreadyTaken.get(i);
-                            if (ItemStack.isSameItemSameComponents(cacheStack, takenStack)) {
+                            if (ItemStack.isSameItemSameTags(cacheStack, takenStack)) {
                                 cacheCount -= takenStack.getCount();
                                 takenIndex = i;
                                 break;
@@ -130,20 +130,20 @@ public class PipeNetwork {
             boolean foundCraftingPipe = false;
             for (RecipePipeEntity craftingPipe : this.recipePipes) {
                 ItemStack result = craftingPipe.getResult();
-                if (ItemStack.isSameItemSameComponents(result, stack)) {
+                if (ItemStack.isSameItemSameTags(result, stack)) {
                     if (foundCraftingPipe) {
                         if (player != null) {
                             player.displayClientMessage(Component.translatable("chat." + ClassicPipes.MOD_ID + ".multiple_recipes", stack.getItem().getDescription()).withStyle(ChatFormatting.YELLOW), false);
                         }
                         break;
                     }
-                    int requiredCrafts = Math.ceilDiv(missingItem.getCount(), result.getCount());
+                    int requiredCrafts = missingItem.getCount() / result.getCount() + (missingItem.getCount() % result.getCount() != 0 ? 1 : 0);
                     List<ItemStack> ingredients = craftingPipe.getIngredientsCollated();
                     boolean canCraft = true;
                     for (ItemStack ingredient : ingredients) {
                         boolean alreadyVisited = false;
                         for (ItemStack visitedStack : visited) {
-                            if (ItemStack.isSameItemSameComponents(visitedStack, ingredient)) {
+                            if (ItemStack.isSameItemSameTags(visitedStack, ingredient)) {
                                 alreadyVisited = true;
                                 canCraft = false;
                                 break;
@@ -167,7 +167,7 @@ public class PipeNetwork {
                             int remaining = result.getCount() * requiredCrafts - amount;
                             boolean matched = false;
                             for (ItemStack spareItem : this.spareItems) {
-                                if (ItemStack.isSameItemSameComponents(spareItem, stack)) {
+                                if (ItemStack.isSameItemSameTags(spareItem, stack)) {
                                     spareItem.grow(remaining);
                                     matched = true;
                                     break;
@@ -355,7 +355,7 @@ public class PipeNetwork {
             for (ItemStack stack : providerPipe.getCache()) {
                 boolean alreadyThere = false;
                 for (ItemStack inStack : existingItems) {
-                    if (ItemStack.isSameItemSameComponents(stack, inStack)) {
+                    if (ItemStack.isSameItemSameTags(stack, inStack)) {
                         inStack.grow(stack.getCount());
                         if (inStack.getCount() < 0) {
                             inStack.setCount(Integer.MAX_VALUE);
@@ -375,7 +375,7 @@ public class PipeNetwork {
             if (!result.isEmpty()) {
                 boolean matched = false;
                 for (ItemStack alreadyCraftable : craftableItems) {
-                    if (ItemStack.isSameItemSameComponents(alreadyCraftable, result)) {
+                    if (ItemStack.isSameItemSameTags(alreadyCraftable, result)) {
                         matched = true;
                         break;
                     }
@@ -385,7 +385,7 @@ public class PipeNetwork {
                 }
             }
         }
-        return new ClientBoundItemListPayload(existingItems, craftableItems, this.sortingMode, this.pos, requestPos);
+        return new ClientBoundItemListPayload(existingItems, craftableItems, this.pos, requestPos, this.sortingMode);
     }
 
     public void cacheUpdated() {

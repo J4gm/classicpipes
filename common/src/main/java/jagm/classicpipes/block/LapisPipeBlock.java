@@ -11,6 +11,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -65,7 +66,7 @@ public class LapisPipeBlock extends BooleanDirectionsPipeBlock {
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, Direction initialDirection, BlockState neighborState, LevelAccessor level, BlockPos pipePos, BlockPos neighborPos) {
+    public BlockState updateShape(BlockState state, Direction initialDirection, BlockState neighborState, LevelAccessor level, BlockPos pipePos, BlockPos neighborPos) {
         BlockState superState = super.updateShape(state, initialDirection, neighborState, level, pipePos, neighborPos);
         Direction direction = superState.getValue(FACING) == FacingOrNone.NONE ? Direction.DOWN : superState.getValue(FACING).getDirection();
         for (int i = 0; i < 6; i++) {
@@ -78,7 +79,7 @@ public class LapisPipeBlock extends BooleanDirectionsPipeBlock {
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pipePos, Player player, BlockHitResult hitResult) {
+    public InteractionResult use(BlockState state, Level level, BlockPos pipePos, Player player, InteractionHand hand, BlockHitResult hitResult) {
         if (player.getAbilities().mayBuild && !MiscUtil.itemIsPipe(player.getMainHandItem()) && state.getValue(FACING) != FacingOrNone.NONE) {
             Direction direction = MiscUtil.nextDirection(state.getValue(FACING).getDirection());
             for (int i = 0; i < 5; i++) {

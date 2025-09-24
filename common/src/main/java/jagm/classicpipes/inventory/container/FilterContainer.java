@@ -107,7 +107,7 @@ public class FilterContainer implements Filter {
         for (ItemStack filterStack : this.filter) {
             if (filterStack.getItem() instanceof LabelItem labelItem && labelItem.itemMatches(filterStack, stack)) {
                 return true;
-            } else if (filterStack.is(stack.getItem()) && (!this.shouldMatchComponents() || ItemStack.isSameItemSameComponents(stack, filterStack))) {
+            } else if (filterStack.is(stack.getItem()) && (!this.shouldMatchComponents() || ItemStack.isSameItemSameTags(stack, filterStack))) {
                 return true;
             }
         }

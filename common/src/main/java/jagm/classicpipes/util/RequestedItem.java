@@ -17,7 +17,7 @@ public class RequestedItem {
 
     private static final short TIMEOUT = 24000;
     public static final Codec<RequestedItem> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            MiscUtil.UNLIMITED_STACK_CODEC.fieldOf("item").orElse(ItemStack.EMPTY).forGetter(RequestedItem::getStack),
+            ItemStack.CODEC.fieldOf("item").orElse(ItemStack.EMPTY).forGetter(RequestedItem::getStack),
             BlockPos.CODEC.fieldOf("destination").orElse(BlockPos.ZERO).forGetter(RequestedItem::getDestination),
             Codec.STRING.fieldOf("player").orElse("").forGetter(RequestedItem::getPlayerName)
     ).apply(instance, RequestedItem::new));
@@ -37,7 +37,7 @@ public class RequestedItem {
     public void sendMessage(ServerLevel level, Component component) {
         List<ServerPlayer> players = level.getPlayers(player -> player.getName().getString().equals(this.playerName));
         if (!players.isEmpty()) {
-            players.getFirst().displayClientMessage(component, false);
+            players.get(0).displayClientMessage(component, false);
         }
     }
 
@@ -46,7 +46,7 @@ public class RequestedItem {
     }
 
     public boolean matches(ItemStack stack) {
-        return ItemStack.isSameItemSameComponents(stack, this.stack);
+        return ItemStack.isSameItemSameTags(stack, this.stack);
     }
 
     public boolean matches(RequestedItem anotherItem) {

@@ -4,10 +4,8 @@ import jagm.classicpipes.block.NetworkedPipeBlock;
 import jagm.classicpipes.util.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -119,7 +117,7 @@ public abstract class NetworkedPipeEntity extends RoundRobinPipeEntity {
             if (validTargets.isEmpty()) {
                 for (StockingPipeEntity stockingPipe : this.network.getStockingPipes()) {
                     for (ItemStack stack : stockingPipe.getMissingItemsCache()) {
-                        if (stack.is(item.getStack().getItem()) && (!stockingPipe.shouldMatchComponents() || ItemStack.isSameItemSameComponents(stack, item.getStack()))) {
+                        if (stack.is(item.getStack().getItem()) && (!stockingPipe.shouldMatchComponents() || ItemStack.isSameItemSameTags(stack, item.getStack()))) {
                             int surplus = item.getStack().getCount() - stack.getCount();
                             if (surplus > 0) {
                                 spareItems.add(item.copyWithCount(surplus));
@@ -191,7 +189,7 @@ public abstract class NetworkedPipeEntity extends RoundRobinPipeEntity {
         Iterator<ItemStack> iterator = this.routingSchedule.keySet().iterator();
         while (iterator.hasNext()) {
             ItemStack stack = iterator.next();
-            if (ItemStack.isSameItemSameComponents(stack, item.getStack()) && stack.getCount() == item.getStack().getCount()) {
+            if (ItemStack.isSameItemSameTags(stack, item.getStack()) && stack.getCount() == item.getStack().getCount()) {
                 item.setEjecting(false);
                 item.setTargetDirection(this.routingSchedule.get(stack).getDirection());
                 iterator.remove();
@@ -378,48 +376,48 @@ public abstract class NetworkedPipeEntity extends RoundRobinPipeEntity {
     }
 
     @Override
-    protected void loadAdditional(CompoundTag valueInput, HolderLookup.Provider registries) {
-        super.loadAdditional(valueInput, registries);
+    public void load(CompoundTag valueInput) {
+        super.load(valueInput);
         this.routingSchedule.clear();
         this.setController(valueInput.getBoolean("controller"));
         this.syncedNetworkPos = this.getBlockPos();
         if (this.isController()) {
             this.network = new PipeNetwork(this.getBlockPos(), SortingMode.fromByte(valueInput.getByte("sorting_mode")));
             ListTag requestedItems = valueInput.getList("requested_items", ListTag.TAG_COMPOUND);
-            requestedItems.forEach(tag -> MiscUtil.loadFromTag(tag, RequestedItem.CODEC, registries, this.network::addRequestedItem));
+            requestedItems.forEach(tag -> MiscUtil.loadFromTag(tag, RequestedItem.CODEC, this.network::addRequestedItem));
             this.syncedNetworkPos = this.getBlockPos();
         } else {
-            MiscUtil.loadFromTag(valueInput.get("synced_network_pos"), BlockPos.CODEC, registries, pos -> this.syncedNetworkPos = pos);
+            MiscUtil.loadFromTag(valueInput.get("synced_network_pos"), BlockPos.CODEC, pos -> this.syncedNetworkPos = pos);
         }
         ListTag routingList = valueInput.getList("routing_schedule", ListTag.TAG_COMPOUND);
         routingList.forEach(tag -> {
             if (tag instanceof CompoundTag compoundTag) {
                 int slot = compoundTag.getInt("slot");
-                MiscUtil.loadFromTag(tag, ItemStack.CODEC, registries, stack -> this.routingSchedule.put(stack, new ScheduledRoute(Direction.from3DDataValue(slot))));
+                MiscUtil.loadFromTag(tag, ItemStack.CODEC, stack -> this.routingSchedule.put(stack, new ScheduledRoute(Direction.from3DDataValue(slot))));
             }
         });
     }
 
     @Override
-    protected void saveAdditional(CompoundTag valueOutput, HolderLookup.Provider registries) {
-        super.saveAdditional(valueOutput, registries);
+    protected void saveAdditional(CompoundTag valueOutput) {
+        super.saveAdditional(valueOutput);
         valueOutput.putBoolean("controller", this.isController());
         if (this.hasNetwork() && this.isController()) {
             valueOutput.putByte("sorting_mode", this.getNetwork().getSortingMode().getValue());
             ListTag requestedItems = new ListTag();
             for (RequestedItem requestedItem : this.getNetwork().getRequestedItems()) {
                 if (!requestedItem.isDelivered()) {
-                    MiscUtil.saveToTag(new CompoundTag(), requestedItem, RequestedItem.CODEC, registries, requestedItems::add);
+                    MiscUtil.saveToTag(requestedItem, RequestedItem.CODEC, requestedItems::add);
                 }
             }
             valueOutput.put("requested_items", requestedItems);
         }
-        valueOutput.put("synced_network_pos", BlockPos.CODEC.encodeStart(NbtOps.INSTANCE, this.hasNetwork() ? this.network.getPos() : this.getBlockPos()).getOrThrow());
+        MiscUtil.saveToTag(this.hasNetwork() ? this.network.getPos() : this.getBlockPos(), BlockPos.CODEC, tag -> valueOutput.put("synced_network_pos", tag));
         ListTag routingList = new ListTag();
         for (ItemStack stack : this.routingSchedule.keySet()) {
             CompoundTag tag = new CompoundTag();
             tag.putInt("slot", this.routingSchedule.get(stack).getDirection().get3DDataValue());
-            MiscUtil.saveToTag(tag, stack, ItemStack.CODEC, registries, routingList::add);
+            MiscUtil.saveToTag(tag, stack, ItemStack.CODEC, routingList::add);
         }
         valueOutput.put("routing_schedule", routingList);
     }

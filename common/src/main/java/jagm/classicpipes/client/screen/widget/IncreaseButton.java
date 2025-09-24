@@ -8,12 +8,12 @@ import net.minecraft.resources.ResourceLocation;
 
 public class IncreaseButton extends Button {
 
-    private static final ResourceLocation INCREASE_GREYED = MiscUtil.resourceLocation("widget/increase_greyed");
-    private static final ResourceLocation INCREASE_NORMAL = MiscUtil.resourceLocation("widget/increase");
-    private static final ResourceLocation INCREASE_SELECT = MiscUtil.resourceLocation("widget/increase_hovered");
-    private static final ResourceLocation DECREASE_GREYED = MiscUtil.resourceLocation("widget/decrease_greyed");
-    private static final ResourceLocation DECREASE_NORMAL = MiscUtil.resourceLocation("widget/decrease");
-    private static final ResourceLocation DECREASE_SELECT = MiscUtil.resourceLocation("widget/decrease_hovered");
+    private static final ResourceLocation INCREASE_GREYED = MiscUtil.resourceLocation("textures/gui/sprites/widget/increase_greyed.png");
+    private static final ResourceLocation INCREASE_NORMAL = MiscUtil.resourceLocation("textures/gui/sprites/widget/increase.png");
+    private static final ResourceLocation INCREASE_SELECT = MiscUtil.resourceLocation("textures/gui/sprites/widget/increase_hovered.png");
+    private static final ResourceLocation DECREASE_GREYED = MiscUtil.resourceLocation("textures/gui/sprites/widget/decrease_greyed.png");
+    private static final ResourceLocation DECREASE_NORMAL = MiscUtil.resourceLocation("textures/gui/sprites/widget/decrease.png");
+    private static final ResourceLocation DECREASE_SELECT = MiscUtil.resourceLocation("textures/gui/sprites/widget/decrease_hovered.png");
 
     private final boolean decrease;
 
@@ -28,7 +28,7 @@ public class IncreaseButton extends Button {
         ResourceLocation sprite = this.decrease ?
                 (!this.active ? DECREASE_GREYED : (this.isHovered() ? DECREASE_SELECT : DECREASE_NORMAL)) :
                 (!this.active ? INCREASE_GREYED : (this.isHovered() ? INCREASE_SELECT : INCREASE_NORMAL));
-        graphics.blitSprite(sprite, this.getX(), this.getY(), this.width, this.height);
+        this.renderTexture(graphics, sprite, this.getX(), this.getY(), 0, 0, this.height, this.width, this.height, this.width, this.height);
     }
 
 }
