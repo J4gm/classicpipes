@@ -45,6 +45,7 @@ legacyForge {
 
 sourceSets.main.resources.srcDir 'src/generated/resources'
 
+
 dependencies {
     compileOnly project(":common")
     annotationProcessor("org.spongepowered:mixin:0.8.5-SNAPSHOT:processor")
@@ -53,7 +54,7 @@ dependencies {
     // compile against the JEI API but do not include it at runtime
     compileOnly("mezz.jei:jei-${jei_minecraft}-forge-api:${jei_version}")
     // at runtime, use the full JEI jar for Forge
-    runtimeOnly("mezz.jei:jei-${jei_minecraft}-forge:${jei_version}")
+    // runtimeOnly("mezz.jei:jei-${jei_minecraft}-forge:${jei_version}")
 }
 
 jar {

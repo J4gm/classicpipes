@@ -2,6 +2,7 @@ package jagm.classicpipes.client.screen;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
+import com.mojang.datafixers.util.Pair;
 import jagm.classicpipes.client.renderer.FluidRenderInfo;
 import jagm.classicpipes.inventory.container.Filter;
 import jagm.classicpipes.inventory.menu.FluidFilterMenu;
@@ -9,7 +10,9 @@ import jagm.classicpipes.services.Services;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -24,24 +27,56 @@ public abstract class FluidFilterScreen<T extends FluidFilterMenu> extends Filte
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
-        int i = this.leftPos;
-        int j = this.topPos;
-        super.render(graphics, mouseX, mouseY, partialTicks);
+        this.renderBg(graphics, partialTicks, mouseX, mouseY);
         RenderSystem.disableDepthTest();
         graphics.pose().pushPose();
-        graphics.pose().translate((float)i, (float)j, 0.0F);
+        graphics.pose().translate(this.leftPos, this.topPos, 0.0F);
+        this.hoveredSlot = null;
         for(int k = 0; k < this.menu.slots.size(); ++k) {
             Slot slot = this.menu.slots.get(k);
             if (slot.isActive()) {
-                this.renderSlot(graphics, slot);
+                if (slot.container instanceof Filter) {
+                    this.renderFluidSlot(graphics, slot);
+                } else {
+                    this.renderItemSlot(graphics, slot);
+                }
             }
+            if (this.isHovering(slot.x, slot.y, 16, 16, mouseX, mouseY) && slot.isActive()) {
+                this.hoveredSlot = slot;
+                if (this.hoveredSlot.isHighlightable()) {
+                    renderSlotHighlight(graphics, slot.x, slot.y, 0);
+                }
+            }
+        }
+        this.renderLabels(graphics, mouseX, mouseY);
+        ItemStack stack = this.menu.getCarried();
+        if (!stack.isEmpty()) {
+            int x = mouseX - this.leftPos - 8;
+            int y = mouseY - this.topPos - 8;
+            graphics.pose().pushPose();
+            graphics.pose().translate(0.0F, 0.0F, 232.0F);
+            graphics.renderItem(stack, x, y);
+            graphics.renderItemDecorations(this.font, stack, x, y, null);
+            graphics.pose().popPose();
         }
         graphics.pose().popPose();
         RenderSystem.enableDepthTest();
     }
 
-    private void renderSlot(GuiGraphics graphics, Slot slot) {
-        if (slot.container instanceof Filter && slot.hasItem()) {
+    private void renderFluidSlot(GuiGraphics graphics, Slot slot) {
+        ItemStack stack = slot.getItem();
+        boolean renderFluid = true;
+        graphics.pose().pushPose();
+        graphics.pose().translate(0.0F, 0.0F, 100.0F);
+        if (stack.isEmpty()) {
+            Pair<ResourceLocation, ResourceLocation> pair = slot.getNoItemIcon();
+            if (pair != null && this.minecraft != null) {
+                TextureAtlasSprite sprite = this.minecraft.getTextureAtlas(pair.getFirst()).apply(pair.getSecond());
+                graphics.blit(slot.x, slot.y, 0, 16, 16, sprite);
+                renderFluid = false;
+            }
+        }
+        if (renderFluid) {
             Fluid fluid = Services.LOADER_SERVICE.getFluidFromStack(slot.getItem());
             if (fluid != null) {
                 FluidRenderInfo info = Services.LOADER_SERVICE.getFluidRenderInfo(fluid.defaultFluidState());
@@ -60,14 +95,35 @@ public abstract class FluidFilterScreen<T extends FluidFilterMenu> extends Filte
                 float minV = info.sprite().getV0();
                 float maxV = info.sprite().getV1();
                 bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-                bufferbuilder.vertex(matrix4f, x1, y1, 0).uv(minU, minV).color(info.tint());
-                bufferbuilder.vertex(matrix4f, x1, y2, 0).uv(minU, maxV).color(info.tint());
-                bufferbuilder.vertex(matrix4f, x2, y2, 0).uv(maxU, maxV).color(info.tint());
-                bufferbuilder.vertex(matrix4f, x2, y1, 0).uv(maxU, minV).color(info.tint());
+                bufferbuilder.vertex(matrix4f, x1, y1, 0).uv(minU, minV).color(info.tint()).endVertex();
+                bufferbuilder.vertex(matrix4f, x1, y2, 0).uv(minU, maxV).color(info.tint()).endVertex();
+                bufferbuilder.vertex(matrix4f, x2, y2, 0).uv(maxU, maxV).color(info.tint()).endVertex();
+                bufferbuilder.vertex(matrix4f, x2, y1, 0).uv(maxU, minV).color(info.tint()).endVertex();
                 BufferUploader.drawWithShader(bufferbuilder.end());
                 RenderSystem.disableBlend();
             }
         }
+        graphics.pose().popPose();
+    }
+
+    private void renderItemSlot(GuiGraphics graphics, Slot slot) {
+        ItemStack stack = slot.getItem();
+        boolean renderItem = true;
+        graphics.pose().pushPose();
+        graphics.pose().translate(0.0F, 0.0F, 100.0F);
+        if (stack.isEmpty()) {
+            Pair<ResourceLocation, ResourceLocation> pair = slot.getNoItemIcon();
+            if (pair != null && this.minecraft != null) {
+                TextureAtlasSprite sprite = this.minecraft.getTextureAtlas(pair.getFirst()).apply(pair.getSecond());
+                graphics.blit(slot.x, slot.y, 0, 16, 16, sprite);
+                renderItem = false;
+            }
+        }
+        if (renderItem) {
+            graphics.renderItem(stack, slot.x, slot.y, slot.x + slot.y * this.imageWidth);
+            graphics.renderItemDecorations(this.font, stack, slot.x, slot.y, null);
+        }
+        graphics.pose().popPose();
     }
 
     @Override
