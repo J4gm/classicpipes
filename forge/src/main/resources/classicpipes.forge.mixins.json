@@ -3,9 +3,7 @@
   "minVersion": "0.8",
   "package": "jagm.classicpipes.mixin",
   "compatibilityLevel": "JAVA_21",
-  "mixins": [
-    "CrafterInsertionMixin"
-  ],
+  "mixins": [],
   "client": [],
   "server": [],
   "injectors": {
