@@ -4,7 +4,7 @@
 
 Welcome to Classic Pipes! This is an item and fluid transport mod inspired by old versions of Buildcraft and Logistics Pipes, built from scratch to stylistically match up with modern Minecraft. As well as adding basic item and fluid transport pipes, Classic Pipes also introduces a system of networked pipes that can be hooked up to your chests and machines to sort, fetch, and craft items automatically.
 
-<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/nxhCllIh-sc" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+https://youtu.be/nxhCllIh-sc
 
 For information about getting started with this mod, see the above video tutorial or check out [The Classic Pipes Wiki](https://github.com/J4gm/classicpipes/wiki).
 
@@ -13,6 +13,9 @@ For information about getting started with this mod, see the above video tutoria
 * The Buildcraft and Logistics Pipes teams.
 * Jaredlll08 for creating a very useful [Multiloader Template](https://github.com/jaredlll08/MultiLoader-Template).
 * My beta testers: Tipsy, Sketti, and Charlie <3
+* Japanese translation: hamutaromaru.
+
+If you'd like to help translate the mod to another language, please get in touch! (Or submit a pull request on the Github if you know how to do that.)
 
 ## NOTES
 
