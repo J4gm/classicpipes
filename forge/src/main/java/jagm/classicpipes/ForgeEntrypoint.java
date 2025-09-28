@@ -50,6 +50,7 @@ public class ForgeEntrypoint {
             event.register(Registries.CREATIVE_MODE_TAB, helper -> helper.register(ClassicPipes.PIPES_TAB_KEY, ClassicPipes.PIPES_TAB));
             event.register(Registries.DATA_COMPONENT_TYPE, helper -> helper.register(ClassicPipes.LABEL_COMPONENT_KEY, ClassicPipes.LABEL_COMPONENT));
             event.register(Registries.TRIGGER_TYPE, helper -> helper.register(MiscUtil.resourceLocation("request_item"), ClassicPipes.REQUEST_ITEM_TRIGGER));
+            event.register(Registries.CUSTOM_STAT, helper -> helper.register(ClassicPipes.ITEMS_REQUESTED_STAT, ClassicPipes.ITEMS_REQUESTED_STAT));
 
             event.register(ForgeRegistries.Keys.BLOCK_ENTITY_TYPES, helper -> {
                 helper.register("basic_pipe", ClassicPipes.BASIC_PIPE_ENTITY);
@@ -107,6 +108,7 @@ public class ForgeEntrypoint {
                 ForgePacketHandler.registerServerPayload(ServerBoundTransferRecipePayload.class, ServerBoundTransferRecipePayload.STREAM_CODEC);
                 ForgePacketHandler.registerServerPayload(ServerBoundSetFilterPayload.class, ServerBoundSetFilterPayload.STREAM_CODEC);
                 ForgePacketHandler.registerClientPayload(ClientBoundItemListPayload.class, ClientBoundItemListPayload.STREAM_CODEC);
+                ClassicPipes.createStats();
             });
         }
 
