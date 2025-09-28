@@ -5,6 +5,7 @@ import jagm.classicpipes.block.StockingPipeBlock;
 import jagm.classicpipes.inventory.container.FilterContainer;
 import jagm.classicpipes.inventory.menu.StockingPipeMenu;
 import jagm.classicpipes.services.Services;
+import jagm.classicpipes.util.FacingOrNone;
 import jagm.classicpipes.util.ItemInPipe;
 import jagm.classicpipes.util.RequestedItem;
 import net.minecraft.core.BlockPos;
@@ -41,7 +42,7 @@ public class StockingPipeEntity extends NetworkedPipeEntity implements MenuProvi
     @Override
     public void tickServer(ServerLevel level, BlockPos pos, BlockState state) {
         super.tickServer(level, pos, state);
-        if (!this.cacheInitialised) {
+        if (!this.cacheInitialised && !state.getValue(StockingPipeBlock.FACING).equals(FacingOrNone.NONE)) {
             this.updateCache(level);
             this.cacheInitialised = true;
         }
@@ -94,9 +95,7 @@ public class StockingPipeEntity extends NetworkedPipeEntity implements MenuProvi
     }
 
     public void updateCache() {
-        if (this.getLevel() instanceof ServerLevel serverLevel) {
-            this.updateCache(serverLevel);
-        }
+        this.cacheInitialised = false;
     }
 
     public void tryRequests(ServerLevel level) {

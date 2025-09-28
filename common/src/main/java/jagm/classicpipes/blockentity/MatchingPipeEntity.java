@@ -45,10 +45,15 @@ public class MatchingPipeEntity extends NetworkedPipeEntity implements MenuProvi
         super.tickServer(level, pos, state);
     }
 
-    public void updateCache(ServerLevel level, BlockPos pos, Direction facing) {
+    private void updateCache(ServerLevel level, BlockPos pos, Direction facing) {
         this.cache.clear();
         this.cannotFit.clear();
         this.cache.addAll(Services.LOADER_SERVICE.getContainerItems(level, pos.relative(facing), facing.getOpposite()));
+    }
+
+    @Override
+    public void updateCache() {
+        this.cacheInitialised = false;
     }
 
     @Override
