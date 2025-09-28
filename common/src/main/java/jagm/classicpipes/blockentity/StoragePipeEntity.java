@@ -50,8 +50,7 @@ public class StoragePipeEntity extends NetworkedPipeEntity implements MenuProvid
         super.tickServer(level, pos, state);
     }
 
-    @Override
-    public void updateCache(ServerLevel level, BlockPos pos, Direction facing) {
+    private void updateCache(ServerLevel level, BlockPos pos, Direction facing) {
         this.cache.clear();
         this.cannotFit.clear();
         List<ItemStack> stacks = Services.LOADER_SERVICE.getContainerItems(level, pos.relative(facing), facing.getOpposite());
@@ -69,6 +68,11 @@ public class StoragePipeEntity extends NetworkedPipeEntity implements MenuProvid
         if (this.hasNetwork()) {
             this.getNetwork().cacheUpdated();
         }
+    }
+
+    @Override
+    public void updateCache() {
+        this.cacheInitialised = false;
     }
 
     @Override
@@ -126,8 +130,8 @@ public class StoragePipeEntity extends NetworkedPipeEntity implements MenuProvid
     public void setLeaveOne(boolean leaveOne) {
         this.leaveOne = leaveOne;
         Direction facing = this.getBlockState().getValue(ProviderPipeBlock.FACING).getDirection();
-        if (this.getLevel() instanceof ServerLevel serverLevel && facing != null) {
-            this.updateCache(serverLevel, this.getBlockPos(), facing);
+        if (this.getLevel() instanceof ServerLevel && facing != null) {
+            this.updateCache();
         }
     }
 
@@ -172,7 +176,7 @@ public class StoragePipeEntity extends NetworkedPipeEntity implements MenuProvid
         Direction facing = this.getBlockState().getValue(ProviderPipeBlock.FACING).getDirection();
         if (facing != null) {
             boolean extracted = Services.LOADER_SERVICE.extractSpecificItem(this, level, this.getBlockPos().relative(facing), facing.getOpposite(), stack.copy());
-            this.updateCache(level, this.getBlockPos(), facing);
+            this.updateCache();
             return extracted;
         }
         return false;

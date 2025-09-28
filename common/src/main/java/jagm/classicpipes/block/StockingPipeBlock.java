@@ -53,8 +53,8 @@ public class StockingPipeBlock extends ContainerAdjacentNetworkedPipeBlock {
     @Override
     public void onNeighborChange(BlockState state, LevelReader level, BlockPos pos, BlockPos neighbor) {
         Direction facing = state.getValue(FACING).getDirection();
-        if (level instanceof ServerLevel serverLevel && facing != null && level.getBlockEntity(pos) instanceof StockingPipeEntity stockingPipe && neighbor.equals(pos.relative(facing))) {
-            stockingPipe.updateCache(serverLevel);
+        if (level instanceof ServerLevel && facing != null && level.getBlockEntity(pos) instanceof StockingPipeEntity stockingPipe && neighbor.equals(pos.relative(facing))) {
+            stockingPipe.updateCache();
         }
     }
 
