@@ -31,7 +31,6 @@ public class StoragePipeEntity extends NetworkedPipeEntity implements MenuProvid
     private final List<ItemStack> cache;
     private boolean cacheInitialised;
     private final List<ItemStack> cannotFit;
-    private long lastCached;
 
     public StoragePipeEntity(BlockPos pos, BlockState state) {
         super(ClassicPipes.STORAGE_PIPE_ENTITY, pos, state);
@@ -41,7 +40,6 @@ public class StoragePipeEntity extends NetworkedPipeEntity implements MenuProvid
         this.cache = new ArrayList<>();
         this.cacheInitialised = false;
         this.cannotFit = new ArrayList<>();
-        this.lastCached = 0;
     }
 
     @Override
@@ -54,26 +52,22 @@ public class StoragePipeEntity extends NetworkedPipeEntity implements MenuProvid
     }
 
     private void updateCache(ServerLevel level, BlockPos pos, Direction facing) {
-        long time = level.getGameTime();
-        if (this.lastCached != time) {
-            this.lastCached = time;
-            this.cache.clear();
-            this.cannotFit.clear();
-            List<ItemStack> stacks = Services.LOADER_SERVICE.getContainerItems(level, pos.relative(facing), facing.getOpposite());
-            Iterator<ItemStack> iterator = stacks.iterator();
-            while (iterator.hasNext()) {
-                ItemStack stack = iterator.next();
-                if (this.shouldLeaveOne()) {
-                    stack.shrink(1);
-                    if (stack.isEmpty()) {
-                        iterator.remove();
-                    }
+        this.cache.clear();
+        this.cannotFit.clear();
+        List<ItemStack> stacks = Services.LOADER_SERVICE.getContainerItems(level, pos.relative(facing), facing.getOpposite());
+        Iterator<ItemStack> iterator = stacks.iterator();
+        while (iterator.hasNext()) {
+            ItemStack stack = iterator.next();
+            if (this.shouldLeaveOne()) {
+                stack.shrink(1);
+                if (stack.isEmpty()) {
+                    iterator.remove();
                 }
             }
-            this.cache.addAll(stacks);
-            if (this.hasNetwork()) {
-                this.getNetwork().cacheUpdated();
-            }
+        }
+        this.cache.addAll(stacks);
+        if (this.hasNetwork()) {
+            this.getNetwork().cacheUpdated();
         }
     }
 
