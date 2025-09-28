@@ -15,6 +15,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.stats.Stats;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -145,6 +146,7 @@ public class NetworkedPipeBlock extends PipeBlock {
                         payload,
                         ClientBoundItemListPayload.STREAM_CODEC
                 );
+                player.awardStat(Stats.ITEM_USED.get(ClassicPipes.PIPE_SLICER));
                 return ItemInteractionResult.SUCCESS;
             }
         }

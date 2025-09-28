@@ -4,6 +4,7 @@ import jagm.classicpipes.ClassicPipes;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.stats.Stats;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -58,6 +59,7 @@ public class TagLabelItem extends LabelItem {
                 }
             }
         }
+        player.awardStat(Stats.ITEM_USED.get(this));
         return InteractionResultHolder.success(labelStack);
     }
 

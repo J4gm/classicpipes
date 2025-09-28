@@ -157,5 +157,6 @@
   "advancements.classicpipes.autocraft_recipe_pipe.title": "How Perverse",
   "advancements.classicpipes.autocraft_recipe_pipe.description": "Use a Recipe Pipe to craft a Recipe Pipe",
   "advancements.classicpipes.autocraft_eight_steps.title": "Master of Logistics",
-  "advancements.classicpipes.autocraft_eight_steps.description": "Request an item requiring at least 8 crafting steps"
+  "advancements.classicpipes.autocraft_eight_steps.description": "Request an item requiring at least 8 crafting steps",
+  "stat.classicpipes.items_requested": "Items Requested from Pipe Network"
 }
