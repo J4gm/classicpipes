@@ -203,6 +203,7 @@ public class PipeNetwork {
             if (cancelled) {
                 this.queue.forEach(tuple -> this.removeRequestedItem(tuple.b()));
             } else if (player != null) {
+                player.awardStat(ClassicPipes.ITEMS_REQUESTED_STAT, stack.getCount());
                 ClassicPipes.REQUEST_ITEM_TRIGGER.trigger((ServerPlayer) player, stack, this.craftedItemsForAdvancement.size());
                 player.displayClientMessage(Component.translatable("chat." + ClassicPipes.MOD_ID + ".requested", stack.getCount(), stack.getItem().getDescription()).withStyle(ChatFormatting.GREEN), false);
             }

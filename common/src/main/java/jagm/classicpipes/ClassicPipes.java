@@ -16,7 +16,10 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.stats.StatFormatter;
+import net.minecraft.stats.Stats;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.CreativeModeTab;
@@ -150,6 +153,8 @@ public class ClassicPipes {
     public static final MenuType<AdvancedCopperPipeMenu> ADVANCED_COPPER_PIPE_MENU = Services.LOADER_SERVICE.createMenuType(AdvancedCopperPipeMenu::new, ClientBoundBoolPayload.HANDLER);
     public static final MenuType<AdvancedCopperFluidPipeMenu> ADVANCED_COPPER_FLUID_PIPE_MENU = Services.LOADER_SERVICE.createSimpleMenuType(AdvancedCopperFluidPipeMenu::new);
 
+    public static final ResourceLocation ITEMS_REQUESTED_STAT = MiscUtil.resourceLocation("items_requested");
+
     private static Item createItem(String name, Function<Item.Properties, Item> factory, int stackSize) {
         Item.Properties props = new Item.Properties();
         if (stackSize < 64) {
@@ -189,6 +194,10 @@ public class ClassicPipes {
 
     private static Component translateDesc(String desc) {
         return Component.translatable("item." + MOD_ID + "." + desc + ".desc").withStyle(ChatFormatting.GRAY);
+    }
+
+    public static void createStats() {
+        Stats.CUSTOM.get(ITEMS_REQUESTED_STAT, StatFormatter.DEFAULT);
     }
 
 }

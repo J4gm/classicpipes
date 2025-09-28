@@ -49,6 +49,7 @@ public class ForgeEntrypoint {
             event.register(ForgeRegistries.Keys.ITEMS, helper -> ClassicPipes.ITEMS.forEach(helper::register));
             event.register(ForgeRegistries.Keys.SOUND_EVENTS, helper -> ClassicPipes.SOUNDS.forEach(helper::register));
             event.register(Registries.CREATIVE_MODE_TAB, helper -> helper.register(ClassicPipes.PIPES_TAB_KEY, ClassicPipes.PIPES_TAB));
+            event.register(Registries.CUSTOM_STAT, helper -> helper.register(ClassicPipes.ITEMS_REQUESTED_STAT, ClassicPipes.ITEMS_REQUESTED_STAT));
 
             event.register(ForgeRegistries.Keys.BLOCK_ENTITY_TYPES, helper -> {
                 helper.register("basic_pipe", ClassicPipes.BASIC_PIPE_ENTITY);
@@ -107,6 +108,7 @@ public class ForgeEntrypoint {
                 ForgePacketHandler.registerServerPayload(ServerBoundTransferRecipePayload.class, ServerBoundTransferRecipePayload.HANDLER);
                 ForgePacketHandler.registerServerPayload(ServerBoundSetFilterPayload.class, ServerBoundSetFilterPayload.HANDLER);
                 ForgePacketHandler.registerClientPayload(ClientBoundItemListPayload.class, ClientBoundItemListPayload.HANDLER);
+                ClassicPipes.createStats();
             });
         }
 

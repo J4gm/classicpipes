@@ -6,6 +6,7 @@ import jagm.classicpipes.util.MiscUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
@@ -38,6 +39,7 @@ public class ModLabelItem extends LabelItem {
                 player.displayClientMessage(Component.translatable("chat." + ClassicPipes.MOD_ID + ".mod_set", Component.literal(Services.LOADER_SERVICE.getModName(mod)).withStyle(ChatFormatting.LIGHT_PURPLE)), false);
             }
         }
+        player.awardStat(Stats.ITEM_USED.get(this));
         return InteractionResultHolder.success(labelStack);
     }
 
