@@ -108,8 +108,8 @@ public class ProviderPipeEntity extends NetworkedPipeEntity implements MenuProvi
     public void setLeaveOne(boolean leaveOne) {
         this.leaveOne = leaveOne;
         Direction facing = this.getBlockState().getValue(ProviderPipeBlock.FACING).getDirection();
-        if (this.getLevel() instanceof ServerLevel serverLevel && facing != null) {
-            this.updateCache(serverLevel, this.getBlockPos(), facing);
+        if (this.getLevel() instanceof ServerLevel && facing != null) {
+            this.updateCache();
         }
     }
 
@@ -117,8 +117,7 @@ public class ProviderPipeEntity extends NetworkedPipeEntity implements MenuProvi
         return this.leaveOne;
     }
 
-    @Override
-    public void updateCache(ServerLevel level, BlockPos pos, Direction facing) {
+    private void updateCache(ServerLevel level, BlockPos pos, Direction facing) {
         this.cache.clear();
         List<ItemStack> stacks = Services.LOADER_SERVICE.getContainerItems(level, pos.relative(facing), facing.getOpposite());
         Iterator<ItemStack> iterator = stacks.iterator();
@@ -139,11 +138,9 @@ public class ProviderPipeEntity extends NetworkedPipeEntity implements MenuProvi
         }
     }
 
+    @Override
     public void updateCache() {
-        Direction facing = this.getBlockState().getValue(ProviderPipeBlock.FACING).getDirection();
-        if (this.getLevel() instanceof ServerLevel serverLevel && facing != null) {
-            this.updateCache(serverLevel, this.getBlockPos(), facing);
-        }
+        this.cacheInitialised = false;
     }
 
     @Override
@@ -156,7 +153,7 @@ public class ProviderPipeEntity extends NetworkedPipeEntity implements MenuProvi
         Direction facing = this.getBlockState().getValue(ProviderPipeBlock.FACING).getDirection();
         if (facing != null) {
             boolean extracted = Services.LOADER_SERVICE.extractSpecificItem(this, level, this.getBlockPos().relative(facing), facing.getOpposite(), stack.copy());
-            this.updateCache(level, this.getBlockPos(), facing);
+            this.updateCache();
             return extracted;
         }
         return false;

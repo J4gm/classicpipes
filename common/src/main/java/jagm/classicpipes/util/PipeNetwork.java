@@ -227,15 +227,34 @@ public class PipeNetwork {
     }
 
     public void tick(ServerLevel level) {
-        int pipeToUpdate = level.getRandom().nextInt(Math.max(100, this.providerPipes.size()));
+        int updatablePipesCount = this.providerPipes.size() + this.matchingPipes.size() + this.stockingPipes.size();
+        int pipeToUpdate = level.getRandom().nextInt(Math.max(100, updatablePipesCount));
         if (pipeToUpdate < this.providerPipes.size()) {
             int i = 0;
             for (ProviderPipe providerPipe : this.providerPipes) {
                 if (i == pipeToUpdate) {
                     Direction facing = providerPipe.getFacing();
                     if (facing != null) {
-                        providerPipe.updateCache(level, providerPipe.getProviderPipePos(), facing);
+                        providerPipe.updateCache();
                     }
+                    break;
+                }
+                i++;
+            }
+        } else if (pipeToUpdate < this.providerPipes.size() + this.matchingPipes.size()) {
+            int i = 0;
+            for (MatchingPipe matchingPipe : this.matchingPipes) {
+                if (i == pipeToUpdate) {
+                    matchingPipe.updateCache();
+                    break;
+                }
+                i++;
+            }
+        } else if (pipeToUpdate < updatablePipesCount) {
+            int i = 0;
+            for (StockingPipeEntity stockingPipe : this.stockingPipes) {
+                if (i == pipeToUpdate) {
+                    stockingPipe.updateCache();
                     break;
                 }
                 i++;

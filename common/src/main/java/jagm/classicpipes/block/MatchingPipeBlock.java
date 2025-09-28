@@ -52,8 +52,8 @@ public class MatchingPipeBlock extends ContainerAdjacentNetworkedPipeBlock {
     @Override
     public void onNeighborChange(BlockState state, LevelReader level, BlockPos pos, BlockPos neighbor) {
         Direction facing = state.getValue(FACING).getDirection();
-        if (level instanceof ServerLevel serverLevel && facing != null && level.getBlockEntity(pos) instanceof MatchingPipeEntity matchingPipe && neighbor.equals(pos.relative(facing))) {
-            matchingPipe.updateCache(serverLevel, pos, facing);
+        if (level instanceof ServerLevel && facing != null && level.getBlockEntity(pos) instanceof MatchingPipeEntity matchingPipe && neighbor.equals(pos.relative(facing))) {
+            matchingPipe.updateCache();
         }
     }
 

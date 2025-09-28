@@ -15,7 +15,7 @@ public interface ProviderPipe {
 
     BlockPos getProviderPipePos();
 
-    void updateCache(ServerLevel level, BlockPos pos, Direction facing);
+    void updateCache();
 
     Direction getFacing();
 
