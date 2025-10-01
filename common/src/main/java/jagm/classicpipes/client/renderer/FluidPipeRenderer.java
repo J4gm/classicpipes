@@ -75,9 +75,9 @@ public class FluidPipeRenderer implements BlockEntityRenderer<FluidPipeEntity, F
     public void submit(FluidPipeRenderState pipeState, PoseStack poses, SubmitNodeCollector queue, CameraRenderState cameraState) {
         poses.pushPose();
         if (pipeState.width() > 0.01F) {
-            Matrix4f matrix = poses.last().pose();
             TextureAtlasSprite fluidSprite = pipeState.fluidInfo().sprite() == null ? Minecraft.getInstance().getBlockRenderer().getBlockModelShaper().getParticleIcon(Blocks.WATER.defaultBlockState()) : pipeState.fluidInfo().sprite();
             queue.submitCustomGeometry(poses, RenderType.text(fluidSprite.atlasLocation()), ((pose, vertexBuffer) -> {
+                Matrix4f matrix = pose.pose();
                 float start = 0.5F - pipeState.width() / 2;
                 float end = 0.5F + pipeState.width() / 2;
                 boolean renderMiddle = false;
