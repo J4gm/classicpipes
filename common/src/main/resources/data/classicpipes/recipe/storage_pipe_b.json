@@ -3,7 +3,7 @@
   "category": "misc",
   "key": {
     "O": "#classicpipes:pipes/networked",
-    "W": "#c:chests/wooden"
+    "W": "#minecraft:copper_chests"
   },
   "pattern": [
     "OOO",
