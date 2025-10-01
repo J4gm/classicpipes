@@ -208,7 +208,7 @@ public class RequestScreen extends AbstractContainerScreen<RequestMenu> {
             ItemStack toRequest = slot.getItem();
             if (!toRequest.isEmpty()) {
                 boolean craftable = this.menu.itemCraftable(toRequest);
-                if (event.hasShiftDown() || event.isRight()) {
+                if (event.hasShiftDown() || event.button() == 1) {
                     int amount = event.hasShiftDown() ? Math.min(toRequest.getCount() - (craftable ? 1 : 0), toRequest.getMaxStackSize()) : 1;
                     if (amount > 0) {
                         Services.LOADER_SERVICE.sendToServer(new ServerBoundRequestPayload(toRequest.copyWithCount(amount), this.menu.getRequestPos()));
