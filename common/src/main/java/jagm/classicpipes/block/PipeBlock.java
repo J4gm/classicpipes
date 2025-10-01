@@ -137,7 +137,7 @@ public abstract class PipeBlock extends TransparentBlock implements SimpleWaterl
     }
 
     @Override
-    protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
+    protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos, Direction direction) {
         BlockEntity blockEntity = level.getBlockEntity(pos);
         if (blockEntity instanceof PipeEntity pipe) {
             return pipe.getComparatorOutput();

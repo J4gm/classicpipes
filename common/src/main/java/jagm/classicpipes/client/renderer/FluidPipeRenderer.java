@@ -2,22 +2,20 @@ package jagm.classicpipes.client.renderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Axis;
 import jagm.classicpipes.block.FluidPipeBlock;
 import jagm.classicpipes.blockentity.FluidPipeEntity;
 import jagm.classicpipes.services.Services;
 import jagm.classicpipes.util.FluidInPipe;
-import jagm.classicpipes.util.ItemInPipe;
-import jagm.classicpipes.util.MiscUtil;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
-import net.minecraft.world.item.ItemDisplayContext;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
@@ -26,7 +24,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-public class FluidPipeRenderer implements BlockEntityRenderer<FluidPipeEntity> {
+public class FluidPipeRenderer implements BlockEntityRenderer<FluidPipeEntity, FluidPipeRenderer.FluidPipeRenderState> {
 
     private final BlockEntityRendererProvider.Context context;
     private final Map<FluidPipeEntity, Float> lastWidths;
@@ -37,29 +35,20 @@ public class FluidPipeRenderer implements BlockEntityRenderer<FluidPipeEntity> {
     }
 
     @Override
-    public boolean shouldRender(FluidPipeEntity pipe, Vec3 cameraPos) {
-        boolean ret = Vec3.atCenterOf(pipe.getBlockPos()).closerThan(cameraPos, this.getViewDistance());
-        if (!ret) {
-            this.lastWidths.remove(pipe);
-        }
-        return ret;
+    public FluidPipeRenderState createRenderState() {
+        return new FluidPipeRenderState();
     }
 
     @Override
-    public void render(FluidPipeEntity pipe, float partialTicks, PoseStack poses, MultiBufferSource bufferSource, int light, int overlay, Vec3 cameraPos) {
-        if (!this.lastWidths.containsKey(pipe)) {
-            this.lastWidths.put(pipe, 0.0F);
-        }
-        poses.pushPose();
-        Matrix4f matrix = poses.last().pose();
-        FluidRenderInfo info = Services.LOADER_SERVICE.getFluidRenderInfo(pipe.getFluid().defaultFluidState(), pipe.getLevel(), pipe.getBlockPos());
-        TextureAtlasSprite fluidSprite = info.sprite();
-        if (fluidSprite == null) {
-            fluidSprite = Minecraft.getInstance().getBlockRenderer().getBlockModelShaper().getParticleIcon(Blocks.WATER.defaultBlockState());
-        }
-        VertexConsumer vertexBuffer = bufferSource.getBuffer(RenderType.text(fluidSprite.atlasLocation()));
+    public void extractRenderState(FluidPipeEntity pipe, FluidPipeRenderState pipeState, float partialTicks, Vec3 cameraPos, ModelFeatureRenderer.CrumblingOverlay breakProgress) {
+        BlockEntityRenderer.super.extractRenderState(pipe, pipeState, partialTicks, cameraPos, breakProgress);
+        FluidRenderInfo fluidInfo = Services.LOADER_SERVICE.getFluidRenderInfo(pipe.getFluid().defaultFluidState(), pipe.getLevel(), pipe.getBlockPos());
         boolean[] middleSides = new boolean[6];
         Arrays.fill(middleSides, true);
+        boolean[] pipeDirections = new boolean[6];
+        for (int i = 0; i < 6; i++) {
+            pipeDirections[i] = pipe.getBlockState().getValue(FluidPipeBlock.PROPERTY_BY_DIRECTION.get(Direction.from3DDataValue(i)));
+        }
         int totalAmount = 0;
         for (FluidInPipe fluidPacket : pipe.getContents()) {
             totalAmount += fluidPacket.getAmount();
@@ -67,51 +56,53 @@ public class FluidPipeRenderer implements BlockEntityRenderer<FluidPipeEntity> {
             middleSides[fluidPacket.getTargetDirection().get3DDataValue()] = false;
         }
         float targetWidth = Math.min(7.0F, totalAmount * 7.0F / FluidPipeEntity.CAPACITY) / 16.0F;
-        float lastWidth = this.lastWidths.get(pipe);
+        float lastWidth = this.lastWidths.getOrDefault(pipe, 0.0F);
         float width = lastWidth + (targetWidth - lastWidth) / 32.0F;
         this.lastWidths.put(pipe, width);
-        if (width > 0.01F) {
-            float start = 0.5F - width / 2;
-            float end = 0.5F + width / 2;
-            boolean renderMiddle = false;
-            for (Direction direction : Direction.values()) {
-                if (!middleSides[direction.get3DDataValue()] && pipe.getBlockState().getValue(FluidPipeBlock.PROPERTY_BY_DIRECTION.get(direction))) {
-                    renderMiddle = true;
-                    boolean[] renderSides = new boolean[6];
-                    Arrays.fill(renderSides, true);
-                    renderSides[direction.getOpposite().get3DDataValue()] = false;
-                    switch (direction) {
-                        case UP -> this.renderFluidCuboid(vertexBuffer, matrix, start, end, start, end, 1.0F, end, fluidSprite, info.tint(), light, renderSides);
-                        case DOWN -> this.renderFluidCuboid(vertexBuffer, matrix, start, 0.0F, start, end, start, end, fluidSprite, info.tint(), light, renderSides);
-                        case EAST -> this.renderFluidCuboid(vertexBuffer, matrix, end, start, start, 1.0F, end, end, fluidSprite, info.tint(), light, renderSides);
-                        case WEST -> this.renderFluidCuboid(vertexBuffer, matrix, 0.0F, start, start, start, end, end, fluidSprite, info.tint(), light, renderSides);
-                        case SOUTH -> this.renderFluidCuboid(vertexBuffer, matrix, start, start, end, end, end, 1.0F, fluidSprite, info.tint(), light, renderSides);
-                        case NORTH -> this.renderFluidCuboid(vertexBuffer, matrix, start, start, 0.0F, end, end, start, fluidSprite, info.tint(), light, renderSides);
+        pipeState.initialise(fluidInfo, width, middleSides, pipeDirections);
+    }
+
+    @Override
+    public boolean shouldRender(FluidPipeEntity pipe, Vec3 cameraPos) {
+        boolean shouldRender = BlockEntityRenderer.super.shouldRender(pipe, cameraPos);
+        if (!shouldRender) {
+            this.lastWidths.remove(pipe);
+        }
+        return shouldRender;
+    }
+
+    @Override
+    public void submit(FluidPipeRenderState pipeState, PoseStack poses, SubmitNodeCollector queue, CameraRenderState cameraState) {
+        poses.pushPose();
+        if (pipeState.width() > 0.01F) {
+            Matrix4f matrix = poses.last().pose();
+            TextureAtlasSprite fluidSprite = pipeState.fluidInfo().sprite() == null ? Minecraft.getInstance().getBlockRenderer().getBlockModelShaper().getParticleIcon(Blocks.WATER.defaultBlockState()) : pipeState.fluidInfo().sprite();
+            queue.submitCustomGeometry(poses, RenderType.text(fluidSprite.atlasLocation()), ((pose, vertexBuffer) -> {
+                float start = 0.5F - pipeState.width() / 2;
+                float end = 0.5F + pipeState.width() / 2;
+                boolean renderMiddle = false;
+                for (Direction direction : Direction.values()) {
+                    if (!pipeState.middleSides()[direction.get3DDataValue()] && pipeState.pipeDirections()[direction.get3DDataValue()]) {
+                        renderMiddle = true;
+                        boolean[] renderSides = new boolean[6];
+                        Arrays.fill(renderSides, true);
+                        renderSides[direction.getOpposite().get3DDataValue()] = false;
+                        switch (direction) {
+                            case UP -> this.renderFluidCuboid(vertexBuffer, matrix, start, end, start, end, 1.0F, end, fluidSprite, pipeState.fluidInfo().tint(), pipeState.lightCoords, renderSides);
+                            case DOWN -> this.renderFluidCuboid(vertexBuffer, matrix, start, 0.0F, start, end, start, end, fluidSprite, pipeState.fluidInfo().tint(), pipeState.lightCoords, renderSides);
+                            case EAST -> this.renderFluidCuboid(vertexBuffer, matrix, end, start, start, 1.0F, end, end, fluidSprite, pipeState.fluidInfo().tint(), pipeState.lightCoords, renderSides);
+                            case WEST -> this.renderFluidCuboid(vertexBuffer, matrix, 0.0F, start, start, start, end, end, fluidSprite, pipeState.fluidInfo().tint(), pipeState.lightCoords, renderSides);
+                            case SOUTH -> this.renderFluidCuboid(vertexBuffer, matrix, start, start, end, end, end, 1.0F, fluidSprite, pipeState.fluidInfo().tint(), pipeState.lightCoords, renderSides);
+                            case NORTH -> this.renderFluidCuboid(vertexBuffer, matrix, start, start, 0.0F, end, end, start, fluidSprite, pipeState.fluidInfo().tint(), pipeState.lightCoords, renderSides);
+                        }
                     }
                 }
-            }
-            if (renderMiddle) {
-                this.renderFluidCuboid(vertexBuffer, matrix, start, start, start, end, end, end, fluidSprite, info.tint(), light, middleSides);
-            }
+                if (renderMiddle) {
+                    this.renderFluidCuboid(vertexBuffer, matrix, start, start, start, end, end, end, fluidSprite, pipeState.fluidInfo().tint(), pipeState.lightCoords, pipeState.middleSides());
+                }
+            }));
         }
         poses.popPose();
-        if (MiscUtil.DEBUG_MODE) {
-            if (!pipe.isEmpty()){
-                for (FluidInPipe fluidPacket : pipe.getContents()) {
-                    Direction direction = fluidPacket.getProgress() < ItemInPipe.HALFWAY ? fluidPacket.getFromDirection() : fluidPacket.getTargetDirection();
-                    poses.pushPose();
-                    poses.translate(fluidPacket.getDebugRenderPosition(partialTicks));
-                    poses.scale(0.4375F, 0.4375F, 0.4375F);
-                    if (direction.equals(Direction.EAST) || direction.equals(Direction.WEST)) {
-                        poses.mulPose(Axis.YP.rotationDegrees(90.0F));
-                    } else if (direction.equals(Direction.UP) || direction.equals(Direction.DOWN)) {
-                        poses.mulPose(Axis.XP.rotationDegrees(90.0F));
-                    }
-                    this.context.getItemRenderer().renderStatic(new ItemStack(pipe.getFluid().getBucket()), ItemDisplayContext.FIXED, light, overlay, poses, bufferSource, pipe.getLevel(), 0);
-                    poses.popPose();
-                }
-            }
-        }
     }
 
     public void renderFluidCuboid(VertexConsumer vertexBuffer, Matrix4f matrix, float x1, float y1, float z1, float x2, float y2, float z2, TextureAtlasSprite fluidSprite, int tint, int light, boolean[] renderSide) {
@@ -166,6 +157,38 @@ public class FluidPipeRenderer implements BlockEntityRenderer<FluidPipeEntity> {
             vertexBuffer.addVertex(matrix, x1, y1, z2).setColor(tint).setUv(u2, v1).setLight(light);
             vertexBuffer.addVertex(matrix, x2, y1, z2).setColor(tint).setUv(u2, v2).setLight(light);
         }
+    }
+
+    public static class FluidPipeRenderState extends BlockEntityRenderState {
+
+        private FluidRenderInfo fluidInfo;
+        private float width;
+        private boolean[] middleSides;
+        private boolean[] pipeDirections;
+
+        public void initialise(FluidRenderInfo fluidInfo, float width, boolean[] middleSides, boolean[] pipeDirections) {
+            this.fluidInfo = fluidInfo;
+            this.width = width;
+            this.middleSides = middleSides;
+            this.pipeDirections = pipeDirections;
+        }
+
+        public FluidRenderInfo fluidInfo() {
+            return this.fluidInfo;
+        }
+
+        public float width() {
+            return this.width;
+        }
+
+        public boolean[] middleSides() {
+            return this.middleSides;
+        }
+
+        public boolean[] pipeDirections() {
+            return this.pipeDirections;
+        }
+
     }
 
 }

@@ -8,6 +8,7 @@ import jagm.classicpipes.util.MiscUtil;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
@@ -46,8 +47,8 @@ public class RequestAmountScreen extends Screen {
         this.leftPos = (this.width - IMAGE_WIDTH) / 2;
         this.topPos = (this.height - IMAGE_HEIGHT) / 2;
         this.count = 1;
-        this.increase = new IncreaseButton(this.leftPos + ITEM_X + 38, this.topPos + 26, false, this.stack.getCount() > 1 || this.craftable, button -> this.changeCount(hasShiftDown() ? 10 : 1));
-        this.decrease = new IncreaseButton(this.leftPos + ITEM_X + 38, this.topPos + 54, true, false, button -> this.changeCount(hasShiftDown() ? -10 : -1));
+        this.increase = new IncreaseButton(this.leftPos + ITEM_X + 38, this.topPos + 26, false, this.stack.getCount() > 1 || this.craftable, button -> this.changeCount(this.minecraft != null && this.minecraft.hasShiftDown() ? 10 : 1));
+        this.decrease = new IncreaseButton(this.leftPos + ITEM_X + 38, this.topPos + 54, true, false, button -> this.changeCount(this.minecraft != null && this.minecraft.hasShiftDown() ? -10 : -1));
         this.addRenderableWidget(Button.builder(Component.translatable("widget." + ClassicPipes.MOD_ID + ".cancel"), button -> this.onClose()).bounds(this.leftPos + 16, this.topPos + 72, 70, 16).build());
         this.addRenderableWidget(Button.builder(Component.translatable("widget." + ClassicPipes.MOD_ID + ".request"), button -> {
             Services.LOADER_SERVICE.sendToServer(new ServerBoundRequestPayload(this.stack.copyWithCount(this.count), this.previousScreen.getMenu().getRequestPos()));
@@ -115,10 +116,10 @@ public class RequestAmountScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (super.keyPressed(keyCode, scanCode, modifiers)) {
+    public boolean keyPressed(KeyEvent event) {
+        if (super.keyPressed(event)) {
             return true;
-        } else if (this.minecraft != null && this.minecraft.options.keyInventory.matches(keyCode, scanCode)) {
+        } else if (this.minecraft != null && this.minecraft.options.keyInventory.matches(event)) {
             this.onClose();
             return true;
         }
@@ -127,7 +128,7 @@ public class RequestAmountScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-        this.changeCount((int) (hasShiftDown() ? 10 * scrollY : scrollY));
+        this.changeCount((int) (this.minecraft != null && this.minecraft.hasShiftDown() ? 10 * scrollY : scrollY));
         return true;
     }
 

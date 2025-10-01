@@ -14,6 +14,8 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -200,14 +202,14 @@ public class RequestScreen extends AbstractContainerScreen<RequestMenu> {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        Slot slot = this.getHoveredSlot(mouseX, mouseY);
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        Slot slot = this.getHoveredSlot(event.x(), event.y());
         if (slot != null) {
             ItemStack toRequest = slot.getItem();
             if (!toRequest.isEmpty()) {
                 boolean craftable = this.menu.itemCraftable(toRequest);
-                if (hasShiftDown() || button == 1) {
-                    int amount = hasShiftDown() ? Math.min(toRequest.getCount() - (craftable ? 1 : 0), toRequest.getMaxStackSize()) : 1;
+                if (event.hasShiftDown() || event.isRight()) {
+                    int amount = event.hasShiftDown() ? Math.min(toRequest.getCount() - (craftable ? 1 : 0), toRequest.getMaxStackSize()) : 1;
                     if (amount > 0) {
                         Services.LOADER_SERVICE.sendToServer(new ServerBoundRequestPayload(toRequest.copyWithCount(amount), this.menu.getRequestPos()));
                         toRequest.shrink(amount);
@@ -218,7 +220,7 @@ public class RequestScreen extends AbstractContainerScreen<RequestMenu> {
                 }
             }
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, doubleClick);
     }
 
     @Override
@@ -227,11 +229,11 @@ public class RequestScreen extends AbstractContainerScreen<RequestMenu> {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == 256 && this.minecraft != null && this.minecraft.player != null) {
+    public boolean keyPressed(KeyEvent event) {
+        if (event.input() == 256 && this.minecraft != null && this.minecraft.player != null) {
             this.minecraft.player.closeContainer();
         }
-        return this.searchBar.keyPressed(keyCode, scanCode, modifiers) || this.searchBar.canConsumeInput() || super.keyPressed(keyCode, scanCode, modifiers);
+        return this.searchBar.keyPressed(event) || this.searchBar.canConsumeInput() || super.keyPressed(event);
     }
 
     @Override
@@ -255,7 +257,7 @@ public class RequestScreen extends AbstractContainerScreen<RequestMenu> {
     }
 
     private void changeSortType(Button button) {
-        SortingMode nextMode = hasShiftDown() ? this.menu.getSortingMode().prevType() : this.menu.getSortingMode().nextType();
+        SortingMode nextMode = this.minecraft != null && this.minecraft.hasShiftDown() ? this.menu.getSortingMode().prevType() : this.menu.getSortingMode().nextType();
         this.sort_type.setMessage(nextMode.getType());
         this.sort_direction.setMessage(nextMode.getDirection());
         this.menu.setSortingMode(nextMode);
