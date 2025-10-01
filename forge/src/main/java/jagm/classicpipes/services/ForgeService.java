@@ -7,8 +7,8 @@ import jagm.classicpipes.network.ForgePacketHandler;
 import jagm.classicpipes.util.FluidInPipe;
 import jagm.classicpipes.util.ItemInPipe;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -270,16 +270,22 @@ public class ForgeService implements LoaderService {
     public FluidRenderInfo getFluidRenderInfo(FluidState fluidState, BlockAndTintGetter level, BlockPos pos) {
         IClientFluidTypeExtensions fluidInfo = IClientFluidTypeExtensions.of(fluidState);
         int tint = fluidInfo.getTintColor(fluidState, level, pos);
-        TextureAtlasSprite sprite = Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(fluidInfo.getStillTexture(fluidState, level, pos));
-        return new FluidRenderInfo(tint, sprite);
+        AbstractTexture texture = Minecraft.getInstance().getTextureManager().getTexture(TextureAtlas.LOCATION_BLOCKS);
+        if (texture instanceof TextureAtlas blockAtlas) {
+            return new FluidRenderInfo(tint, blockAtlas.getSprite(fluidInfo.getStillTexture(fluidState, level, pos)));
+        }
+        return new FluidRenderInfo(tint, null);
     }
 
     @Override
     public FluidRenderInfo getFluidRenderInfo(FluidState fluidState) {
         IClientFluidTypeExtensions fluidInfo = IClientFluidTypeExtensions.of(fluidState);
         int tint = fluidInfo.getTintColor();
-        TextureAtlasSprite sprite = Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(fluidInfo.getStillTexture());
-        return new FluidRenderInfo(tint, sprite);
+        AbstractTexture texture = Minecraft.getInstance().getTextureManager().getTexture(TextureAtlas.LOCATION_BLOCKS);
+        if (texture instanceof TextureAtlas blockAtlas) {
+            return new FluidRenderInfo(tint, blockAtlas.getSprite(fluidInfo.getStillTexture()));
+        }
+        return new FluidRenderInfo(tint, null);
     }
 
     @Override
