@@ -11,6 +11,7 @@ pluginManagement {
             }
             filter {
                 includeGroup('net.fabricmc')
+                includeGroup('net.fabricmc.unpick')
                 includeGroup('fabric-loom')
             }
         }
@@ -48,4 +49,4 @@ rootProject.name = 'classicpipes'
 include('common')
 include('fabric')
 include('neoforge')
-include('forge')
+//include('forge')
