@@ -5,7 +5,6 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import jagm.classicpipes.block.FluidPipeBlock;
 import jagm.classicpipes.blockentity.FluidPipeEntity;
 import jagm.classicpipes.services.Services;
-import jagm.classicpipes.util.FluidInPipe;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.SubmitNodeCollector;
@@ -21,17 +20,13 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 public class FluidPipeRenderer implements BlockEntityRenderer<FluidPipeEntity, FluidPipeRenderer.FluidPipeRenderState> {
 
     private final BlockEntityRendererProvider.Context context;
-    private final Map<FluidPipeEntity, Float> lastWidths;
 
     public FluidPipeRenderer(BlockEntityRendererProvider.Context context) {
         this.context = context;
-        this.lastWidths = new HashMap<>();
     }
 
     @Override
@@ -43,32 +38,12 @@ public class FluidPipeRenderer implements BlockEntityRenderer<FluidPipeEntity, F
     public void extractRenderState(FluidPipeEntity pipe, FluidPipeRenderState pipeState, float partialTicks, Vec3 cameraPos, ModelFeatureRenderer.CrumblingOverlay breakProgress) {
         BlockEntityRenderer.super.extractRenderState(pipe, pipeState, partialTicks, cameraPos, breakProgress);
         FluidRenderInfo fluidInfo = Services.LOADER_SERVICE.getFluidRenderInfo(pipe.getFluid().defaultFluidState(), pipe.getLevel(), pipe.getBlockPos());
-        boolean[] middleSides = new boolean[6];
-        Arrays.fill(middleSides, true);
         boolean[] pipeDirections = new boolean[6];
         for (int i = 0; i < 6; i++) {
             pipeDirections[i] = pipe.getBlockState().getValue(FluidPipeBlock.PROPERTY_BY_DIRECTION.get(Direction.from3DDataValue(i)));
         }
-        int totalAmount = 0;
-        for (FluidInPipe fluidPacket : pipe.getContents()) {
-            totalAmount += fluidPacket.getAmount();
-            middleSides[fluidPacket.getFromDirection().get3DDataValue()] = false;
-            middleSides[fluidPacket.getTargetDirection().get3DDataValue()] = false;
-        }
-        float targetWidth = Math.min(7.0F, totalAmount * 7.0F / FluidPipeEntity.CAPACITY) / 16.0F;
-        float lastWidth = this.lastWidths.getOrDefault(pipe, 0.0F);
-        float width = lastWidth + (targetWidth - lastWidth) / 32.0F;
-        this.lastWidths.put(pipe, width);
-        pipeState.initialise(fluidInfo, width, middleSides, pipeDirections);
-    }
-
-    @Override
-    public boolean shouldRender(FluidPipeEntity pipe, Vec3 cameraPos) {
-        boolean shouldRender = BlockEntityRenderer.super.shouldRender(pipe, cameraPos);
-        if (!shouldRender) {
-            this.lastWidths.remove(pipe);
-        }
-        return shouldRender;
+        float width = pipe.lastRenderWidth + (pipe.targetRenderWidth - pipe.lastRenderWidth) * partialTicks;
+        pipeState.initialise(fluidInfo, width, pipe.skipRenderingSide, pipeDirections);
     }
 
     @Override
