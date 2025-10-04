@@ -43,7 +43,7 @@ public class TagLabelItem extends LabelItem {
         } else {
             CompoundTag compoundTag = labelStack.getOrCreateTag();
             String currentTag = compoundTag.contains("classic_pipes_label", CompoundTag.TAG_STRING) ? compoundTag.getString("classic_pipes_label") : "";
-            if (!currentTag.isEmpty() && !tags.contains(currentTag)) {
+            if (currentTag.isEmpty() || !tags.contains(currentTag)) {
                 compoundTag.putString("classic_pipes_label", tags.get(0));
                 if (level.isClientSide()) {
                     player.displayClientMessage(tagSetMessage(tags.get(0)), false);
