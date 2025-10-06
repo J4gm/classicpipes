@@ -139,7 +139,7 @@ public abstract class ItemPipeEntity extends PipeEntity {
     }
 
     @Override
-    public void update(ServerLevel level, BlockState state, BlockPos pos, Direction direction, boolean wasConnected) {
+    protected void update(ServerLevel level, BlockState state, BlockPos pos, Direction direction, boolean wasConnected) {
         if (!this.isEmpty()) {
             ListIterator<ItemInPipe> iterator = this.contents.listIterator();
             while (iterator.hasNext()) {

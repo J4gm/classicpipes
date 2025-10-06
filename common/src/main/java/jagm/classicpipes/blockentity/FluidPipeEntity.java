@@ -145,7 +145,7 @@ public class FluidPipeEntity extends PipeEntity {
     }
 
     @Override
-    public void update(ServerLevel level, BlockState state, BlockPos pos, Direction direction, boolean wasConnected) {
+    protected void update(ServerLevel level, BlockState state, BlockPos pos, Direction direction, boolean wasConnected) {
         if (!this.contents.isEmpty()) {
             ListIterator<FluidInPipe> iterator = this.contents.listIterator();
             while (iterator.hasNext()) {
