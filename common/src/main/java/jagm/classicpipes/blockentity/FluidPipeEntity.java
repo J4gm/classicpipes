@@ -30,6 +30,9 @@ public class FluidPipeEntity extends PipeEntity {
     protected final List<FluidInPipe> contents;
     protected final List<FluidInPipe> queued;
     private final Map<FluidInPipe, Long> tickAdded;
+    public float targetRenderWidth;
+    public float lastRenderWidth;
+    public boolean[] skipRenderingSide = new boolean[6];
 
     public FluidPipeEntity(BlockPos pos, BlockState state) {
         this(ClassicPipes.FLUID_PIPE_ENTITY, pos, state);
@@ -41,6 +44,7 @@ public class FluidPipeEntity extends PipeEntity {
         this.queued = new ArrayList<>();
         this.tickAdded = new HashMap<>();
         this.fluid = Fluids.WATER;
+        Arrays.fill(this.skipRenderingSide, true);
     }
 
     @Override
@@ -106,10 +110,16 @@ public class FluidPipeEntity extends PipeEntity {
 
     @Override
     public void tickClient(Level level, BlockPos pos) {
+        this.lastRenderWidth = this.targetRenderWidth;
         if (!this.contents.isEmpty()) {
             ListIterator<FluidInPipe> iterator = this.contents.listIterator();
+            int totalAmount = 0;
+            Arrays.fill(this.skipRenderingSide, true);
             while (iterator.hasNext()) {
                 FluidInPipe fluidPacket = iterator.next();
+                totalAmount += fluidPacket.getAmount();
+                this.skipRenderingSide[fluidPacket.getTargetDirection().get3DDataValue()] = false;
+                this.skipRenderingSide[fluidPacket.getFromDirection().get3DDataValue()] = false;
                 if (this.tickAdded.containsKey(fluidPacket)) {
                     if (this.tickAdded.get(fluidPacket) == level.getGameTime()) {
                         continue;
@@ -127,7 +137,11 @@ public class FluidPipeEntity extends PipeEntity {
                     }
                 }
             }
+            this.targetRenderWidth = Math.min(7.0F, totalAmount * 7.0F / FluidPipeEntity.CAPACITY) / 16.0F;
+        } else {
+            this.targetRenderWidth = 0.0F;
         }
+        this.targetRenderWidth = Math.clamp(this.targetRenderWidth, this.lastRenderWidth - 0.0625F, this.lastRenderWidth + 0.0625F);
     }
 
     @Override
