@@ -25,6 +25,7 @@ public class FluidPipeEntity extends PipeEntity {
 
     public static final int CAPACITY = 1000;
     public static final int MIN_PACKET_SIZE = 20;
+    private static final float MAX_RENDER_WIDTH_CHANGE = 1.0F / 64.0F;
 
     protected Fluid fluid;
     protected final List<FluidInPipe> contents;
@@ -137,11 +138,11 @@ public class FluidPipeEntity extends PipeEntity {
                     }
                 }
             }
-            this.targetRenderWidth = Math.min(7.0F, totalAmount * 7.0F / FluidPipeEntity.CAPACITY) / 16.0F;
+            this.targetRenderWidth = Math.min(1.0F, (float) Math.sqrt(totalAmount) / (float) Math.sqrt(FluidPipeEntity.CAPACITY)) * (7.0F / 16.0F);
         } else {
             this.targetRenderWidth = 0.0F;
         }
-        this.targetRenderWidth = Math.clamp(this.targetRenderWidth, this.lastRenderWidth - 0.0625F, this.lastRenderWidth + 0.0625F);
+        this.targetRenderWidth = Math.clamp(this.targetRenderWidth, this.lastRenderWidth - MAX_RENDER_WIDTH_CHANGE, this.lastRenderWidth + MAX_RENDER_WIDTH_CHANGE);
     }
 
     @Override
