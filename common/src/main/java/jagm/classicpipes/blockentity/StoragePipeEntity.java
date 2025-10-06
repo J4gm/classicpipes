@@ -88,7 +88,7 @@ public class StoragePipeEntity extends NetworkedPipeEntity implements MenuProvid
             }
         }
         for (ItemStack containerStack : this.matchingCache) {
-            if (stack.is(containerStack.getItem()) && (!this.shouldMatchComponents() || ItemStack.iSameItemSameTags(stack, containerStack))) {
+            if (stack.is(containerStack.getItem()) && (!this.shouldMatchComponents() || ItemStack.isSameItemSameTags(stack, containerStack))) {
                 return true;
             }
         }
