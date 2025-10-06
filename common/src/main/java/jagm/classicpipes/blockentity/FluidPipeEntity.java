@@ -142,7 +142,9 @@ public class FluidPipeEntity extends PipeEntity {
         } else {
             this.targetRenderWidth = 0.0F;
         }
-        this.targetRenderWidth = Math.clamp(this.targetRenderWidth, this.lastRenderWidth - MAX_RENDER_WIDTH_CHANGE, this.lastRenderWidth + MAX_RENDER_WIDTH_CHANGE);
+        float minWidth = this.lastRenderWidth - MAX_RENDER_WIDTH_CHANGE;
+        float maxWidth = this.lastRenderWidth + MAX_RENDER_WIDTH_CHANGE;
+        this.targetRenderWidth = this.targetRenderWidth < minWidth ? minWidth : Math.min(this.targetRenderWidth, maxWidth);
     }
 
     @Override
