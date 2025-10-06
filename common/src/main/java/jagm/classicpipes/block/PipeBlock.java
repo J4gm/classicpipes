@@ -116,7 +116,7 @@ public abstract class PipeBlock extends TransparentBlock implements SimpleWaterl
         boolean willConnect = this.canConnect((Level) level, pipePos, direction);
         BlockState newState = this.setPipeConnected(state, direction, willConnect);
         if (wasConnected != willConnect && level.getBlockEntity(pipePos) instanceof PipeEntity pipe && level instanceof ServerLevel serverLevel) {
-            pipe.update(serverLevel, newState, pipePos, direction, wasConnected);
+            pipe.scheduleUpdate(serverLevel, newState, pipePos, direction, wasConnected);
         }
         return newState;
     }

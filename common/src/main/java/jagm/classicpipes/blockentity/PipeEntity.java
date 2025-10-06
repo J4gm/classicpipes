@@ -14,16 +14,26 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public abstract class PipeEntity extends BlockEntity {
+
+    private final List<ScheduledPipeUpdate> updates;
 
     public PipeEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
+        this.updates = new ArrayList<>();
     }
 
     public static <T extends BlockEntity> void tick(Level level, BlockPos pos, BlockState state, T blockEntity) {
         if (blockEntity instanceof PipeEntity pipe) {
             if (level instanceof ServerLevel serverLevel) {
                 pipe.tickServer(serverLevel, pos, state);
+                for (ScheduledPipeUpdate update : pipe.updates) {
+                    pipe.update(update.level(), update.state(), update.pos(), update.direction(), update.wasConnected());
+                }
+                pipe.updates.clear();
             } else {
                 pipe.tickClient(level, pos);
             }
@@ -34,7 +44,11 @@ public abstract class PipeEntity extends BlockEntity {
 
     public abstract void tickClient(Level level, BlockPos pos);
 
-    public abstract void update(ServerLevel level, BlockState state, BlockPos pos, Direction direction, boolean wasConnected);
+    public final void scheduleUpdate(ServerLevel level, BlockState state, BlockPos pos, Direction direction, boolean wasConnected) {
+        this.updates.add(new ScheduledPipeUpdate(level, state, pos, direction, wasConnected));
+    }
+
+    protected abstract void update(ServerLevel level, BlockState state, BlockPos pos, Direction direction, boolean wasConnected);
 
     public abstract int getComparatorOutput();
 
@@ -67,6 +81,9 @@ public abstract class PipeEntity extends BlockEntity {
     @Override
     public Packet<ClientGamePacketListener> getUpdatePacket() {
         return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    private record ScheduledPipeUpdate(ServerLevel level, BlockState state, BlockPos pos, Direction direction, boolean wasConnected) {
     }
 
 }
