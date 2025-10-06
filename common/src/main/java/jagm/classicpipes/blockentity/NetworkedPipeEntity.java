@@ -1,5 +1,6 @@
 package jagm.classicpipes.blockentity;
 
+import jagm.classicpipes.block.ContainerAdjacentNetworkedPipeBlock;
 import jagm.classicpipes.block.NetworkedPipeBlock;
 import jagm.classicpipes.util.*;
 import net.minecraft.core.BlockPos;
@@ -150,9 +151,13 @@ public abstract class NetworkedPipeEntity extends RoundRobinPipeEntity {
             }
             if (validTargets.contains(this) && state.getBlock() instanceof NetworkedPipeBlock networkedBlock) {
                 List<Direction> validDirections = new ArrayList<>();
-                for (Direction direction : Direction.values()) {
-                    if (this.isPipeConnected(state, direction) && !networkedBlock.isLinked(state, direction)) {
-                        validDirections.add(direction);
+                if (networkedBlock instanceof ContainerAdjacentNetworkedPipeBlock && state.getValue(ContainerAdjacentNetworkedPipeBlock.FACING) != FacingOrNone.NONE) {
+                    validDirections.add(state.getValue(ContainerAdjacentNetworkedPipeBlock.FACING).getDirection());
+                } else {
+                    for (Direction direction : Direction.values()) {
+                        if (this.isPipeConnected(state, direction) && !networkedBlock.isLinked(state, direction)) {
+                            validDirections.add(direction);
+                        }
                     }
                 }
                 if (validDirections.isEmpty() || this instanceof RecipePipeEntity) {
