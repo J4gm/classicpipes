@@ -20,7 +20,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 public class StoragePipeEntity extends NetworkedPipeEntity implements MenuProvider, ProviderPipe, MatchingPipe {
@@ -28,7 +27,8 @@ public class StoragePipeEntity extends NetworkedPipeEntity implements MenuProvid
     private boolean defaultRoute;
     private boolean matchComponents;
     private boolean leaveOne;
-    private final List<ItemStack> cache;
+    private final List<ItemStack> providerCache;
+    private final List<ItemStack> matchingCache;
     private boolean cacheInitialised;
     private final List<ItemStack> cannotFit;
 
@@ -37,7 +37,8 @@ public class StoragePipeEntity extends NetworkedPipeEntity implements MenuProvid
         this.defaultRoute = false;
         this.matchComponents = false;
         this.leaveOne = false;
-        this.cache = new ArrayList<>();
+        this.providerCache = new ArrayList<>();
+        this.matchingCache = new ArrayList<>();
         this.cacheInitialised = false;
         this.cannotFit = new ArrayList<>();
     }
@@ -52,20 +53,19 @@ public class StoragePipeEntity extends NetworkedPipeEntity implements MenuProvid
     }
 
     private void updateCache(ServerLevel level, BlockPos pos, Direction facing) {
-        this.cache.clear();
+        this.providerCache.clear();
+        this.matchingCache.clear();
         this.cannotFit.clear();
         List<ItemStack> stacks = Services.LOADER_SERVICE.getContainerItems(level, pos.relative(facing), facing.getOpposite());
-        Iterator<ItemStack> iterator = stacks.iterator();
-        while (iterator.hasNext()) {
-            ItemStack stack = iterator.next();
+        for (ItemStack stack : stacks) {
+            this.matchingCache.add(stack.copy());
             if (this.shouldLeaveOne()) {
                 stack.shrink(1);
-                if (stack.isEmpty()) {
-                    iterator.remove();
-                }
+            }
+            if (!stack.isEmpty()) {
+                this.providerCache.add(stack);
             }
         }
-        this.cache.addAll(stacks);
         if (this.hasNetwork()) {
             this.getNetwork().cacheUpdated();
         }
@@ -88,7 +88,7 @@ public class StoragePipeEntity extends NetworkedPipeEntity implements MenuProvid
                 return false;
             }
         }
-        for (ItemStack containerStack : this.cache) {
+        for (ItemStack containerStack : this.matchingCache) {
             if (stack.is(containerStack.getItem()) && (!this.shouldMatchComponents() || ItemStack.isSameItemSameComponents(stack, containerStack))) {
                 return true;
             }
@@ -169,7 +169,7 @@ public class StoragePipeEntity extends NetworkedPipeEntity implements MenuProvid
 
     @Override
     public List<ItemStack> getCache() {
-        return this.cache;
+        return this.providerCache;
     }
 
     @Override
