@@ -116,7 +116,7 @@ public class ProviderPipeEntity extends NetworkedPipeEntity implements MenuProvi
         Iterator<ItemStack> iterator = stacks.iterator();
         while (iterator.hasNext()) {
             ItemStack stack = iterator.next();
-            if (!this.filter.isEmpty() && !this.filter.matches(stack)) {
+            if (!this.filter.isEmpty() && !this.filter.matches(stack).matches) {
                 iterator.remove();
             } else if (this.shouldLeaveOne()) {
                 stack.shrink(1);

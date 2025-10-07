@@ -2,6 +2,7 @@ package jagm.classicpipes.blockentity;
 
 import jagm.classicpipes.ClassicPipes;
 import jagm.classicpipes.inventory.container.DirectionalFilterContainer;
+import jagm.classicpipes.inventory.container.Filter;
 import jagm.classicpipes.inventory.menu.DiamondPipeMenu;
 import jagm.classicpipes.util.ItemInPipe;
 import jagm.classicpipes.util.MiscUtil;
@@ -19,7 +20,9 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class DiamondPipeEntity extends RoundRobinPipeEntity implements MenuProvider {
 
@@ -34,13 +37,25 @@ public class DiamondPipeEntity extends RoundRobinPipeEntity implements MenuProvi
     protected List<Direction> getValidDirections(BlockState state, ItemInPipe item) {
         List<Direction> validDirections = new ArrayList<>();
         Direction direction = MiscUtil.nextDirection(item.getFromDirection());
+        Map<Filter.MatchingResult, List<Direction>> matchPriority = new HashMap<>();
+        matchPriority.put(Filter.MatchingResult.ITEM, new ArrayList<>());
+        matchPriority.put(Filter.MatchingResult.TAG, new ArrayList<>());
+        matchPriority.put(Filter.MatchingResult.MOD, new ArrayList<>());
         for (int i = 0; i < 5; i++) {
-            if (this.isPipeConnected(state, direction) && filter.directionMatches(item.getStack(), direction)) {
-                validDirections.add(direction);
+            Filter.MatchingResult result = filter.directionMatches(item.getStack(), direction);
+            if (this.isPipeConnected(state, direction) && result.matches) {
+                matchPriority.get(result).add(direction);
             }
             direction = MiscUtil.nextDirection(direction);
         }
-        if (validDirections.isEmpty() && filter.directionMatches(item.getStack(), direction)) {
+        if (!matchPriority.get(Filter.MatchingResult.ITEM).isEmpty()) {
+            validDirections.addAll(matchPriority.get(Filter.MatchingResult.ITEM));
+        } else if (!matchPriority.get(Filter.MatchingResult.TAG).isEmpty()) {
+            validDirections.addAll(matchPriority.get(Filter.MatchingResult.TAG));
+        } else if (!matchPriority.get(Filter.MatchingResult.MOD).isEmpty()) {
+            validDirections.addAll(matchPriority.get(Filter.MatchingResult.MOD));
+        }
+        if (validDirections.isEmpty() && filter.directionMatches(item.getStack(), direction).matches) {
             validDirections.add(item.getFromDirection());
         }
         if (validDirections.isEmpty()) {
