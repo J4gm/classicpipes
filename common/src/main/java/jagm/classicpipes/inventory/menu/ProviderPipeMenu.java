@@ -13,6 +13,7 @@ public class ProviderPipeMenu extends FilterMenu {
 
     public ProviderPipeMenu(int id, Inventory playerInventory, ClientBoundTwoBoolsPayload payload) {
         this(id, playerInventory, new SingleItemFilterContainer(null, 9, payload.first()), payload.second());
+        payload.items().forEach(stackWithSlot -> this.getFilter().setItem(stackWithSlot.slot(), stackWithSlot.stack()));
     }
 
     public ProviderPipeMenu(int id, Inventory playerInventory, Filter filter, boolean leaveOne) {

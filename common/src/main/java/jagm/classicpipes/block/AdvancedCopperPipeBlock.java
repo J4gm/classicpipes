@@ -43,7 +43,7 @@ public class AdvancedCopperPipeBlock extends CopperPipeBlock {
             Services.LOADER_SERVICE.openMenu(
                     (ServerPlayer) player,
                     pipe,
-                    new ClientBoundBoolPayload(pipe.shouldMatchComponents()),
+                    new ClientBoundBoolPayload(pipe.getFilter().getItemStacksForPayload(), pipe.shouldMatchComponents()),
                     ClientBoundBoolPayload.STREAM_CODEC
             );
         }

@@ -17,6 +17,7 @@ public class StockingPipeMenu extends FilterMenu {
 
     public StockingPipeMenu(int id, Inventory playerInventory, ClientBoundTwoBoolsPayload payload) {
         this(id, playerInventory, new FilterContainer(null, 9, payload.first()), payload.second());
+        payload.items().forEach(stackWithSlot -> this.getFilter().setItem(stackWithSlot.slot(), stackWithSlot.stack()));
     }
 
     public StockingPipeMenu(int id, Inventory playerInventory, Filter filter, boolean activeStocking) {

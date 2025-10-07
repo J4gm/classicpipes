@@ -1,6 +1,7 @@
 package jagm.classicpipes.blockentity;
 
 import jagm.classicpipes.ClassicPipes;
+import jagm.classicpipes.inventory.container.Filter;
 import jagm.classicpipes.inventory.container.FilterContainer;
 import jagm.classicpipes.inventory.container.SingleItemFilterContainer;
 import jagm.classicpipes.inventory.menu.RoutingPipeMenu;
@@ -83,6 +84,10 @@ public class RoutingPipeEntity extends NetworkedPipeEntity implements MenuProvid
 
     public FilterContainer.MatchingResult canRouteItemHere(ItemStack stack) {
         return this.filter.matches(stack);
+    }
+
+    public Filter getFilter() {
+        return this.filter;
     }
 
 }

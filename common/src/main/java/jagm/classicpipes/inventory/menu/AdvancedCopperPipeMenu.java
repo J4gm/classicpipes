@@ -10,6 +10,7 @@ public class AdvancedCopperPipeMenu extends FilterMenu {
 
     public AdvancedCopperPipeMenu(int id, Inventory playerInventory, ClientBoundBoolPayload payload) {
         this(id, playerInventory, new SingleItemFilterContainer(null, 9, payload.value()));
+        payload.items().forEach(stackWithSlot -> this.getFilter().setItem(stackWithSlot.slot(), stackWithSlot.stack()));
     }
 
     public AdvancedCopperPipeMenu(int id, Inventory playerInventory, Filter filter) {

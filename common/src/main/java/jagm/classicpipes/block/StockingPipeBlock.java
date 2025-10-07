@@ -42,7 +42,7 @@ public class StockingPipeBlock extends ContainerAdjacentNetworkedPipeBlock {
             Services.LOADER_SERVICE.openMenu(
                     (ServerPlayer) player,
                     stockingPipe,
-                    new ClientBoundTwoBoolsPayload(stockingPipe.shouldMatchComponents(), stockingPipe.isActiveStocking()),
+                    new ClientBoundTwoBoolsPayload(stockingPipe.getFilter().getItemStacksForPayload(), stockingPipe.shouldMatchComponents(), stockingPipe.isActiveStocking()),
                     ClientBoundTwoBoolsPayload.STREAM_CODEC
             );
         }

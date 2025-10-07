@@ -115,7 +115,7 @@ public class NetworkedPipeBlock extends PipeBlock {
             Services.LOADER_SERVICE.openMenu(
                     (ServerPlayer) player,
                     routingPipe,
-                    new ClientBoundTwoBoolsPayload(routingPipe.shouldMatchComponents(), routingPipe.isDefaultRoute()),
+                    new ClientBoundTwoBoolsPayload(routingPipe.getFilter().getItemStacksForPayload(), routingPipe.shouldMatchComponents(), routingPipe.isDefaultRoute()),
                     ClientBoundTwoBoolsPayload.STREAM_CODEC
             );
         }

@@ -18,6 +18,8 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 
+import java.util.List;
+
 public class MatchingPipeBlock extends ContainerAdjacentNetworkedPipeBlock {
 
     public MatchingPipeBlock(Properties properties) {
@@ -42,7 +44,7 @@ public class MatchingPipeBlock extends ContainerAdjacentNetworkedPipeBlock {
             Services.LOADER_SERVICE.openMenu(
                     (ServerPlayer) player,
                     matchingPipe,
-                    new ClientBoundBoolPayload(matchingPipe.shouldMatchComponents()),
+                    new ClientBoundBoolPayload(List.of(), matchingPipe.shouldMatchComponents()),
                     ClientBoundBoolPayload.STREAM_CODEC
             );
         }

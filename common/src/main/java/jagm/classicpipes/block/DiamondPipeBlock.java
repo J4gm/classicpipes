@@ -35,7 +35,12 @@ public class DiamondPipeBlock extends BooleanDirectionsPipeBlock {
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
         if (level instanceof ServerLevel && level.getBlockEntity(pos) instanceof DiamondPipeEntity diamondPipe) {
-            Services.LOADER_SERVICE.openMenu((ServerPlayer) player, diamondPipe, new ClientBoundBoolPayload(diamondPipe.shouldMatchComponents()), ClientBoundBoolPayload.STREAM_CODEC);
+            Services.LOADER_SERVICE.openMenu(
+                    (ServerPlayer) player,
+                    diamondPipe,
+                    new ClientBoundBoolPayload(diamondPipe.getFilter().getItemStacksForPayload(), diamondPipe.shouldMatchComponents()),
+                    ClientBoundBoolPayload.STREAM_CODEC
+            );
         }
         return InteractionResult.SUCCESS;
     }

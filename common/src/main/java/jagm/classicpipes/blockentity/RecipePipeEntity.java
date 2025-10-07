@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import jagm.classicpipes.ClassicPipes;
 import jagm.classicpipes.block.NetworkedPipeBlock;
 import jagm.classicpipes.block.RecipePipeBlock;
+import jagm.classicpipes.inventory.container.Filter;
 import jagm.classicpipes.inventory.container.FilterContainer;
 import jagm.classicpipes.inventory.menu.RecipePipeMenu;
 import jagm.classicpipes.services.Services;
@@ -354,6 +355,10 @@ public class RecipePipeEntity extends NetworkedPipeEntity implements MenuProvide
         valueOutput.putInt("waiting_for_craft", this.waitingForCraft);
         valueOutput.putBoolean("crafter_ticked", this.crafterTicked);
         valueOutput.putByte("cooldown", this.cooldown);
+    }
+
+    public Filter getFilter() {
+        return this.filter;
     }
 
 }

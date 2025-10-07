@@ -42,7 +42,7 @@ public class ProviderPipeBlock extends ContainerAdjacentNetworkedPipeBlock {
             Services.LOADER_SERVICE.openMenu(
                     (ServerPlayer) player,
                     providerPipe,
-                    new ClientBoundTwoBoolsPayload(providerPipe.shouldMatchComponents(), providerPipe.shouldLeaveOne()),
+                    new ClientBoundTwoBoolsPayload(providerPipe.getFilter().getItemStacksForPayload(), providerPipe.shouldMatchComponents(), providerPipe.shouldLeaveOne()),
                     ClientBoundTwoBoolsPayload.STREAM_CODEC
             );
         }

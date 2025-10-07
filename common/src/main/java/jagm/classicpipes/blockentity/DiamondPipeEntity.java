@@ -116,4 +116,8 @@ public class DiamondPipeEntity extends RoundRobinPipeEntity implements MenuProvi
         return this.filter.shouldMatchComponents();
     }
 
+    public Filter getFilter() {
+        return this.filter;
+    }
+
 }

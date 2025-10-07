@@ -2,6 +2,7 @@ package jagm.classicpipes.blockentity;
 
 import jagm.classicpipes.ClassicPipes;
 import jagm.classicpipes.block.ProviderPipeBlock;
+import jagm.classicpipes.inventory.container.Filter;
 import jagm.classicpipes.inventory.container.SingleItemFilterContainer;
 import jagm.classicpipes.inventory.menu.ProviderPipeMenu;
 import jagm.classicpipes.services.Services;
@@ -160,6 +161,10 @@ public class ProviderPipeEntity extends NetworkedPipeEntity implements MenuProvi
     @Override
     public Direction getFacing() {
         return this.getBlockState().getValue(ProviderPipeBlock.FACING).getDirection();
+    }
+
+    public Filter getFilter() {
+        return this.filter;
     }
 
 }

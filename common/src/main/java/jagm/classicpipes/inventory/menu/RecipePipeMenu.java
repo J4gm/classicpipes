@@ -22,6 +22,7 @@ public class RecipePipeMenu extends FilterMenu {
 
     public RecipePipeMenu(int id, Inventory playerInventory, ClientBoundRecipePipePayload payload) {
         this(id, playerInventory, new FilterContainer(null, 10, true), payload.slotDirections(), payload.availableDirections(), payload.pos());
+        payload.items().forEach(stackWithSlot -> this.getFilter().setItem(stackWithSlot.slot(), stackWithSlot.stack()));
     }
 
     public RecipePipeMenu(int id, Inventory playerInventory, FilterContainer filter, Direction[] ioDirections, List<Direction> availableDirections, BlockPos pos) {

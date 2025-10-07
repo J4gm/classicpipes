@@ -9,8 +9,12 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.ItemStackWithSlot;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -20,6 +24,7 @@ import java.util.Comparator;
 public class MiscUtil {
 
     public static final boolean DEBUG_MODE = false;
+
     public static final Comparator<Tuple<ItemStack, Boolean>> AMOUNT = Comparator.comparing(tuple -> tuple.a().getCount() - (tuple.b() ? 1 : 0));
     public static final Comparator<Tuple<ItemStack, Boolean>> NAME = Comparator.comparing(tuple -> tuple.a().getItem().getName().getString());
     public static final Comparator<Tuple<ItemStack, Boolean>> MOD = Comparator.comparing(tuple -> Services.LOADER_SERVICE.getModName(modFromItem(tuple.a())));
@@ -30,6 +35,14 @@ public class MiscUtil {
             Codec.INT.fieldOf("count").forGetter(ItemStack::getCount),
             DataComponentPatch.CODEC.optionalFieldOf("components", DataComponentPatch.EMPTY).forGetter(ItemStack::getComponentsPatch)
     ).apply(instance, ItemStack::new));
+
+    public static final StreamCodec<RegistryFriendlyByteBuf, ItemStackWithSlot> ITEM_STACK_WITH_SLOT_STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.INT,
+            ItemStackWithSlot::slot,
+            ItemStack.STREAM_CODEC,
+            ItemStackWithSlot::stack,
+            ItemStackWithSlot::new
+    );
 
     public static ResourceLocation resourceLocation(String name) {
         return ResourceLocation.fromNamespaceAndPath(ClassicPipes.MOD_ID, name);

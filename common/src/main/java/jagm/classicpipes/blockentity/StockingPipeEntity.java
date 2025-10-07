@@ -2,6 +2,7 @@ package jagm.classicpipes.blockentity;
 
 import jagm.classicpipes.ClassicPipes;
 import jagm.classicpipes.block.StockingPipeBlock;
+import jagm.classicpipes.inventory.container.Filter;
 import jagm.classicpipes.inventory.container.FilterContainer;
 import jagm.classicpipes.inventory.menu.StockingPipeMenu;
 import jagm.classicpipes.services.Services;
@@ -172,6 +173,10 @@ public class StockingPipeEntity extends NetworkedPipeEntity implements MenuProvi
     @Override
     public AbstractContainerMenu createMenu(int id, Inventory playerInventory, Player player) {
         return new StockingPipeMenu(id, playerInventory, this.filter, this.activeStocking);
+    }
+
+    public Filter getFilter() {
+        return this.filter;
     }
 
 }
