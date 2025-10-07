@@ -35,7 +35,7 @@ public class AdvancedCopperFluidPipeEntity extends CopperFluidPipeEntity impleme
 
     @Override
     protected Predicate<Fluid> filterPredicate() {
-        return fluid -> this.filter.isEmpty() || this.filter.matches(new ItemStack(fluid.getBucket()));
+        return fluid -> this.filter.isEmpty() || this.filter.matches(new ItemStack(fluid.getBucket())).matches;
     }
 
     @Override

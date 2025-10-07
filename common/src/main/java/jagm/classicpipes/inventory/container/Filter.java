@@ -11,4 +11,19 @@ public interface Filter extends Container {
 
     PipeEntity getPipe();
 
+    enum MatchingResult {
+
+        ITEM(true),
+        TAG(true),
+        MOD(true),
+        FALSE(false);
+
+        public final boolean matches;
+
+        MatchingResult(boolean matches) {
+            this.matches = matches;
+        }
+
+    }
+
 }
