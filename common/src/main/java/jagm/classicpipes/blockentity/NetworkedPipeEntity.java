@@ -2,6 +2,7 @@ package jagm.classicpipes.blockentity;
 
 import jagm.classicpipes.block.ContainerAdjacentNetworkedPipeBlock;
 import jagm.classicpipes.block.NetworkedPipeBlock;
+import jagm.classicpipes.inventory.container.Filter;
 import jagm.classicpipes.util.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -138,10 +139,22 @@ public abstract class NetworkedPipeEntity extends RoundRobinPipeEntity {
                 }
             }
             if (validTargets.isEmpty()) {
+                Map<Filter.MatchingResult, List<RoutingPipeEntity>> matchPriority = new HashMap<>();
+                matchPriority.put(Filter.MatchingResult.ITEM, new ArrayList<>());
+                matchPriority.put(Filter.MatchingResult.TAG, new ArrayList<>());
+                matchPriority.put(Filter.MatchingResult.MOD, new ArrayList<>());
                 for (RoutingPipeEntity routingPipe : this.network.getRoutingPipes()) {
-                    if (routingPipe.canRouteItemHere(item.getStack())) {
-                        validTargets.add(routingPipe);
+                    Filter.MatchingResult result = routingPipe.canRouteItemHere(item.getStack());
+                    if (result.matches) {
+                        matchPriority.get(result).add(routingPipe);
                     }
+                }
+                if (!matchPriority.get(Filter.MatchingResult.ITEM).isEmpty()) {
+                    validTargets.addAll(matchPriority.get(Filter.MatchingResult.ITEM));
+                } else if (!matchPriority.get(Filter.MatchingResult.TAG).isEmpty()) {
+                    validTargets.addAll(matchPriority.get(Filter.MatchingResult.TAG));
+                } else if (!matchPriority.get(Filter.MatchingResult.MOD).isEmpty()) {
+                    validTargets.addAll(matchPriority.get(Filter.MatchingResult.MOD));
                 }
             }
             if (validTargets.isEmpty()) {

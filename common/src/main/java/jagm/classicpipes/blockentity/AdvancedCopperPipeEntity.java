@@ -34,7 +34,7 @@ public class AdvancedCopperPipeEntity extends CopperPipeEntity implements MenuPr
 
     @Override
     protected Predicate<ItemStack> filterPredicate() {
-        return stack -> this.filter.isEmpty() || this.filter.matches(stack);
+        return stack -> this.filter.isEmpty() || this.filter.matches(stack).matches;
     }
 
     @Override

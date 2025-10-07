@@ -2,6 +2,7 @@ package jagm.classicpipes.inventory.container;
 
 import jagm.classicpipes.blockentity.PipeEntity;
 import jagm.classicpipes.item.LabelItem;
+import jagm.classicpipes.item.TagLabelItem;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.Container;
@@ -24,15 +25,15 @@ public class DirectionalFilterContainer implements Filter {
         this.clearContent();
     }
 
-    public boolean directionMatches(ItemStack stack, Direction direction) {
+    public MatchingResult directionMatches(ItemStack stack, Direction direction) {
         for (ItemStack filterStack : filterMap.get(direction)) {
             if (filterStack.getItem() instanceof LabelItem labelItem && labelItem.itemMatches(filterStack, stack)) {
-                return true;
+                return labelItem instanceof TagLabelItem ? MatchingResult.TAG : MatchingResult.MOD;
             } else if (filterStack.is(stack.getItem()) && (!this.shouldMatchComponents() || ItemStack.isSameItemSameTags(stack, filterStack))) {
-                return true;
+                return MatchingResult.ITEM;
             }
         }
-        return false;
+        return MatchingResult.FALSE;
     }
 
     public boolean directionEmpty(Direction direction) {
