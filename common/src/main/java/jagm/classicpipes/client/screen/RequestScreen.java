@@ -60,8 +60,8 @@ public class RequestScreen extends AbstractContainerScreen<RequestMenu> {
         this.searchBar.setBordered(false);
         this.searchBar.setResponder(this.menu::setSearch);
         this.searchBar.setEditable(true);
-        this.prev_page = new PageButton(this.width / 2 - 32 - 8, this.topPos + 180, true, false, button -> this.changePage(-1));
-        this.next_page = new PageButton(this.width / 2 + 32, this.topPos + 180, false, this.menu.getMaxPage() > 0, button -> this.changePage(1));
+        this.prev_page = new PageButton(this.width / 2 - 48 - 8, this.topPos + 180, true, false, button -> this.changePage(-1));
+        this.next_page = new PageButton(this.width / 2 + 48, this.topPos + 180, false, this.menu.getMaxPage() > 0, button -> this.changePage(1));
         this.sort_type = Button.builder(this.menu.getSortingMode().getType(), this::changeSortType).bounds(this.width / 2 - 25, this.topPos + 198, 50, 16).build();
         this.sort_direction = Button.builder(this.menu.getSortingMode().getDirection(), this::changeSortDirection).bounds(this.width / 2 + 27, this.topPos + 198, 50, 16).build();
 
