@@ -10,10 +10,13 @@ For information about getting started with this mod, see the above video tutoria
 
 ## SPECIAL THANKS
 
-* The Buildcraft and Logistics Pipes teams.
-* Jaredlll08 for creating a very useful [Multiloader Template](https://github.com/jaredlll08/MultiLoader-Template).
+* Buildcraft: SpaceToad and team
+* Logistics Pipes: Krapht and team
+* [MultiLoader template](https://github.com/jaredlll08/MultiLoader-Template): Jaredlll08 and contributors
 * My beta testers: Tipsy, Sketti, and Charlie <3
-* Japanese translation: hamutaromaru.
+* Translators: 
+  * **日本語** (Japanese): Hamutaromaru
+  * **Русский** (Russian): AstardGrimoire
 
 If you'd like to help translate the mod to another language, please get in touch! (Or submit a pull request on the Github if you know how to do that.)
 
@@ -21,5 +24,5 @@ If you'd like to help translate the mod to another language, please get in touch
 
 * This mod is available for Fabric, NeoForge, and Forge.
 * You have permission to use this mod in mod packs. Refer to the license for other questions about distribution.
-* The source code and issue tracker are available on [Github](https://github.com/J4gm/classicpipes). Please report any bugs or crashes!
+* The source code and issue tracker are available on [Github](https://github.com/J4gm/classicpipes). **Please report any bugs or crashes!**
 * If you want to follow me on social media, I'm on [Tumblr](https://www.tumblr.com/j4gm) and [Bluesky](https://j4gm.bsky.social).

@@ -12,7 +12,7 @@
         "sources": ""
     },
     "license": "${license}",
-    "icon": "${mod_id}.png",
+    "icon": "${logo}",
     "environment": "*",
     "entrypoints": {
         "main": [
