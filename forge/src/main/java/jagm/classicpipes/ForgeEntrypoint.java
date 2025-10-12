@@ -4,6 +4,7 @@ import jagm.classicpipes.blockentity.FluidPipeEntity;
 import jagm.classicpipes.blockentity.ForgeFluidPipeWrapper;
 import jagm.classicpipes.blockentity.ForgeItemPipeWrapper;
 import jagm.classicpipes.blockentity.ItemPipeEntity;
+import jagm.classicpipes.client.network.ForgeClientPacketHandler;
 import jagm.classicpipes.client.renderer.FluidPipeRenderer;
 import jagm.classicpipes.client.renderer.PipeRenderer;
 import jagm.classicpipes.client.renderer.RecipePipeRenderer;
@@ -27,6 +28,7 @@ import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegisterEvent;
@@ -98,16 +100,15 @@ public class ForgeEntrypoint {
         @SubscribeEvent
         public static void onCommonSetup(FMLCommonSetupEvent event) {
             event.enqueueWork(() -> {
-                ForgePacketHandler.registerServerPayload(ServerBoundMatchComponentsPayload.class, ServerBoundMatchComponentsPayload.STREAM_CODEC);
-                ForgePacketHandler.registerServerPayload(ServerBoundDefaultRoutePayload.class, ServerBoundDefaultRoutePayload.STREAM_CODEC);
-                ForgePacketHandler.registerServerPayload(ServerBoundLeaveOnePayload.class, ServerBoundLeaveOnePayload.STREAM_CODEC);
-                ForgePacketHandler.registerServerPayload(ServerBoundSortingModePayload.class, ServerBoundSortingModePayload.STREAM_CODEC);
-                ForgePacketHandler.registerServerPayload(ServerBoundRequestPayload.class, ServerBoundRequestPayload.STREAM_CODEC);
-                ForgePacketHandler.registerServerPayload(ServerBoundActiveStockingPayload.class, ServerBoundActiveStockingPayload.STREAM_CODEC);
-                ForgePacketHandler.registerServerPayload(ServerBoundSlotDirectionPayload.class, ServerBoundSlotDirectionPayload.STREAM_CODEC);
-                ForgePacketHandler.registerServerPayload(ServerBoundTransferRecipePayload.class, ServerBoundTransferRecipePayload.STREAM_CODEC);
-                ForgePacketHandler.registerServerPayload(ServerBoundSetFilterPayload.class, ServerBoundSetFilterPayload.STREAM_CODEC);
-                ForgePacketHandler.registerClientPayload(ClientBoundItemListPayload.class, ClientBoundItemListPayload.STREAM_CODEC);
+                ForgeServerPacketHandler.registerServerPayload(ServerBoundMatchComponentsPayload.class, ServerBoundMatchComponentsPayload.STREAM_CODEC);
+                ForgeServerPacketHandler.registerServerPayload(ServerBoundDefaultRoutePayload.class, ServerBoundDefaultRoutePayload.STREAM_CODEC);
+                ForgeServerPacketHandler.registerServerPayload(ServerBoundLeaveOnePayload.class, ServerBoundLeaveOnePayload.STREAM_CODEC);
+                ForgeServerPacketHandler.registerServerPayload(ServerBoundSortingModePayload.class, ServerBoundSortingModePayload.STREAM_CODEC);
+                ForgeServerPacketHandler.registerServerPayload(ServerBoundRequestPayload.class, ServerBoundRequestPayload.STREAM_CODEC);
+                ForgeServerPacketHandler.registerServerPayload(ServerBoundActiveStockingPayload.class, ServerBoundActiveStockingPayload.STREAM_CODEC);
+                ForgeServerPacketHandler.registerServerPayload(ServerBoundSlotDirectionPayload.class, ServerBoundSlotDirectionPayload.STREAM_CODEC);
+                ForgeServerPacketHandler.registerServerPayload(ServerBoundTransferRecipePayload.class, ServerBoundTransferRecipePayload.STREAM_CODEC);
+                ForgeServerPacketHandler.registerServerPayload(ServerBoundSetFilterPayload.class, ServerBoundSetFilterPayload.STREAM_CODEC);
                 ClassicPipes.createStats();
             });
         }
@@ -154,12 +155,23 @@ public class ForgeEntrypoint {
 
     }
 
+    @Mod.EventBusSubscriber(value = Dist.DEDICATED_SERVER, modid = ClassicPipes.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
+    public static class ServerModEventHandler {
+
+        @SubscribeEvent
+        public static void onServerSetup(FMLDedicatedServerSetupEvent event) {
+            event.enqueueWork(() -> ForgeServerPacketHandler.registerClientPayload(ClientBoundItemListPayload.class, ClientBoundItemListPayload.STREAM_CODEC));
+        }
+
+    }
+
     @Mod.EventBusSubscriber(value = Dist.CLIENT, modid = ClassicPipes.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
     public static class ClientModEventHandler {
 
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
             event.enqueueWork(() -> {
+                ForgeClientPacketHandler.registerClientPayload(ClientBoundItemListPayload.class, ClientBoundItemListPayload.STREAM_CODEC);
                 MenuScreens.register(ClassicPipes.DIAMOND_PIPE_MENU, DiamondPipeScreen::new);
                 MenuScreens.register(ClassicPipes.ROUTING_PIPE_MENU, RoutingPipeScreen::new);
                 MenuScreens.register(ClassicPipes.PROVIDER_PIPE_MENU, ProviderPipeScreen::new);
