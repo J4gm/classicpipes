@@ -2,8 +2,9 @@ package jagm.classicpipes.services;
 
 import jagm.classicpipes.blockentity.FluidPipeEntity;
 import jagm.classicpipes.blockentity.ItemPipeEntity;
+import jagm.classicpipes.client.network.ForgeClientPacketHandler;
 import jagm.classicpipes.client.renderer.FluidRenderInfo;
-import jagm.classicpipes.network.ForgePacketHandler;
+import jagm.classicpipes.network.ForgeServerPacketHandler;
 import jagm.classicpipes.util.FluidInPipe;
 import jagm.classicpipes.util.ItemInPipe;
 import net.minecraft.client.Minecraft;
@@ -74,12 +75,12 @@ public class ForgeService implements LoaderService {
 
     @Override
     public void sendToServer(CustomPacketPayload payload) {
-        ForgePacketHandler.sendToServer(payload);
+        ForgeClientPacketHandler.sendToServer(payload);
     }
 
     @Override
     public void sendToClient(ServerPlayer player, CustomPacketPayload payload) {
-        ForgePacketHandler.sendToClient(player, payload);
+        ForgeServerPacketHandler.sendToClient(player, payload);
     }
 
     @Override
