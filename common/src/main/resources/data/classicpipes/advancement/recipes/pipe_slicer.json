@@ -1,0 +1,25 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "request": {
+      "trigger": "classicpipes:request_item"
+    },
+    "has_recipe": {
+      "conditions": {
+        "recipe": "classicpipes:pipe_slicer"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_recipe",
+      "request"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "classicpipes:pipe_slicer"
+    ]
+  }
+}
