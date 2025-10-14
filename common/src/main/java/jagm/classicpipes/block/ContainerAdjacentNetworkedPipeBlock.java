@@ -1,6 +1,7 @@
 package jagm.classicpipes.block;
 
 import jagm.classicpipes.ClassicPipes;
+import jagm.classicpipes.blockentity.PipeEntity;
 import jagm.classicpipes.services.Services;
 import jagm.classicpipes.util.FacingOrNone;
 import jagm.classicpipes.util.MiscUtil;
@@ -19,6 +20,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
 
 public abstract class ContainerAdjacentNetworkedPipeBlock extends NetworkedPipeBlock {
@@ -52,15 +54,25 @@ public abstract class ContainerAdjacentNetworkedPipeBlock extends NetworkedPipeB
 
     @Override
     public BlockState updateShape(BlockState state, Direction initialDirection, BlockState neighborState, LevelAccessor level, BlockPos pipePos, BlockPos neighborPos) {
-        BlockState superState = super.updateShape(state, initialDirection, neighborState, level, pipePos, neighborPos);
+        if (state.getValue(WATERLOGGED)) {
+            level.scheduleTick(pipePos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
+        }
+        boolean wasConnected = this.isPipeConnected(state, initialDirection);
+        boolean willConnect = this.canConnect((Level) level, pipePos, initialDirection);
+        state = this.setPipeConnected(state, initialDirection, willConnect);
         Direction direction = state.getValue(FACING) == FacingOrNone.NONE ? Direction.DOWN : state.getValue(FACING).getDirection();
+        state = state.setValue(FACING, FacingOrNone.NONE);
         for (int i = 0; i < 6; i++) {
-            if (this.isPipeConnected(superState, direction) && Services.LOADER_SERVICE.canAccessContainer((Level) level, pipePos.relative(direction), direction.getOpposite())) {
-                return superState.setValue(FACING, FacingOrNone.with(direction));
+            if (this.isPipeConnected(state, direction) && Services.LOADER_SERVICE.canAccessContainer((Level) level, pipePos.relative(direction), direction.getOpposite())) {
+                state = state.setValue(FACING, FacingOrNone.with(direction));
+                break;
             }
             direction = MiscUtil.nextDirection(direction);
         }
-        return superState.setValue(FACING, FacingOrNone.NONE);
+        if (wasConnected != willConnect && level.getBlockEntity(pipePos) instanceof PipeEntity pipe && level instanceof ServerLevel serverLevel) {
+            pipe.scheduleUpdate(serverLevel, state, pipePos, initialDirection, wasConnected);
+        }
+        return state;
     }
 
     @Override
