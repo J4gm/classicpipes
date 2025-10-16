@@ -9,6 +9,7 @@ import jagm.classicpipes.inventory.container.FilterContainer;
 import jagm.classicpipes.inventory.menu.RecipePipeMenu;
 import jagm.classicpipes.services.Services;
 import jagm.classicpipes.util.ItemInPipe;
+import jagm.classicpipes.util.MiscUtil;
 import jagm.classicpipes.util.RequestedItem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -221,20 +222,9 @@ public class RecipePipeEntity extends NetworkedPipeEntity implements MenuProvide
     }
 
     public List<ItemStack> getIngredientsCollated() {
-        List<ItemStack> ingredients = this.getIngredients();
         List<ItemStack> collated = new ArrayList<>();
-        for (ItemStack ingredient : ingredients) {
-            boolean matched = false;
-            for (ItemStack stack : collated) {
-                if (ItemStack.isSameItemSameComponents(ingredient, stack)) {
-                    stack.grow(ingredient.getCount());
-                    matched = true;
-                    break;
-                }
-            }
-            if (!matched) {
-                collated.add(ingredient);
-            }
+        for (ItemStack ingredient : this.getIngredients()) {
+            MiscUtil.mergeStackIntoList(collated, ingredient);
         }
         return collated;
     }

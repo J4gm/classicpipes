@@ -20,6 +20,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.Comparator;
+import java.util.List;
 
 public class MiscUtil {
 
@@ -69,6 +70,20 @@ public class MiscUtil {
 
     public static String modFromItem(ItemStack stack) {
         return BuiltInRegistries.ITEM.getKey(stack.getItem()).toString().split(":")[0];
+    }
+
+    public static void mergeStackIntoList(List<ItemStack> list, ItemStack stack) {
+        boolean matched = false;
+        for (ItemStack listStack : list) {
+            if (ItemStack.isSameItemSameComponents(listStack, stack)) {
+                listStack.grow(stack.getCount());
+                matched = true;
+                break;
+            }
+        }
+        if (!matched) {
+            list.add(stack);
+        }
     }
 
 }
