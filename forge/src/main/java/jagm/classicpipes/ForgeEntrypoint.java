@@ -29,7 +29,6 @@ import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegisterEvent;
@@ -109,6 +108,7 @@ public class ForgeEntrypoint {
                 ForgeServerNetworkHandler.registerServerPayload(7, ServerBoundSlotDirectionPayload.class, ServerBoundSlotDirectionPayload.HANDLER);
                 ForgeServerNetworkHandler.registerServerPayload(8, ServerBoundTransferRecipePayload.class, ServerBoundTransferRecipePayload.HANDLER);
                 ForgeServerNetworkHandler.registerServerPayload(9, ServerBoundSetFilterPayload.class, ServerBoundSetFilterPayload.HANDLER);
+                ForgeServerNetworkHandler.registerClientPayload(10, ClientBoundItemListPayload.class, ClientBoundItemListPayload.HANDLER);
                 ClassicPipes.createStats();
             });
         }
@@ -151,18 +151,6 @@ public class ForgeEntrypoint {
                 });
                 event.addListener(() -> wrapperForSide.forEach((direction, lazyOptional) -> lazyOptional.invalidate()));
             }
-        }
-
-    }
-
-    @Mod.EventBusSubscriber(value = Dist.CLIENT, modid = ClassicPipes.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
-    public static class ServerModEventHandler {
-
-        @SubscribeEvent
-        public static void onServerSetup(FMLDedicatedServerSetupEvent event) {
-            event.enqueueWork(() -> {
-                ForgeServerNetworkHandler.registerClientPayload(10, ClientBoundItemListPayload.class, ClientBoundItemListPayload.HANDLER);
-            });
         }
 
     }
