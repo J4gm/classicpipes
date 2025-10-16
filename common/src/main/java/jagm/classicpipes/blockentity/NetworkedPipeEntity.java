@@ -121,12 +121,15 @@ public abstract class NetworkedPipeEntity extends RoundRobinPipeEntity {
                 for (StockingPipeEntity stockingPipe : this.network.getStockingPipes()) {
                     for (ItemStack stack : stockingPipe.getMissingItemsCache()) {
                         if (stack.is(item.getStack().getItem()) && (!stockingPipe.shouldMatchComponents() || ItemStack.isSameItemSameComponents(stack, item.getStack()))) {
-                            int surplus = item.getStack().getCount() - stack.getCount();
-                            if (surplus > 0) {
-                                spareItems.add(item.copyWithCount(surplus));
-                                item.getStack().setCount(stack.getCount());
+                            int alreadyRequested = stockingPipe.getAlreadyRequested(stack);
+                            if (alreadyRequested < stack.getCount()) {
+                                int surplus = item.getStack().getCount() - stack.getCount() + alreadyRequested;
+                                if (surplus > 0) {
+                                    spareItems.add(item.copyWithCount(surplus));
+                                    item.getStack().setCount(stack.getCount() - alreadyRequested);
+                                }
+                                validTargets.add(stockingPipe);
                             }
-                            validTargets.add(stockingPipe);
                             break;
                         }
                     }
