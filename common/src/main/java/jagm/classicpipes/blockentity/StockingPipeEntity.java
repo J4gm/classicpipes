@@ -102,22 +102,27 @@ public class StockingPipeEntity extends NetworkedPipeEntity implements MenuProvi
     public void tryRequests(ServerLevel level) {
         if (this.hasNetwork()) {
             for (ItemStack stack : this.missingItemsCache) {
-                int alreadyRequested = 0;
-                for (ItemInPipe item : this.contents) {
-                    if (ItemStack.isSameItemSameTags(stack, item.getStack())) {
-                        alreadyRequested += item.getStack().getCount();
-                    }
-                }
-                for (RequestedItem requestedItem : this.getNetwork().getRequestedItems()) {
-                    if (requestedItem.matches(stack) && requestedItem.getDestination().equals(this.getBlockPos())) {
-                        alreadyRequested += requestedItem.getAmountRemaining();
-                    }
-                }
+                int alreadyRequested = this.getAlreadyRequested(stack);
                 if (alreadyRequested < stack.getCount()) {
                     this.getNetwork().request(level, stack.copyWithCount(stack.getCount() - alreadyRequested), this.getBlockPos(), null, true);
                 }
             }
         }
+    }
+
+    public int getAlreadyRequested(ItemStack stack) {
+        int alreadyRequested = 0;
+        for (ItemInPipe item : this.contents) {
+            if (ItemStack.isSameItemSameTags(stack, item.getStack())) {
+                alreadyRequested += item.getStack().getCount();
+            }
+        }
+        for (RequestedItem requestedItem : this.getNetwork().getRequestedItems()) {
+            if (requestedItem.matches(stack) && requestedItem.getDestination().equals(this.getBlockPos())) {
+                alreadyRequested += requestedItem.getAmountRemaining();
+            }
+        }
+        return alreadyRequested;
     }
 
     public boolean isActiveStocking() {
