@@ -138,7 +138,6 @@
   "chat.classicpipes.crafter_jammed": "All requests cancelled as the Crafter at [%s] didn't output the expected result. Make sure it is pointing into the Recipe Pipe and isn't jammed.",
   "chat.classicpipes.missing_recipe_pipe_direction": "All requests cancelled as the Recipe Pipe at [%s] isn't attached to a Crafter or other processing system.",
   "chat.classicpipes.timed_out": "Request for %sx %s timed out.",
-  "chat.classicpipes.multiple_recipes": "Warning: Found multiple Recipe Pipes configured to make %s. The network can only handle one Recipe Pipe per item type.",
   "chat.classicpipes.destination_removed": "Request for %sx %s cancelled because the destination pipe at [%s] was disconnected from the network.",
   "chat.classicpipes.requested": "Requested %sx %s.",
   "chat.classicpipes.nothing_in_offhand": "You have no item in your other hand.",
