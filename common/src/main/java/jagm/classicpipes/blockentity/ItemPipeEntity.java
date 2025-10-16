@@ -106,6 +106,8 @@ public abstract class ItemPipeEntity extends PipeEntity {
                         item.resetProgress(item.getTargetDirection().getOpposite());
                         nextPipe.insertPipeItem(level, item);
                         iterator.remove();
+                    } else if (item.getProgress() >= ItemInPipe.PIPE_LENGTH * 2) {
+                        iterator.remove();
                     }
                 }
             }
