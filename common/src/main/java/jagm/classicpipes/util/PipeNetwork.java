@@ -12,7 +12,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.*;
@@ -32,10 +31,6 @@ public class PipeNetwork {
     private boolean cacheChanged;
     private byte cacheCooldown;
     private final List<RequestedItem> requestedItems;
-    private final List<Tuple<ProviderPipe, RequestedItem>> queue;
-    private final Map<ProviderPipe, List<ItemStack>> takenFromCache;
-    private final List<ItemStack> spareItems;
-    private final Set<Item> craftedItemsForAdvancement;
 
     public PipeNetwork(BlockPos pos, SortingMode sortingMode) {
         this.routingPipes = new HashSet<>();
@@ -49,182 +44,151 @@ public class PipeNetwork {
         this.cacheChanged = false;
         this.cacheCooldown = (byte) 0;
         this.requestedItems = new ArrayList<>();
-        this.queue = new ArrayList<>();
-        this.takenFromCache = new HashMap<>();
-        this.spareItems = new ArrayList<>();
-        this.craftedItemsForAdvancement = new HashSet<>();
     }
 
     public PipeNetwork(BlockPos pos) {
         this(pos, SortingMode.AMOUNT_DESCENDING);
     }
 
-    private void enqueue(ItemStack stack, int amount, BlockPos requestPos, String playerName, ProviderPipe providerPipe) {
-        RequestedItem requestedItem = new RequestedItem(stack.copyWithCount(amount), requestPos, playerName);
-        boolean matched = false;
-        for (Tuple<ProviderPipe, RequestedItem> tuple : this.queue) {
-            if (tuple.a() == providerPipe && requestedItem.matches(tuple.b())) {
-                matched = true;
-                tuple.b().getStack().grow(amount);
-                break;
-            }
-        }
-        if (!matched) {
-            this.queue.add(new Tuple<>(providerPipe, requestedItem));
-        }
-    }
-
-    private MissingItem queueRequest(ItemStack stack, BlockPos requestPos, Player player, List<ItemStack> visited) {
-        MissingItem missingItem = new MissingItem(stack.copy());
-        String playerName = player != null ? player.getName().getString() : "";
-        Iterator<ItemStack> iterator = this.spareItems.listIterator();
-        while (iterator.hasNext()) {
-            ItemStack spareItem = iterator.next();
-            if (ItemStack.isSameItemSameTags(spareItem, stack)) {
-                int amount = Math.min(spareItem.getCount(), missingItem.getCount());
-                spareItem.shrink(amount);
-                missingItem.shrink(amount);
-                if (spareItem.isEmpty()) {
-                    iterator.remove();
+    private Tuple<Integer, Boolean> amountCraftable(ItemStack stack, int requiredAmount, BlockPos requestPos, RequestState requestState, List<ItemStack> itemsInThisBranch) {
+        int amount = 0;
+        boolean hasRecipe = false;
+        int missingStacksSize = requestState.missingStacksSize();
+        for (RecipePipeEntity recipePipe : this.recipePipes) {
+            ItemStack resultStack = recipePipe.getResult();
+            if (ItemStack.isSameItemSameTags(resultStack, stack)) {
+                hasRecipe = true;
+                requestState.reduceMissingStacks(missingStacksSize);
+                List<ItemStack> ingredients = recipePipe.getIngredientsCollated();
+                boolean loopFound = false;
+                for (ItemStack ingredientStack : ingredients) {
+                    for (ItemStack branchStack : itemsInThisBranch) {
+                        if (ItemStack.isSameItemSameTags(branchStack, ingredientStack)) {
+                            missingStacksSize = requestState.missingStacksSize();
+                            requestState.addMissingStack(ingredientStack.copy());
+                            loopFound = true;
+                            break;
+                        }
+                    }
+                    if (loopFound) {
+                        break;
+                    }
                 }
-                this.enqueue(stack, amount, requestPos, playerName, null);
-                break;
-            }
-        }
-        if (!missingItem.isEmpty()) {
-            for (ProviderPipe providerPipe : this.providerPipes) {
-                if (missingItem.isEmpty()) {
-                    break;
-                }
-                List<ItemStack> alreadyTaken = this.takenFromCache.containsKey(providerPipe) ? this.takenFromCache.get(providerPipe) : new ArrayList<>();
-                for (ItemStack cacheStack : providerPipe.getCache()) {
-                    if (ItemStack.isSameItemSameTags(stack, cacheStack)) {
-                        int cacheCount = cacheStack.getCount();
-                        int takenIndex = -1;
-                        for (int i = 0; i < alreadyTaken.size(); i++) {
-                            ItemStack takenStack = alreadyTaken.get(i);
-                            if (ItemStack.isSameItemSameTags(cacheStack, takenStack)) {
-                                cacheCount -= takenStack.getCount();
-                                takenIndex = i;
-                                break;
+                if (!loopFound) {
+                    int requiredCrafts = requiredAmount / resultStack.getCount() + (requiredAmount % resultStack.getCount() != 0 ? 1 : 0);
+                    boolean craftFailed = false;
+                    for (int i = 0; i < requiredCrafts; i++) {
+                        for (ItemStack ingredientStack : ingredients) {
+                            List<ItemStack> newBranchItems = new ArrayList<>(itemsInThisBranch);
+                            newBranchItems.add(ingredientStack);
+                            int ingredientAmount = this.availableAmount(ingredientStack, recipePipe.getBlockPos(), requestState, newBranchItems);
+                            if (ingredientAmount < ingredientStack.getCount()) {
+                                craftFailed = true;
                             }
                         }
-                        int amount = Math.min(missingItem.getCount(), cacheCount);
-                        if (amount > 0) {
-                            this.enqueue(stack, amount, requestPos, playerName, providerPipe);
-                            missingItem.shrink(amount);
-                            if (takenIndex >= 0) {
-                                ItemStack takenStack = alreadyTaken.get(takenIndex);
-                                alreadyTaken.set(takenIndex, takenStack.copyWithCount(takenStack.getCount() + amount));
-                            } else {
-                                alreadyTaken.add(cacheStack.copyWithCount(amount));
-                            }
-                            this.takenFromCache.put(providerPipe, alreadyTaken);
+                        if (!craftFailed) {
+                            int amountToDeliver = Math.min(resultStack.getCount(), requiredAmount);
+                            amount += amountToDeliver;
+                            requestState.scheduleItemRouting(requestPos, resultStack.copyWithCount(amountToDeliver));
+                            requiredAmount -= amountToDeliver;
+                            missingStacksSize = requestState.missingStacksSize();
+                            requestState.addCraftedItem(resultStack);
                         }
+                    }
+                    if (requiredAmount <= 0) {
                         break;
                     }
                 }
             }
         }
-        if (!missingItem.isEmpty()) {
-            boolean foundCraftingPipe = false;
-            for (RecipePipeEntity craftingPipe : this.recipePipes) {
-                ItemStack result = craftingPipe.getResult();
-                if (ItemStack.isSameItemSameTags(result, stack)) {
-                    if (foundCraftingPipe) {
-                        if (player != null) {
-                            player.displayClientMessage(Component.translatable("chat." + ClassicPipes.MOD_ID + ".multiple_recipes", stack.getItem().getDescription()).withStyle(ChatFormatting.YELLOW), false);
-                        }
-                        break;
-                    }
-                    int requiredCrafts = missingItem.getCount() / result.getCount() + (missingItem.getCount() % result.getCount() != 0 ? 1 : 0);
-                    List<ItemStack> ingredients = craftingPipe.getIngredientsCollated();
-                    boolean canCraft = true;
-                    for (ItemStack ingredient : ingredients) {
-                        boolean alreadyVisited = false;
-                        for (ItemStack visitedStack : visited) {
-                            if (ItemStack.isSameItemSameTags(visitedStack, ingredient)) {
-                                alreadyVisited = true;
-                                canCraft = false;
-                                break;
-                            }
-                        }
-                        if (!alreadyVisited) {
-                            List<ItemStack> visited2 = new ArrayList<>(visited);
-                            visited2.add(stack);
-                            MissingItem missingForCraft = this.queueRequest(ingredient.copyWithCount(ingredient.getCount() * requiredCrafts), craftingPipe.getBlockPos(), player, visited2);
-                            if (!missingForCraft.isEmpty()) {
-                                missingItem.addMissingIngredient(missingForCraft);
-                                canCraft = false;
-                            }
-                        }
-                    }
-                    if (canCraft) {
-                        int amount = Math.min(result.getCount() * requiredCrafts, missingItem.getCount());
-                        missingItem.shrink(amount);
-                        this.enqueue(stack, amount, requestPos, playerName, null);
-                        if (result.getCount() * requiredCrafts > amount) {
-                            int remaining = result.getCount() * requiredCrafts - amount;
-                            boolean matched = false;
-                            for (ItemStack spareItem : this.spareItems) {
-                                if (ItemStack.isSameItemSameTags(spareItem, stack)) {
-                                    spareItem.grow(remaining);
-                                    matched = true;
-                                    break;
-                                }
-                            }
-                            if (!matched) {
-                                this.spareItems.add(stack.copyWithCount(remaining));
-                            }
-                        }
-                        this.craftedItemsForAdvancement.add(result.getItem());
-                    }
-                    foundCraftingPipe = true;
-                }
-            }
-        }
-        return missingItem;
+        return new Tuple<>(amount, hasRecipe);
     }
 
-    public void request(ServerLevel level, ItemStack stack, BlockPos requestPos, Player player, boolean partialRequest) {
-        MissingItem missingItem = this.queueRequest(stack.copy(), requestPos, player, new ArrayList<>());
-        if (missingItem.isEmpty()) {
-            boolean cancelled = false;
-            for (Tuple<ProviderPipe, RequestedItem> tuple : this.queue) {
-                this.addRequestedItem(tuple.b());
-                if (tuple.a() != null && !tuple.a().extractItem(level, tuple.b().getStack())) {
-                    cancelled = true;
-                    if (!partialRequest) {
-                        tuple.b().sendMessage(level, Component.translatable("chat." + ClassicPipes.MOD_ID + ".could_not_extract", stack.getCount(), stack.getItem().getDescription(), tuple.a().getProviderPipePos().toShortString()).withStyle(ChatFormatting.RED));
+    private int amountInNetwork(ItemStack stack, BlockPos requestPos, RequestState requestState) {
+        int amount = 0;
+        for (ProviderPipe providerPipe : this.providerPipes) {
+            for (ItemStack cacheStack : providerPipe.getCache()) {
+                if (ItemStack.isSameItemSameTags(cacheStack, stack)) {
+                    int amountProvidable = Math.min(stack.getCount() - amount, cacheStack.getCount() - requestState.amountAlreadyWithdrawing(providerPipe, stack));
+                    if (amountProvidable > 0) {
+                        amount += amountProvidable;
+                        requestState.scheduleItemWithdrawal(providerPipe, stack.copyWithCount(amountProvidable));
+                        requestState.scheduleItemRouting(requestPos, stack.copyWithCount(amountProvidable));
                     }
                     break;
                 }
             }
-            if (cancelled) {
-                this.queue.forEach(tuple -> this.removeRequestedItem(tuple.b()));
+            if (amount >= stack.getCount()) {
+                break;
+            }
+        }
+        return amount;
+    }
+
+    private int availableAmount(ItemStack stack, BlockPos requestPos, RequestState requestState, List<ItemStack> itemsInThisBranch) {
+        int amount = this.amountInNetwork(stack, requestPos, requestState);
+        if (amount < stack.getCount()) {
+            Tuple<Integer, Boolean> tuple = this.amountCraftable(stack, stack.getCount() - amount, requestPos, requestState, itemsInThisBranch);
+            amount += tuple.a();
+            if (amount < stack.getCount() && !tuple.b()) {
+                requestState.addMissingStack(stack.copyWithCount(stack.getCount() - amount));
+            }
+        }
+        return amount;
+    }
+
+    public void request(ServerLevel level, ItemStack stack, BlockPos requestPos, Player player, boolean partialRequests) {
+        RequestState requestState = new RequestState();
+        int amount = this.availableAmount(stack, requestPos, requestState, new ArrayList<>());
+        if (amount < stack.getCount()) {
+            if (partialRequests) {
+                this.request(level, stack.copyWithCount(amount), requestPos, player, false);
             } else if (player != null) {
+                player.displayClientMessage(Component.translatable("chat." + ClassicPipes.MOD_ID + ".missing_item.a", stack.getCount(), stack.getItem().getDescription()).withStyle(ChatFormatting.RED), false);
+                for (ItemStack missingStack : requestState.getMissingStacks()) {
+                    player.displayClientMessage(Component.translatable("chat." + ClassicPipes.MOD_ID + ".missing_item.b", missingStack.getCount(), missingStack.getItem().getDescription()).withStyle(ChatFormatting.YELLOW), false);
+                }
+            }
+        } else {
+            String playerName = player != null ? player.getName().getString() : "";
+            int requestedItemsSize = this.requestedItems.size();
+            for (Map.Entry<BlockPos, List<ItemStack>> entry : requestState.getItemsToRoute().entrySet()) {
+                for (ItemStack routeStack : entry.getValue()) {
+                    this.requestedItems.add(new RequestedItem(routeStack, entry.getKey(), playerName));
+                }
+            }
+            boolean success = true;
+            for (Map.Entry<ProviderPipe, List<ItemStack>> entry : requestState.getItemsToWithdraw().entrySet()) {
+                for (ItemStack withdrawStack : entry.getValue()) {
+                    boolean withdrawalSuccessful = false;
+                    for (ItemStack cacheStack : entry.getKey().getCache()) {
+                        if (ItemStack.isSameItemSameTags(cacheStack, withdrawStack)) {
+                            int amountToExtract = Math.min(cacheStack.getCount(), withdrawStack.getCount());
+                            withdrawalSuccessful = entry.getKey().extractItem(level, cacheStack.copyWithCount(amountToExtract));
+                            break;
+                        }
+                    }
+                    if (!withdrawalSuccessful) {
+                        success = false;
+                        while (this.requestedItems.size() > requestedItemsSize) {
+                            this.requestedItems.remove(this.requestedItems.size() - 1);
+                        }
+                        if (player != null) {
+                            player.displayClientMessage(Component.translatable("chat." + ClassicPipes.MOD_ID + ".could_not_extract", stack.getCount(), stack.getItem().getDescription(), entry.getKey().getProviderPipePos().toShortString()).withStyle(ChatFormatting.RED), false);
+                        }
+                        break;
+                    }
+                }
+                if (!success) {
+                    break;
+                }
+            }
+            if (success && player != null) {
                 player.awardStat(ClassicPipes.ITEMS_REQUESTED_STAT, stack.getCount());
-                ClassicPipes.REQUEST_ITEM_TRIGGER.trigger((ServerPlayer) player, stack, this.craftedItemsForAdvancement.size());
+                ClassicPipes.REQUEST_ITEM_TRIGGER.trigger((ServerPlayer) player, stack, requestState.getUniqueCrafts());
                 player.displayClientMessage(Component.translatable("chat." + ClassicPipes.MOD_ID + ".requested", stack.getCount(), stack.getItem().getDescription()).withStyle(ChatFormatting.GREEN), false);
             }
-        } else if (partialRequest && missingItem.getCount() < stack.getCount()) {
-            this.resetForNewRequest();
-            this.request(level, stack.copyWithCount(stack.getCount() - missingItem.getCount()), requestPos, player, false);
-            return;
-        } else if (player != null) {
-            player.displayClientMessage(Component.translatable("chat." + ClassicPipes.MOD_ID + ".missing_item.a", stack.getCount(), stack.getItem().getDescription()).withStyle(ChatFormatting.RED), false);
-            for (ItemStack missing : missingItem.getBaseItems(new ArrayList<>())) {
-                player.displayClientMessage(Component.translatable("chat." + ClassicPipes.MOD_ID + ".missing_item.b", missing.getCount(), missing.getItem().getDescription()).withStyle(ChatFormatting.YELLOW), false);
-            }
         }
-        this.resetForNewRequest();
-    }
-
-    private void resetForNewRequest() {
-        this.queue.clear();
-        this.takenFromCache.clear();
-        this.spareItems.clear();
-        this.craftedItemsForAdvancement.clear();
     }
 
     public void tick(ServerLevel level) {

@@ -138,7 +138,6 @@
   "chat.classicpipes.crafter_jammed": "[%s] の自動作業台が想定された結果を出力しなかったため、リクエストはすべて取り消されました。レシピパイプに正しく接続されているか、詰まりがないか確認してください。",
   "chat.classicpipes.missing_recipe_pipe_direction": "[%s] のレシピパイプが自動作業台または他の処理システムに接続されていないため、すべてのリクエストがキャンセルされました。",
   "chat.classicpipes.timed_out": "%s個の%sのリクエストがタイムアウトしました。",
-  "chat.classicpipes.multiple_recipes": "警告: %s を作成するレシピパイプが複数見つかりました。ネットワークはアイテムごとに1つのレシピパイプしか処理できません。",
   "chat.classicpipes.destination_removed": "目的地のパイプがネットワークから切断されていたため%sx %s のリクエストはキャンセルされました。",
   "chat.classicpipes.requested": "リクエスト %s個の%s",
   "chat.classicpipes.nothing_in_offhand": "オフハンドにアイテムがありません。",

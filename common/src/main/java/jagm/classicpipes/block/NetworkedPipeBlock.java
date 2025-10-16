@@ -10,6 +10,8 @@ import jagm.classicpipes.inventory.menu.RequestMenu;
 import jagm.classicpipes.network.ClientBoundItemListPayload;
 import jagm.classicpipes.network.ClientBoundTwoBoolsPayload;
 import jagm.classicpipes.services.Services;
+import jagm.classicpipes.util.MiscUtil;
+import jagm.classicpipes.util.RequestedItem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -24,6 +26,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -134,6 +137,12 @@ public class NetworkedPipeBlock extends PipeBlock {
                         ClientBoundItemListPayload.HANDLER
                 );
                 player.awardStat(Stats.ITEM_USED.get(ClassicPipes.PIPE_SLICER));
+            }
+        } else if (MiscUtil.DEBUG_MODE && handStack.getItem().equals(Items.STICK)) {
+            if (player instanceof ServerPlayer serverPlayer && level.getBlockEntity(pipePos) instanceof NetworkedPipeEntity networkedPipe && networkedPipe.hasNetwork()) {
+                for (RequestedItem requestedItem : networkedPipe.getNetwork().getRequestedItems()) {
+                    serverPlayer.displayClientMessage(Component.literal(requestedItem.getAmountRemaining() + "x " + requestedItem.getStack().getDisplayName().getString()), false);
+                }
             }
         } else if (level instanceof ServerLevel && level.getBlockEntity(pipePos) instanceof RoutingPipeEntity routingPipe) {
             Services.LOADER_SERVICE.openMenu(

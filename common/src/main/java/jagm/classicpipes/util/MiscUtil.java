@@ -18,11 +18,13 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.Comparator;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class MiscUtil {
 
     public static final boolean DEBUG_MODE = false;
+
     public static final Comparator<Tuple<ItemStack, Boolean>> AMOUNT = Comparator.comparing(tuple -> tuple.a().getCount() - (tuple.b() ? 1 : 0));
     public static final Comparator<Tuple<ItemStack, Boolean>> NAME = Comparator.comparing(tuple -> tuple.a().getDisplayName().getString());
     public static final Comparator<Tuple<ItemStack, Boolean>> MOD = Comparator.comparing(tuple -> Services.LOADER_SERVICE.getModName(modFromItem(tuple.a())));
@@ -95,6 +97,20 @@ public class MiscUtil {
 
     public static <T> void saveToTag(T thing, Codec<T> codec, Consumer<? super Tag> resultConsumer) {
         codec.encodeStart(NbtOps.INSTANCE, thing).result().ifPresent(resultConsumer);
+    }
+
+    public static void mergeStackIntoList(List<ItemStack> list, ItemStack stack) {
+        boolean matched = false;
+        for (ItemStack listStack : list) {
+            if (ItemStack.isSameItemSameComponents(listStack, stack)) {
+                listStack.grow(stack.getCount());
+                matched = true;
+                break;
+            }
+        }
+        if (!matched) {
+            list.add(stack);
+        }
     }
 
 }
