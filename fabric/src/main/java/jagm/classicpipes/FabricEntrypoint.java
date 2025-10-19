@@ -108,6 +108,7 @@ public class FabricEntrypoint implements ModInitializer {
         registerServerPayload(ServerBoundSlotDirectionPayload.TYPE, ServerBoundSlotDirectionPayload.HANDLER);
         registerServerPayload(ServerBoundTransferRecipePayload.TYPE, ServerBoundTransferRecipePayload.HANDLER);
         registerServerPayload(ServerBoundSetFilterPayload.TYPE, ServerBoundSetFilterPayload.HANDLER);
+        registerServerPayload(ServerBoundBlockingModePayload.TYPE, ServerBoundBlockingModePayload.HANDLER);
 
     }
 

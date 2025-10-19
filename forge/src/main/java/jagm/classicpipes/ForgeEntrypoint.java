@@ -109,6 +109,7 @@ public class ForgeEntrypoint {
                 ForgeServerNetworkHandler.registerServerPayload(8, ServerBoundTransferRecipePayload.class, ServerBoundTransferRecipePayload.HANDLER);
                 ForgeServerNetworkHandler.registerServerPayload(9, ServerBoundSetFilterPayload.class, ServerBoundSetFilterPayload.HANDLER);
                 ForgeServerNetworkHandler.registerClientPayload(10, ClientBoundItemListPayload.class, ClientBoundItemListPayload.HANDLER);
+                ForgeServerNetworkHandler.registerServerPayload(11, ServerBoundBlockingModePayload.class, ServerBoundBlockingModePayload.HANDLER);
                 ClassicPipes.createStats();
             });
         }
