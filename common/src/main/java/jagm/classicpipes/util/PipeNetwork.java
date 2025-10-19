@@ -60,12 +60,13 @@ public class PipeNetwork {
                 hasRecipe = true;
                 requestState.reduceMissingStacks(missingStacksSize);
                 List<ItemStack> ingredients = recipePipe.getIngredientsCollated();
+                int requiredCrafts = requiredAmount / resultStack.getCount() + (requiredAmount % resultStack.getCount() != 0 ? 1 : 0);
                 boolean loopFound = false;
                 for (ItemStack ingredientStack : ingredients) {
                     for (ItemStack branchStack : itemsInThisBranch) {
                         if (ItemStack.isSameItemSameTags(branchStack, ingredientStack)) {
                             missingStacksSize = requestState.missingStacksSize();
-                            requestState.addMissingStack(ingredientStack.copy());
+                            requestState.addMissingStack(ingredientStack.copyWithCount(ingredientStack.getCount() * requiredCrafts));
                             loopFound = true;
                             break;
                         }
@@ -75,8 +76,39 @@ public class PipeNetwork {
                     }
                 }
                 if (!loopFound) {
-                    int requiredCrafts = requiredAmount / resultStack.getCount() + (requiredAmount % resultStack.getCount() != 0 ? 1 : 0);
-                    boolean craftFailed = false;
+                    int possibleCrafts = requiredCrafts;
+                    for (ItemStack ingredientStack : ingredients) {
+                        List<ItemStack> newBranchItems = new ArrayList<>(itemsInThisBranch);
+                        newBranchItems.add(ingredientStack);
+                        RequestState backupState = requestState.copy();
+                        int requiredIngredientAmount = ingredientStack.getCount() * requiredCrafts;
+                        int ingredientAmount = this.availableAmount(ingredientStack.copyWithCount(requiredIngredientAmount), recipePipe.getBlockPos(), requestState, newBranchItems);
+                        possibleCrafts = Math.min(possibleCrafts, ingredientAmount / ingredientStack.getCount());
+                        requestState.restore(backupState);
+                    }
+                    if (possibleCrafts > 0) {
+                        int missingStacksSize2 = requestState.missingStacksSize();
+                        for (ItemStack ingredientStack : ingredients) {
+                            List<ItemStack> newBranchItems = new ArrayList<>(itemsInThisBranch);
+                            newBranchItems.add(ingredientStack);
+                            int possibleIngredientAmount = ingredientStack.getCount() * possibleCrafts;
+                            this.availableAmount(ingredientStack.copyWithCount(possibleIngredientAmount), recipePipe.getBlockPos(), requestState, newBranchItems);
+                        }
+                        requestState.reduceMissingStacks(missingStacksSize2);
+                        int amountToDeliver = Math.min(resultStack.getCount() * possibleCrafts, requiredAmount);
+                        amount += amountToDeliver;
+                        requestState.scheduleItemRouting(requestPos, resultStack.copyWithCount(amountToDeliver));
+                        requiredAmount -= resultStack.getCount() * possibleCrafts;
+                        missingStacksSize = requestState.missingStacksSize();
+                        requestState.addCraftedItem(resultStack);
+                        if (requiredAmount <= 0) {
+                            if (requiredAmount < 0) {
+                                requestState.addSpareStack(stack.copyWithCount(-requiredAmount));
+                            }
+                            break;
+                        }
+                    }
+                    /*boolean craftFailed = false;
                     for (int i = 0; i < requiredCrafts; i++) {
                         RequestState backupState = requestState.copy();
                         for (ItemStack ingredientStack : ingredients) {
@@ -97,13 +129,7 @@ public class PipeNetwork {
                         } else {
                             requestState.restore(backupState);
                         }
-                    }
-                    if (requiredAmount <= 0) {
-                        if (requiredAmount < 0) {
-                            requestState.addSpareStack(stack.copyWithCount(-requiredAmount));
-                        }
-                        break;
-                    }
+                    }*/
                 }
             }
         }
