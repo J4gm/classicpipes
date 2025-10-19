@@ -13,12 +13,51 @@ public class RequestState {
     private final Map<BlockPos, List<ItemStack>> itemsToRoute;
     private final List<ItemStack> missingStacks;
     private final Set<Item> uniqueCraftedItems;
+    private final List<ItemStack> spareStacks;
 
     public RequestState() {
         this.itemsToWithdraw = new HashMap<>();
         this.itemsToRoute = new HashMap<>();
         this.missingStacks = new ArrayList<>();
         this.uniqueCraftedItems = new HashSet<>();
+        this.spareStacks = new ArrayList<>();
+    }
+
+    private RequestState(Map<ProviderPipe, List<ItemStack>> itemsToWithdraw, Map<BlockPos, List<ItemStack>> itemsToRoute, List<ItemStack> missingStacks, Set<Item> uniqueCraftedItems, List<ItemStack> spareStacks) {
+        this.itemsToWithdraw = itemsToWithdraw;
+        this.itemsToRoute = itemsToRoute;
+        this.missingStacks = missingStacks;
+        this.uniqueCraftedItems = uniqueCraftedItems;
+        this.spareStacks = spareStacks;
+    }
+
+    public RequestState copy() {
+        Map<ProviderPipe, List<ItemStack>> copiedItemsToWithdraw = new HashMap<>();
+        for (Map.Entry<ProviderPipe, List<ItemStack>> entry : this.itemsToWithdraw.entrySet()) {
+            List<ItemStack> copiedWithdrawStacks = new ArrayList<>();
+            entry.getValue().forEach(withdrawStack -> copiedWithdrawStacks.add(withdrawStack.copy()));
+            copiedItemsToWithdraw.put(entry.getKey(), copiedWithdrawStacks);
+        }
+        Map<BlockPos, List<ItemStack>> copiedItemsToRoute = new HashMap<>();
+        for (Map.Entry<BlockPos, List<ItemStack>> entry : this.itemsToRoute.entrySet()) {
+            List<ItemStack> copiedRouteStacks = new ArrayList<>();
+            entry.getValue().forEach(routeStack -> copiedRouteStacks.add(routeStack.copy()));
+            copiedItemsToRoute.put(entry.getKey(), copiedRouteStacks);
+        }
+        List<ItemStack> copiedSpareStacks = new ArrayList<>();
+        this.spareStacks.forEach(spareStack -> copiedSpareStacks.add(spareStack.copy()));
+        return new RequestState(copiedItemsToWithdraw, copiedItemsToRoute, this.missingStacks, new HashSet<>(this.uniqueCraftedItems), copiedSpareStacks);
+    }
+
+    public void restore(RequestState backupState) {
+        this.itemsToWithdraw.clear();
+        this.itemsToWithdraw.putAll(backupState.itemsToWithdraw);
+        this.itemsToRoute.clear();
+        this.itemsToRoute.putAll(backupState.itemsToRoute);
+        this.uniqueCraftedItems.clear();
+        this.uniqueCraftedItems.addAll(backupState.uniqueCraftedItems);
+        this.spareStacks.clear();
+        this.spareStacks.addAll(backupState.spareStacks);
     }
 
     public int amountAlreadyWithdrawing(ProviderPipe providerPipe, ItemStack stack) {
@@ -60,7 +99,7 @@ public class RequestState {
     }
 
     public void addMissingStack(ItemStack stack) {
-        MiscUtil.mergeStackIntoList(this.missingStacks, stack);
+        this.missingStacks.add(stack);
     }
 
     public int missingStacksSize() {
@@ -73,8 +112,12 @@ public class RequestState {
         }
     }
 
-    public List<ItemStack> getMissingStacks() {
-        return this.missingStacks;
+    public List<ItemStack> collateMissingStacks() {
+        List<ItemStack> collatedStacks = new ArrayList<>();
+        for (ItemStack missingStack : this.missingStacks) {
+            MiscUtil.mergeStackIntoList(collatedStacks, missingStack);
+        }
+        return collatedStacks;
     }
 
     public Map<BlockPos, List<ItemStack>> getItemsToRoute() {
@@ -93,4 +136,11 @@ public class RequestState {
         return this.uniqueCraftedItems.size();
     }
 
+    public void addSpareStack(ItemStack stack) {
+        MiscUtil.mergeStackIntoList(this.spareStacks, stack);
+    }
+
+    public List<ItemStack> getSpareStacks() {
+        return this.spareStacks;
+    }
 }
