@@ -8,6 +8,7 @@ import jagm.classicpipes.inventory.menu.StockingPipeMenu;
 import jagm.classicpipes.services.Services;
 import jagm.classicpipes.util.FacingOrNone;
 import jagm.classicpipes.util.ItemInPipe;
+import jagm.classicpipes.util.MiscUtil;
 import jagm.classicpipes.util.RequestedItem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -58,17 +59,7 @@ public class StockingPipeEntity extends NetworkedPipeEntity implements MenuProvi
                 if (stack.isEmpty()) {
                     continue;
                 }
-                boolean matched = false;
-                for (ItemStack filterStack : filterItems) {
-                    if (ItemStack.isSameItemSameComponents(stack, filterStack)) {
-                        filterStack.grow(stack.getCount());
-                        matched = true;
-                        break;
-                    }
-                }
-                if (!matched) {
-                    filterItems.add(stack.copy());
-                }
+                MiscUtil.mergeStackIntoList(filterItems, stack.copy());
             }
             if (!filterItems.isEmpty()) {
                 List<ItemStack> containerItems = Services.LOADER_SERVICE.getContainerItems(level, this.getBlockPos().relative(facing), facing.getOpposite());

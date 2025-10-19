@@ -78,6 +78,7 @@ public class PipeNetwork {
                     int requiredCrafts = Math.ceilDiv(requiredAmount, resultStack.getCount());
                     boolean craftFailed = false;
                     for (int i = 0; i < requiredCrafts; i++) {
+                        RequestState backupState = requestState.copy();
                         for (ItemStack ingredientStack : ingredients) {
                             List<ItemStack> newBranchItems = new ArrayList<>(itemsInThisBranch);
                             newBranchItems.add(ingredientStack);
@@ -90,12 +91,17 @@ public class PipeNetwork {
                             int amountToDeliver = Math.min(resultStack.getCount(), requiredAmount);
                             amount += amountToDeliver;
                             requestState.scheduleItemRouting(requestPos, resultStack.copyWithCount(amountToDeliver));
-                            requiredAmount -= amountToDeliver;
+                            requiredAmount -= resultStack.getCount();
                             missingStacksSize = requestState.missingStacksSize();
                             requestState.addCraftedItem(resultStack);
+                        } else {
+                            requestState.restore(backupState);
                         }
                     }
                     if (requiredAmount <= 0) {
+                        if (requiredAmount < 0) {
+                            requestState.addSpareStack(stack.copyWithCount(-requiredAmount));
+                        }
                         break;
                     }
                 }
@@ -106,20 +112,34 @@ public class PipeNetwork {
 
     private int amountInNetwork(ItemStack stack, BlockPos requestPos, RequestState requestState) {
         int amount = 0;
-        for (ProviderPipe providerPipe : this.providerPipes) {
-            for (ItemStack cacheStack : providerPipe.getCache()) {
-                if (ItemStack.isSameItemSameComponents(cacheStack, stack)) {
-                    int amountProvidable = Math.min(stack.getCount() - amount, cacheStack.getCount() - requestState.amountAlreadyWithdrawing(providerPipe, stack));
-                    if (amountProvidable > 0) {
-                        amount += amountProvidable;
-                        requestState.scheduleItemWithdrawal(providerPipe, stack.copyWithCount(amountProvidable));
-                        requestState.scheduleItemRouting(requestPos, stack.copyWithCount(amountProvidable));
+        for (ItemStack spareStack : requestState.getSpareStacks()) {
+            if (ItemStack.isSameItemSameComponents(spareStack, stack)) {
+                int spareAmount = Math.min(spareStack.getCount(), stack.getCount());
+                if (spareAmount > 0) {
+                    amount += spareAmount;
+                    spareStack.shrink(spareAmount);
+                    requestState.scheduleItemRouting(requestPos, stack.copyWithCount(spareAmount));
+                }
+                break;
+            }
+        }
+        requestState.getSpareStacks().removeIf(ItemStack::isEmpty);
+        if (amount < stack.getCount()) {
+            for (ProviderPipe providerPipe : this.providerPipes) {
+                for (ItemStack cacheStack : providerPipe.getCache()) {
+                    if (ItemStack.isSameItemSameComponents(cacheStack, stack)) {
+                        int amountProvidable = Math.min(stack.getCount() - amount, cacheStack.getCount() - requestState.amountAlreadyWithdrawing(providerPipe, stack));
+                        if (amountProvidable > 0) {
+                            amount += amountProvidable;
+                            requestState.scheduleItemWithdrawal(providerPipe, stack.copyWithCount(amountProvidable));
+                            requestState.scheduleItemRouting(requestPos, stack.copyWithCount(amountProvidable));
+                        }
+                        break;
                     }
+                }
+                if (amount >= stack.getCount()) {
                     break;
                 }
-            }
-            if (amount >= stack.getCount()) {
-                break;
             }
         }
         return amount;
@@ -130,7 +150,7 @@ public class PipeNetwork {
         if (amount < stack.getCount()) {
             Tuple<Integer, Boolean> tuple = this.amountCraftable(stack, stack.getCount() - amount, requestPos, requestState, itemsInThisBranch);
             amount += tuple.a();
-            if (amount < stack.getCount() && !tuple.b()) {
+            if (!tuple.b()) {
                 requestState.addMissingStack(stack.copyWithCount(stack.getCount() - amount));
             }
         }
@@ -145,7 +165,7 @@ public class PipeNetwork {
                 this.request(level, stack.copyWithCount(amount), requestPos, player, false);
             } else if (player != null) {
                 player.displayClientMessage(Component.translatable("chat." + ClassicPipes.MOD_ID + ".missing_item.a", stack.getCount(), stack.getItemName()).withStyle(ChatFormatting.RED), false);
-                for (ItemStack missingStack : requestState.getMissingStacks()) {
+                for (ItemStack missingStack : requestState.collateMissingStacks()) {
                     player.displayClientMessage(Component.translatable("chat." + ClassicPipes.MOD_ID + ".missing_item.b", missingStack.getCount(), missingStack.getItemName()).withStyle(ChatFormatting.YELLOW), false);
                 }
             }
