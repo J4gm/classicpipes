@@ -9,7 +9,7 @@ import net.minecraft.network.codec.StreamCodec;
 import java.util.ArrayList;
 import java.util.List;
 
-public record ClientBoundRecipePipePayload(Direction[] slotDirections, List<Direction> availableDirections, BlockPos pos) {
+public record ClientBoundRecipePipePayload(Direction[] slotDirections, List<Direction> availableDirections, BlockPos pos, boolean blockingMode) {
 
     public static final StreamCodec<RegistryFriendlyByteBuf, ClientBoundRecipePipePayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.byteArray(10),
@@ -18,6 +18,8 @@ public record ClientBoundRecipePipePayload(Direction[] slotDirections, List<Dire
             ClientBoundRecipePipePayload::availableDirections,
             BlockPos.STREAM_CODEC,
             ClientBoundRecipePipePayload::pos,
+            ByteBufCodecs.BOOL,
+            ClientBoundRecipePipePayload::blockingMode,
             ClientBoundRecipePipePayload::makePayload
     );
 
@@ -29,12 +31,12 @@ public record ClientBoundRecipePipePayload(Direction[] slotDirections, List<Dire
         return directionBytes;
     }
 
-    private static ClientBoundRecipePipePayload makePayload(byte[] directionBytes, List<Direction> availableDirections, BlockPos pos) {
+    private static ClientBoundRecipePipePayload makePayload(byte[] directionBytes, List<Direction> availableDirections, BlockPos pos, boolean blockingMode) {
         Direction[] directions = new Direction[directionBytes.length];
         for (int i = 0; i < directionBytes.length; i++) {
             directions[i] = Direction.from3DDataValue(directionBytes[i]);
         }
-        return new ClientBoundRecipePipePayload(directions, availableDirections, pos);
+        return new ClientBoundRecipePipePayload(directions, availableDirections, pos, blockingMode);
     }
 
 }

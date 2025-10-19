@@ -45,11 +45,11 @@ public class RecipePipeBlock extends NetworkedPipeBlock {
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
-        if (level instanceof ServerLevel && level.getBlockEntity(pos) instanceof RecipePipeEntity craftingPipe) {
+        if (level instanceof ServerLevel && level.getBlockEntity(pos) instanceof RecipePipeEntity recipePipe) {
             Services.LOADER_SERVICE.openMenu(
                     (ServerPlayer) player,
-                    craftingPipe,
-                    new ClientBoundRecipePipePayload(craftingPipe.getSlotDirections(), craftingPipe.getDirectionsForButtons(state), pos),
+                    recipePipe,
+                    new ClientBoundRecipePipePayload(recipePipe.getSlotDirections(), recipePipe.getDirectionsForButtons(state), pos, recipePipe.isBlockingMode()),
                     ClientBoundRecipePipePayload.STREAM_CODEC
             );
         }
