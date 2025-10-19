@@ -157,16 +157,9 @@ public class RecipePipeEntity extends NetworkedPipeEntity implements MenuProvide
                 }
             }
             if (readyToCraft > 0 && readyToCraft < Integer.MAX_VALUE) {
-                Map<Direction, CrafterBlockEntity> crafters = new HashMap<>();
                 for (int i = 0; i < readyToCraft; i++) {
                     for (int slot = 0; slot < 9; slot++) {
                         ItemStack ingredient = this.filter.getItem(slot);
-                        if (crafters.containsKey(this.slotDirections[slot])) {
-                            crafters.get(this.slotDirections[slot]).setSlotState(slot, !ingredient.isEmpty());
-                        } else if (this.getLevel() != null && this.getLevel().getBlockEntity(this.getBlockPos().relative(this.slotDirections[slot])) instanceof CrafterBlockEntity crafter) {
-                            crafters.put(this.slotDirections[slot], crafter);
-                            crafter.setSlotState(slot, !ingredient.isEmpty());
-                        }
                         if (!ingredient.isEmpty()) {
                             this.heldItems.get(slot).shrink(ingredient.getCount());
                             this.queued.add(new ItemInPipe(
@@ -243,7 +236,6 @@ public class RecipePipeEntity extends NetworkedPipeEntity implements MenuProvide
         ItemStack stack = item.getStack();
         if (!stack.isEmpty() && this.waitingForCraft > 0 && item.getFromDirection().equals(this.slotDirections[9]) && ItemStack.isSameItemSameTags(this.getResult(), stack)) {
             this.waitingForCraft -= stack.getCount();
-            this.crafterTicked = false;
             if (this.waitingForCraft <= 0) {
                 this.waitingForCraft = 0;
                 this.attemptCraft();
