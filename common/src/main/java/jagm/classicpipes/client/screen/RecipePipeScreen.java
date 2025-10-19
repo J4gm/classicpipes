@@ -1,7 +1,9 @@
 package jagm.classicpipes.client.screen;
 
 import jagm.classicpipes.ClassicPipes;
+import jagm.classicpipes.client.screen.widget.SmallerCheckbox;
 import jagm.classicpipes.inventory.menu.RecipePipeMenu;
+import jagm.classicpipes.network.ServerBoundBlockingModePayload;
 import jagm.classicpipes.network.ServerBoundSlotDirectionPayload;
 import jagm.classicpipes.services.Services;
 import jagm.classicpipes.util.MiscUtil;
@@ -27,7 +29,7 @@ public class RecipePipeScreen extends FilterScreen<RecipePipeMenu> {
     public RecipePipeScreen(RecipePipeMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
         this.slotDirectionButtons = new Button[10];
-        this.imageHeight = 171;
+        this.imageHeight = 189;
         this.inventoryLabelY = this.imageHeight - 94;
         this.buttonsNeedUpdate = true;
     }
@@ -57,6 +59,14 @@ public class RecipePipeScreen extends FilterScreen<RecipePipeMenu> {
         for (Button button : this.slotDirectionButtons) {
             this.addRenderableWidget(button);
         }
+        this.addRenderableWidget(SmallerCheckbox.builder()
+                .pos(this.leftPos + 8, this.topPos + 74)
+                .onValueChange(this::blockingModeCheckboxChanged)
+                .tooltip(Tooltip.create(Component.translatable("tooltip.classicpipes.blocking_mode")))
+                .selected(this.getMenu().isBlockingMode())
+                .label(Component.translatable("widget.classicpipes.blocking_mode"), this.font)
+                .build()
+        );
         this.buttonsNeedUpdate = true;
     }
 
@@ -84,6 +94,10 @@ public class RecipePipeScreen extends FilterScreen<RecipePipeMenu> {
             this.slotDirectionButtons[slot].setTooltip(active ? createDirectionTooltip(direction, slot == 9) : null);
         }
         this.setFocused(null);
+    }
+
+    private void blockingModeCheckboxChanged(SmallerCheckbox checkbox, boolean checked) {
+        Services.LOADER_SERVICE.sendToServer(new ServerBoundBlockingModePayload(checked));
     }
 
     @Override

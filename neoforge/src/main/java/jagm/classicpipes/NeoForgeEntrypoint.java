@@ -127,6 +127,7 @@ public class NeoForgeEntrypoint {
             registerServerPayload(registrar, ServerBoundSlotDirectionPayload.TYPE, ServerBoundSlotDirectionPayload.STREAM_CODEC);
             registerServerPayload(registrar, ServerBoundTransferRecipePayload.TYPE, ServerBoundTransferRecipePayload.STREAM_CODEC);
             registerServerPayload(registrar, ServerBoundSetFilterPayload.TYPE, ServerBoundSetFilterPayload.STREAM_CODEC);
+            registerServerPayload(registrar, ServerBoundBlockingModePayload.TYPE, ServerBoundBlockingModePayload.STREAM_CODEC);
             registerClientPayload(registrar, ClientBoundItemListPayload.TYPE, ClientBoundItemListPayload.STREAM_CODEC);
         }
 

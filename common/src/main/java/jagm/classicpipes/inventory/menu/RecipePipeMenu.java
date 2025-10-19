@@ -1,6 +1,7 @@
 package jagm.classicpipes.inventory.menu;
 
 import jagm.classicpipes.ClassicPipes;
+import jagm.classicpipes.blockentity.RecipePipeEntity;
 import jagm.classicpipes.inventory.container.FilterContainer;
 import jagm.classicpipes.network.ClientBoundRecipePipePayload;
 import jagm.classicpipes.util.MiscUtil;
@@ -19,24 +20,26 @@ public class RecipePipeMenu extends FilterMenu {
     private final Direction[] ioDirections;
     private final List<Direction> availableDirections;
     private final BlockPos pos;
+    private boolean blockingMode;
 
     public RecipePipeMenu(int id, Inventory playerInventory, ClientBoundRecipePipePayload payload) {
-        this(id, playerInventory, new FilterContainer(null, 10, true), payload.slotDirections(), payload.availableDirections(), payload.pos());
+        this(id, playerInventory, new FilterContainer(null, 10, true), payload.slotDirections(), payload.availableDirections(), payload.pos(), payload.blockingMode());
         payload.items().forEach(stackWithSlot -> this.getFilter().setItem(stackWithSlot.slot(), stackWithSlot.stack()));
     }
 
-    public RecipePipeMenu(int id, Inventory playerInventory, FilterContainer filter, Direction[] ioDirections, List<Direction> availableDirections, BlockPos pos) {
+    public RecipePipeMenu(int id, Inventory playerInventory, FilterContainer filter, Direction[] ioDirections, List<Direction> availableDirections, BlockPos pos, boolean blockingMode) {
         super(ClassicPipes.RECIPE_PIPE_MENU, id, filter);
         this.ioDirections = ioDirections;
         this.availableDirections = availableDirections;
         this.pos = pos;
+        this.blockingMode = blockingMode;
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 this.addSlot(new FilterSlot(filter, j + i * 3, 53 + j * 18, 17 + i * 18));
             }
         }
         this.addSlot(new FilterSlot(filter, 9, 125, 35));
-        this.addStandardInventorySlots(playerInventory, 8, 89);
+        this.addStandardInventorySlots(playerInventory, 8, 107);
     }
 
     public void setSlotDirection(int slot, Direction direction) {
@@ -112,6 +115,17 @@ public class RecipePipeMenu extends FilterMenu {
                 }
             }
             slot.setChanged();
+        }
+    }
+
+    public boolean isBlockingMode() {
+        return this.blockingMode;
+    }
+
+    public void setBlockingMode(boolean blockingMode) {
+        this.blockingMode = blockingMode;
+        if (this.getFilter().getPipe() instanceof RecipePipeEntity recipePipe) {
+            recipePipe.setBlockingMode(blockingMode);
         }
     }
 

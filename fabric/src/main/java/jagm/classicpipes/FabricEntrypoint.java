@@ -111,6 +111,7 @@ public class FabricEntrypoint implements ModInitializer {
         registerServerPayload(ServerBoundSlotDirectionPayload.TYPE, ServerBoundSlotDirectionPayload.STREAM_CODEC);
         registerServerPayload(ServerBoundTransferRecipePayload.TYPE, ServerBoundTransferRecipePayload.STREAM_CODEC);
         registerServerPayload(ServerBoundSetFilterPayload.TYPE, ServerBoundSetFilterPayload.STREAM_CODEC);
+        registerServerPayload(ServerBoundBlockingModePayload.TYPE, ServerBoundBlockingModePayload.STREAM_CODEC);
 
         PayloadTypeRegistry.playS2C().register(ClientBoundItemListPayload.TYPE, ClientBoundItemListPayload.STREAM_CODEC);
 
