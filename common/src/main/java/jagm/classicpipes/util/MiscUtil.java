@@ -100,16 +100,18 @@ public class MiscUtil {
     }
 
     public static void mergeStackIntoList(List<ItemStack> list, ItemStack stack) {
-        boolean matched = false;
-        for (ItemStack listStack : list) {
-            if (ItemStack.isSameItemSameTags(listStack, stack)) {
-                listStack.grow(stack.getCount());
-                matched = true;
-                break;
+        if (!stack.isEmpty()) {
+            boolean matched = false;
+            for (ItemStack listStack : list) {
+                if (ItemStack.isSameItemSameTags(listStack, stack)) {
+                    listStack.grow(stack.getCount());
+                    matched = true;
+                    break;
+                }
             }
-        }
-        if (!matched) {
-            list.add(stack);
+            if (!matched) {
+                list.add(stack.copy());
+            }
         }
     }
 

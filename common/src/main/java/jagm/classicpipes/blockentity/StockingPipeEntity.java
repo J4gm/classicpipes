@@ -58,17 +58,7 @@ public class StockingPipeEntity extends NetworkedPipeEntity implements MenuProvi
                 if (stack.isEmpty()) {
                     continue;
                 }
-                boolean matched = false;
-                for (ItemStack filterStack : filterItems) {
-                    if (ItemStack.isSameItemSameTags(stack, filterStack)) {
-                        filterStack.grow(stack.getCount());
-                        matched = true;
-                        break;
-                    }
-                }
-                if (!matched) {
-                    filterItems.add(stack.copy());
-                }
+                MiscUtil.mergeStackIntoList(filterItems, stack.copy());
             }
             if (!filterItems.isEmpty()) {
                 List<ItemStack> containerItems = Services.LOADER_SERVICE.getContainerItems(level, this.getBlockPos().relative(facing), facing.getOpposite());
