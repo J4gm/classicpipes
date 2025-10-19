@@ -102,7 +102,7 @@ public class MiscUtil {
     public static void mergeStackIntoList(List<ItemStack> list, ItemStack stack) {
         boolean matched = false;
         for (ItemStack listStack : list) {
-            if (ItemStack.isSameItemSameComponents(listStack, stack)) {
+            if (ItemStack.isSameItemSameTags(listStack, stack)) {
                 listStack.grow(stack.getCount());
                 matched = true;
                 break;

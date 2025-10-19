@@ -25,7 +25,7 @@ public class RequestState {
         int amount = 0;
         if (this.itemsToWithdraw.containsKey(providerPipe)) {
             for (ItemStack withdrawStack : this.itemsToWithdraw.get(providerPipe)) {
-                if (ItemStack.isSameItemSameComponents(withdrawStack, stack)) {
+                if (ItemStack.isSameItemSameTags(withdrawStack, stack)) {
                     amount += withdrawStack.getCount();
                 }
             }
@@ -69,7 +69,7 @@ public class RequestState {
 
     public void reduceMissingStacks(int targetSize) {
         while (this.missingStacks.size() > targetSize) {
-            this.missingStacks.removeLast();
+            this.missingStacks.remove(this.missingStacks.size() - 1);
         }
     }
 
