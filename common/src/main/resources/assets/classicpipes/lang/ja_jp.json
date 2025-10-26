@@ -51,7 +51,7 @@
   "item.classicpipes.wooden_pipe.desc": "基本的なアイテムパイプ",
   "item.classicpipes.golden_pipe.desc": "アイテムを加速させます。",
   "item.classicpipes.copper_pipe.desc": "コンテナからアイテムを取り出します。",
-  "item.classicpipes.iron_pipe.desc": "アイテムを一方向に送ります。",
+  "item.classicpipes.iron_pipe.desc": "アイテムを1方向に送ります。",
   "item.classicpipes.diamond_pipe.desc": "アイテムを仕分けます。",
   "item.classicpipes.flint_pipe.desc": "アイテムをディスペンサーのように放出します。",
   "item.classicpipes.brick_pipe.desc": "コンテナに接続できません。",
@@ -73,7 +73,7 @@
   "item.classicpipes.mod_label.desc": "オフハンドにアイテムを持って使用すると、そのアイテムがModフィルターに設定されます。",
   "item.classicpipes.wooden_fluid_pipe.desc": "基本的な液体パイプ",
   "item.classicpipes.copper_fluid_pipe.desc": "タンクから液体を取り出します。",
-  "item.classicpipes.iron_fluid_pipe.desc": "液体を一方向に送ります。",
+  "item.classicpipes.iron_fluid_pipe.desc": "液体を1方向に送ります。",
   "item.classicpipes.diamond_fluid_pipe.desc": "液体を仕分けます。",
   "item.classicpipes.brick_fluid_pipe.desc": "タンクに接続できません。",
   "item.classicpipes.lapis_fluid_pipe.desc": "液体を優先してタンクに入れます。",
@@ -152,9 +152,12 @@
   "advancements.classicpipes.obtain_pipe.title": "パイプに呼ばれて",
   "advancements.classicpipes.obtain_pipe.description": "パイプを手に入れる",
   "advancements.classicpipes.request_item.title": "何かリクエストはある？",
-  "advancements.classicpipes.request_item.description": "リクエストパイプを使用して、ネットワークからアイテムを取り出す。",
-  "advancements.classicpipes.autocraft_recipe_pipe.title": "なんてひねくれてやがる",
+  "advancements.classicpipes.request_item.description": "リクエストパイプを使用して、ネットワークからアイテムを取り出す",
+  "advancements.classicpipes.autocraft_recipe_pipe.title": "ひねくレシピ",
   "advancements.classicpipes.autocraft_recipe_pipe.description": "レシピパイプを利用してレシピパイプを作成する",
   "advancements.classicpipes.autocraft_eight_steps.title": "物流王",
-  "advancements.classicpipes.autocraft_eight_steps.description": "クラフト工程が8工程以上必要なアイテムをリクエストする"
+  "advancements.classicpipes.autocraft_eight_steps.description": "クラフト工程が8工程以上必要なアイテムをリクエストする",
+  "widget.classicpipes.blocking_mode": "1つずつ処理",
+  "tooltip.classicpipes.blocking_mode": "これにチェックを入れると、前回の処理結果が届くまで材料を保持します。",
+  "stat.classicpipes.items_requested": "パイプネットワークからのリクエストアイテム"
 }
