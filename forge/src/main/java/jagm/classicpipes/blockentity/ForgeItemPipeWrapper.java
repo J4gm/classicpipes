@@ -44,7 +44,7 @@ public class ForgeItemPipeWrapper implements IItemHandler {
 
     @Override
     public boolean isItemValid(int slot, ItemStack stack) {
-        return this.pipe.isPipeConnected(this.pipe.getBlockState(), this.side);
+        return this.side != null && this.pipe.isPipeConnected(this.pipe.getBlockState(), this.side);
     }
 
 }
