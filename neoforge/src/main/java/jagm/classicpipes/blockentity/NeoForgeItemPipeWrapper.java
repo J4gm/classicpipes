@@ -37,7 +37,7 @@ public class NeoForgeItemPipeWrapper implements ResourceHandler<ItemResource> {
 
     @Override
     public boolean isValid(int slot, ItemResource itemResource) {
-        return this.pipe.isPipeConnected(this.pipe.getBlockState(), this.side);
+        return this.side != null && this.pipe.isPipeConnected(this.pipe.getBlockState(), this.side);
     }
 
     @Override

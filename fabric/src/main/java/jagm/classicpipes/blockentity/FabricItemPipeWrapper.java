@@ -21,7 +21,7 @@ public class FabricItemPipeWrapper implements Storage<ItemVariant>, StorageView<
 
     @Override
     public boolean supportsInsertion() {
-        return this.pipe.isPipeConnected(this.pipe.getBlockState(), this.side);
+        return this.side != null && this.pipe.isPipeConnected(this.pipe.getBlockState(), this.side);
     }
 
     @Override

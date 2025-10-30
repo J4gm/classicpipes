@@ -39,7 +39,7 @@ public class NeoForgeFluidPipeWrapper implements ResourceHandler<FluidResource> 
 
     @Override
     public boolean isValid(int tank, FluidResource fluidResource) {
-        return this.pipe.isPipeConnected(this.pipe.getBlockState(), this.side);
+        return this.side != null && this.pipe.isPipeConnected(this.pipe.getBlockState(), this.side);
     }
 
     @Override

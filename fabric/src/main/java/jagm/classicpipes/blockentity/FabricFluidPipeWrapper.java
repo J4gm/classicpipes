@@ -24,7 +24,7 @@ public class FabricFluidPipeWrapper implements Storage<FluidVariant>, StorageVie
 
     @Override
     public boolean supportsInsertion() {
-        return this.pipe.isPipeConnected(this.pipe.getBlockState(), this.side);
+        return this.side != null && this.pipe.isPipeConnected(this.pipe.getBlockState(), this.side);
     }
 
     @Override
