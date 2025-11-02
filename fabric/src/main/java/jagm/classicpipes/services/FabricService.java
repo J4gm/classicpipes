@@ -244,11 +244,14 @@ public class FabricService implements LoaderService {
         Direction face = fluidPacket.getTargetDirection().getOpposite();
         Storage<FluidVariant> fluidHandler = FluidStorage.SIDED.find(level, containerPos, containerEntity.getBlockState(), containerEntity, face);
         if (fluidHandler != null && fluidHandler.supportsInsertion()) {
-            long inserted;
+            long inserted = 0;
             long amount = fluidPacket.getAmount() * FabricEntrypoint.FLUID_CONVERSION_RATE;
             try (Transaction transaction = Transaction.openOuter()) {
-                inserted = fluidHandler.insert(FluidVariant.of(fluid), amount, transaction);
-                transaction.commit();
+                FluidVariant fluidVariant = FluidVariant.of(fluid);
+                if (!fluidVariant.isBlank()) {
+                    inserted = fluidHandler.insert(FluidVariant.of(fluid), amount, transaction);
+                    transaction.commit();
+                }
             }
             if (inserted >= amount) {
                 return true;
@@ -283,7 +286,10 @@ public class FabricService implements LoaderService {
             try (Transaction transaction = Transaction.openOuter()) {
                 long amountToExtract = Math.min(amount, pipe.remainingCapacity()) * FabricEntrypoint.FLUID_CONVERSION_RATE;
                 if (predicate.test(pipe.getFluid())) {
-                    extracted = fluidHandler.extract(FluidVariant.of(pipe.getFluid()), amountToExtract, transaction);
+                    FluidVariant fluidVariant = FluidVariant.of(pipe.getFluid());
+                    if (!fluidVariant.isBlank()) {
+                        extracted = fluidHandler.extract(FluidVariant.of(pipe.getFluid()), amountToExtract, transaction);
+                    }
                 }
                 if (extracted <= 0 && pipe.isEmpty()) {
                     Iterator<StorageView<FluidVariant>> iterator = fluidHandler.nonEmptyIterator();
