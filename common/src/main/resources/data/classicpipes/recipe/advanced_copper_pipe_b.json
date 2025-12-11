@@ -3,7 +3,7 @@
   "category": "misc",
   "key": {
     "O": "classicpipes:copper_pipe",
-    "W": "minecraft:netherite_ingot"
+    "W": "minecraft:diamond"
   },
   "pattern": [
     "OOO",
