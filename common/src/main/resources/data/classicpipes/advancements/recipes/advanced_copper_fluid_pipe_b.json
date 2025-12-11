@@ -5,7 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": ["minecraft:netherite_ingot"]
+            "items": ["classicpipes:copper_fluid_pipe"]
           }
         ]
       },
