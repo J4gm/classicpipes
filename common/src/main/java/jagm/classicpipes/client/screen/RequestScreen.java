@@ -86,14 +86,14 @@ public class RequestScreen extends AbstractContainerScreen<RequestMenu> {
     }
 
     private Slot getHoveredSlot(double mouseX, double mouseY) {
-        Iterator<Slot> var5 = this.menu.displaySlots.iterator();
+        Iterator<Slot> iterator = this.menu.displaySlots.iterator();
         Slot slot;
         do {
-            if (!var5.hasNext()) {
+            if (!iterator.hasNext()) {
                 return null;
             }
-            slot = var5.next();
-        } while(!slot.isActive() || !this.isHovering(slot.x, slot.y, 16, 16, mouseX, mouseY));
+            slot = iterator.next();
+        } while (!slot.isActive() || !this.isHovering(slot.x, slot.y, 16, 16, mouseX, mouseY));
         return slot;
     }
 
@@ -187,6 +187,7 @@ public class RequestScreen extends AbstractContainerScreen<RequestMenu> {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        this.setFocused(null);
         Slot slot = this.getHoveredSlot(mouseX, mouseY);
         if (slot != null) {
             ItemStack toRequest = slot.getItem();
