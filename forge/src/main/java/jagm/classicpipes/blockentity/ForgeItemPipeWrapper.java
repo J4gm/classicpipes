@@ -26,10 +26,13 @@ public class ForgeItemPipeWrapper implements IItemHandler {
 
     @Override
     public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
-        if (!simulate && this.isItemValid(slot, stack)) {
-            this.pipe.setItem(this.side, stack);
+        if (this.isItemValid(slot, stack)) {
+            if (!simulate) {
+                this.pipe.setItem(this.side, stack);
+            }
+            return ItemStack.EMPTY;
         }
-        return ItemStack.EMPTY;
+        return stack;
     }
 
     @Override
