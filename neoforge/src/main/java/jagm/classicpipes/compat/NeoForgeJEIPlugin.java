@@ -21,7 +21,7 @@ import mezz.jei.api.recipe.transfer.IUniversalRecipeTransferHandler;
 import mezz.jei.api.registration.IGuiHandlerRegistration;
 import mezz.jei.api.registration.IRecipeTransferRegistration;
 import net.minecraft.client.renderer.Rect2i;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
@@ -38,8 +38,8 @@ import java.util.Optional;
 public class NeoForgeJEIPlugin implements IModPlugin {
 
     @Override
-    public ResourceLocation getPluginUid() {
-        return MiscUtil.resourceLocation("jei_plugin");
+    public Identifier getPluginUid() {
+        return MiscUtil.identifier("jei_plugin");
     }
 
     @Override

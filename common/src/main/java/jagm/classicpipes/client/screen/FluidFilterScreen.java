@@ -22,7 +22,7 @@ public abstract class FluidFilterScreen<T extends FluidFilterMenu> extends Filte
     }
 
     @Override
-    protected void renderSlot(GuiGraphics graphics, Slot slot) {
+    protected void renderSlot(GuiGraphics graphics, Slot slot, int x, int y) {
         if (slot.container instanceof Filter && slot.hasItem()) {
             Fluid fluid = Services.LOADER_SERVICE.getFluidFromStack(slot.getItem());
             if (fluid != null) {
@@ -32,7 +32,7 @@ public abstract class FluidFilterScreen<T extends FluidFilterMenu> extends Filte
                 return;
             }
         }
-        super.renderSlot(graphics, slot);
+        super.renderSlot(graphics, slot, x, y);
     }
 
     @Override

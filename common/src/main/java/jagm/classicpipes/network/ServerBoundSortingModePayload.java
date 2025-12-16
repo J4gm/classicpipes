@@ -13,7 +13,7 @@ import net.minecraft.world.entity.player.Player;
 
 public record ServerBoundSortingModePayload(SortingMode sortingMode) implements SelfHandler {
 
-    public static final CustomPacketPayload.Type<ServerBoundSortingModePayload> TYPE = new CustomPacketPayload.Type<>(MiscUtil.resourceLocation("sorting_mode"));
+    public static final CustomPacketPayload.Type<ServerBoundSortingModePayload> TYPE = new CustomPacketPayload.Type<>(MiscUtil.identifier("sorting_mode"));
     public static final StreamCodec<RegistryFriendlyByteBuf, ServerBoundSortingModePayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.BYTE,
             payload -> payload.sortingMode().getValue(),

@@ -6,12 +6,12 @@ import jagm.classicpipes.block.FluidPipeBlock;
 import jagm.classicpipes.blockentity.FluidPipeEntity;
 import jagm.classicpipes.services.Services;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
@@ -51,7 +51,7 @@ public class FluidPipeRenderer implements BlockEntityRenderer<FluidPipeEntity, F
         poses.pushPose();
         if (pipeState.width() > 0.01F) {
             TextureAtlasSprite fluidSprite = pipeState.fluidInfo().sprite() == null ? Minecraft.getInstance().getBlockRenderer().getBlockModelShaper().getParticleIcon(Blocks.WATER.defaultBlockState()) : pipeState.fluidInfo().sprite();
-            queue.submitCustomGeometry(poses, RenderType.text(fluidSprite.atlasLocation()), ((pose, vertexBuffer) -> {
+            queue.submitCustomGeometry(poses, RenderTypes.text(fluidSprite.atlasLocation()), ((pose, vertexBuffer) -> {
                 Matrix4f matrix = pose.pose();
                 float start = 0.5F - pipeState.width() / 2;
                 float end = 0.5F + pipeState.width() / 2;

@@ -15,12 +15,12 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 
 public class RecipePipeScreen extends FilterScreen<RecipePipeMenu> {
 
-    private static final ResourceLocation BACKGROUND = MiscUtil.resourceLocation("textures/gui/container/recipe_pipe.png");
+    private static final Identifier BACKGROUND = MiscUtil.identifier("textures/gui/container/recipe_pipe.png");
     private static final ChatFormatting[] DIRECTION_COLOURS = new ChatFormatting[]{ChatFormatting.LIGHT_PURPLE, ChatFormatting.GREEN, ChatFormatting.YELLOW, ChatFormatting.BLUE, ChatFormatting.GRAY, ChatFormatting.RED};
 
     private final Button[] slotDirectionButtons;
@@ -71,7 +71,7 @@ public class RecipePipeScreen extends FilterScreen<RecipePipeMenu> {
     }
 
     private void cycleSlotDirection(int slot) {
-        Direction newDirection = this.minecraft != null && this.minecraft.hasShiftDown() ? this.menu.prevDirection(this.menu.getSlotDirection(slot)) : this.menu.nextDirection(this.menu.getSlotDirection(slot));
+        Direction newDirection = this.minecraft.hasShiftDown() ? this.menu.prevDirection(this.menu.getSlotDirection(slot)) : this.menu.nextDirection(this.menu.getSlotDirection(slot));
         this.menu.setSlotDirection(slot, newDirection);
         this.buttonsNeedUpdate = true;
         Services.LOADER_SERVICE.sendToServer(new ServerBoundSlotDirectionPayload(this.menu.getPos(), slot, newDirection));

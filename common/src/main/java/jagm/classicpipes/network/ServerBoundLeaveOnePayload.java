@@ -11,7 +11,7 @@ import net.minecraft.world.entity.player.Player;
 
 public record ServerBoundLeaveOnePayload(boolean leaveOne) implements SelfHandler {
 
-    public static final Type<ServerBoundLeaveOnePayload> TYPE = new Type<>(MiscUtil.resourceLocation("leave_one"));
+    public static final Type<ServerBoundLeaveOnePayload> TYPE = new Type<>(MiscUtil.identifier("leave_one"));
     public static final StreamCodec<RegistryFriendlyByteBuf, ServerBoundLeaveOnePayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.BOOL,
             ServerBoundLeaveOnePayload::leaveOne,

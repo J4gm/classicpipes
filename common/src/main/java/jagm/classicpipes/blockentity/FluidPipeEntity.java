@@ -9,6 +9,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -176,7 +177,7 @@ public class FluidPipeEntity extends PipeEntity {
         FluidState fluidState = this.fluid.defaultFluidState();
         if (fluidState.is(ClassicPipes.THIN_FLUIDS)) {
             return ItemInPipe.DEFAULT_SPEED * 4;
-        } else if (fluidState.is(ClassicPipes.THICK_FLUIDS) && this.level != null && !this.level.dimensionType().ultraWarm()) {
+        } else if (fluidState.is(ClassicPipes.THICK_FLUIDS) && this.level != null && !this.level.environmentAttributes().getDimensionValue(EnvironmentAttributes.FAST_LAVA)) {
             return ItemInPipe.DEFAULT_SPEED;
         } else {
             return ItemInPipe.DEFAULT_SPEED * 2;

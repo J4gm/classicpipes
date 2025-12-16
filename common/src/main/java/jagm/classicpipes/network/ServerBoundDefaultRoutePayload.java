@@ -11,7 +11,7 @@ import net.minecraft.world.entity.player.Player;
 
 public record ServerBoundDefaultRoutePayload(boolean defaultRoute) implements SelfHandler {
 
-    public static final Type<ServerBoundDefaultRoutePayload> TYPE = new Type<>(MiscUtil.resourceLocation("default_route"));
+    public static final Type<ServerBoundDefaultRoutePayload> TYPE = new Type<>(MiscUtil.identifier("default_route"));
     public static final StreamCodec<RegistryFriendlyByteBuf, ServerBoundDefaultRoutePayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.BOOL,
             ServerBoundDefaultRoutePayload::defaultRoute,

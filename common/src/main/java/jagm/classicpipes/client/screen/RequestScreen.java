@@ -18,7 +18,7 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
@@ -28,10 +28,10 @@ import java.util.Iterator;
 
 public class RequestScreen extends AbstractContainerScreen<RequestMenu> {
 
-    private static final ResourceLocation BACKGROUND = MiscUtil.resourceLocation("textures/gui/container/request.png");
-    private static final WidgetSprites X_BUTTON = new WidgetSprites(MiscUtil.resourceLocation("widget/x"), MiscUtil.resourceLocation("widget/x_hovered"));
-    private static final ResourceLocation SLOT_HIGHLIGHT_BACK_SPRITE = ResourceLocation.withDefaultNamespace("container/slot_highlight_back");
-    private static final ResourceLocation SLOT_HIGHLIGHT_FRONT_SPRITE = ResourceLocation.withDefaultNamespace("container/slot_highlight_front");
+    private static final Identifier BACKGROUND = MiscUtil.identifier("textures/gui/container/request.png");
+    private static final WidgetSprites X_BUTTON = new WidgetSprites(MiscUtil.identifier("widget/x"), MiscUtil.identifier("widget/x_hovered"));
+    private static final Identifier SLOT_HIGHLIGHT_BACK_SPRITE = Identifier.withDefaultNamespace("container/slot_highlight_back");
+    private static final Identifier SLOT_HIGHLIGHT_FRONT_SPRITE = Identifier.withDefaultNamespace("container/slot_highlight_front");
 
     private EditBox searchBar;
     private PageButton prev_page;
@@ -90,7 +90,7 @@ public class RequestScreen extends AbstractContainerScreen<RequestMenu> {
         if (this.hoveredSlot != null && this.hoveredSlot.isHighlightable()) {
             graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT_HIGHLIGHT_BACK_SPRITE, this.hoveredSlot.x - 4, this.hoveredSlot.y - 4, 24, 24);
         }
-        this.renderSlots(graphics);
+        this.renderSlots(graphics, mouseX, mouseY);
         if (this.hoveredSlot != null && this.hoveredSlot.isHighlightable()) {
             graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT_HIGHLIGHT_FRONT_SPRITE, this.hoveredSlot.x - 4, this.hoveredSlot.y - 4, 24, 24);
         }
@@ -110,10 +110,10 @@ public class RequestScreen extends AbstractContainerScreen<RequestMenu> {
     }
 
     @Override
-    protected void renderSlots(GuiGraphics graphics) {
+    protected void renderSlots(GuiGraphics graphics, int x, int y) {
         for (Slot slot : this.menu.displaySlots) {
             if (slot.isActive()) {
-                this.renderSlot(graphics, slot);
+                this.renderSlot(graphics, slot, x, y);
             }
         }
     }
@@ -135,7 +135,7 @@ public class RequestScreen extends AbstractContainerScreen<RequestMenu> {
     }
 
     @Override
-    protected void renderSlot(GuiGraphics graphics, Slot slot) {
+    protected void renderSlot(GuiGraphics graphics, Slot slot, int x, int y) {
         ItemStack stack = slot.getItem();
         int seed = slot.x + slot.y * this.imageWidth;
         graphics.renderItem(stack, slot.x, slot.y, seed);
@@ -161,13 +161,11 @@ public class RequestScreen extends AbstractContainerScreen<RequestMenu> {
         String s = stringForCount(count);
         int colour = colourForCount(count);
         float countScale = 1.0F;
-        if (this.minecraft != null) {
-            final int guiScale = this.minecraft.getWindow().getGuiScale();
-            int numerator = guiScale;
-            while (font.width(s) * countScale > 16 && numerator > 1) {
-                numerator--;
-                countScale = (float) numerator / guiScale;
-            }
+        final int guiScale = this.minecraft.getWindow().getGuiScale();
+        int numerator = guiScale;
+        while (font.width(s) * countScale > 16 && numerator > 1) {
+            numerator--;
+            countScale = (float) numerator / guiScale;
         }
         int slotOffset = countScale == 1.0F ? 17 : 16;
         graphics.pose().pushMatrix();
@@ -216,7 +214,7 @@ public class RequestScreen extends AbstractContainerScreen<RequestMenu> {
                         toRequest.shrink(amount);
                         this.menu.update();
                     }
-                } else if (this.minecraft != null) {
+                } else {
                     this.minecraft.setScreen(new RequestAmountScreen(toRequest, this, craftable));
                 }
             }
@@ -231,7 +229,7 @@ public class RequestScreen extends AbstractContainerScreen<RequestMenu> {
 
     @Override
     public boolean keyPressed(KeyEvent event) {
-        if (event.input() == 256 && this.minecraft != null && this.minecraft.player != null) {
+        if (event.input() == 256 && this.minecraft.player != null) {
             this.minecraft.player.closeContainer();
         }
         return this.searchBar.keyPressed(event) || this.searchBar.canConsumeInput() || super.keyPressed(event);
@@ -258,7 +256,7 @@ public class RequestScreen extends AbstractContainerScreen<RequestMenu> {
     }
 
     private void changeSortType(Button button) {
-        SortingMode nextMode = this.minecraft != null && this.minecraft.hasShiftDown() ? this.menu.getSortingMode().prevType() : this.menu.getSortingMode().nextType();
+        SortingMode nextMode = this.minecraft.hasShiftDown() ? this.menu.getSortingMode().prevType() : this.menu.getSortingMode().nextType();
         this.sort_type.setMessage(nextMode.getType());
         this.sort_direction.setMessage(nextMode.getDirection());
         this.menu.setSortingMode(nextMode);

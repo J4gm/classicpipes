@@ -12,7 +12,7 @@ import net.minecraft.world.entity.player.Player;
 
 public record ServerBoundSlotDirectionPayload(BlockPos pos, int slot, Direction direction) implements SelfHandler {
 
-    public static final CustomPacketPayload.Type<ServerBoundSlotDirectionPayload> TYPE = new CustomPacketPayload.Type<>(MiscUtil.resourceLocation("slot_direction"));
+    public static final CustomPacketPayload.Type<ServerBoundSlotDirectionPayload> TYPE = new CustomPacketPayload.Type<>(MiscUtil.identifier("slot_direction"));
     public static final StreamCodec<RegistryFriendlyByteBuf, ServerBoundSlotDirectionPayload> STREAM_CODEC = StreamCodec.composite(
             BlockPos.STREAM_CODEC,
             ServerBoundSlotDirectionPayload::pos,

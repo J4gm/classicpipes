@@ -5,16 +5,16 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.CommonComponents;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class PageButton extends Button {
 
-    private static final ResourceLocation PREV_GREYED = MiscUtil.resourceLocation("widget/prev_page_greyed");
-    private static final ResourceLocation PREV_NORMAL = MiscUtil.resourceLocation("widget/prev_page");
-    private static final ResourceLocation PREV_SELECT = MiscUtil.resourceLocation("widget/prev_page_hovered");
-    private static final ResourceLocation NEXT_GREYED = MiscUtil.resourceLocation("widget/next_page_greyed");
-    private static final ResourceLocation NEXT_NORMAL = MiscUtil.resourceLocation("widget/next_page");
-    private static final ResourceLocation NEXT_SELECT = MiscUtil.resourceLocation("widget/next_page_hovered");
+    private static final Identifier PREV_GREYED = MiscUtil.identifier("widget/prev_page_greyed");
+    private static final Identifier PREV_NORMAL = MiscUtil.identifier("widget/prev_page");
+    private static final Identifier PREV_SELECT = MiscUtil.identifier("widget/prev_page_hovered");
+    private static final Identifier NEXT_GREYED = MiscUtil.identifier("widget/next_page_greyed");
+    private static final Identifier NEXT_NORMAL = MiscUtil.identifier("widget/next_page");
+    private static final Identifier NEXT_SELECT = MiscUtil.identifier("widget/next_page_hovered");
 
     private final boolean prev;
 
@@ -25,8 +25,8 @@ public class PageButton extends Button {
     }
 
     @Override
-    public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        ResourceLocation sprite = this.prev ?
+    public void renderContents(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        Identifier sprite = this.prev ?
                 (!this.active ? PREV_GREYED : (this.isHovered() ? PREV_SELECT : PREV_NORMAL)) :
                 (!this.active ? NEXT_GREYED : (this.isHovered() ? NEXT_SELECT : NEXT_NORMAL));
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, this.getX(), this.getY(), this.width, this.height);

@@ -3,12 +3,12 @@ package jagm.classicpipes.inventory.menu;
 import jagm.classicpipes.ClassicPipes;
 import jagm.classicpipes.inventory.container.DirectionalFilterContainer;
 import jagm.classicpipes.util.MiscUtil;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 
 public class DiamondFluidPipeMenu extends FluidFilterMenu {
 
-    private static final ResourceLocation EMPTY_SLOT = MiscUtil.resourceLocation("container/slot/fluid");
+    private static final Identifier EMPTY_SLOT = MiscUtil.identifier("container/slot/fluid");
 
     public DiamondFluidPipeMenu(int id, Inventory playerInventory) {
         this(id, playerInventory, new DirectionalFilterContainer(null, false));
@@ -22,7 +22,7 @@ public class DiamondFluidPipeMenu extends FluidFilterMenu {
                 this.addSlot(new FilterSlot(filter, j + i * 9, 8 + j * 18, 18 + i * 18) {
 
                     @Override
-                    public ResourceLocation getNoItemIcon() {
+                    public Identifier getNoItemIcon() {
                         return column == 0 ? EMPTY_SLOT : null;
                     }
 

@@ -17,8 +17,8 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.stats.StatFormatter;
 import net.minecraft.stats.Stats;
@@ -137,8 +137,8 @@ public class ClassicPipes {
 
     public static final RequestItemTrigger REQUEST_ITEM_TRIGGER = new RequestItemTrigger();
 
-    public static final TagKey<Fluid> THIN_FLUIDS = TagKey.create(Registries.FLUID, MiscUtil.resourceLocation("thin"));
-    public static final TagKey<Fluid> THICK_FLUIDS = TagKey.create(Registries.FLUID, MiscUtil.resourceLocation("thick"));
+    public static final TagKey<Fluid> THIN_FLUIDS = TagKey.create(Registries.FLUID, MiscUtil.identifier("thin"));
+    public static final TagKey<Fluid> THICK_FLUIDS = TagKey.create(Registries.FLUID, MiscUtil.identifier("thick"));
 
     public static final SoundEvent PIPE_EJECT_SOUND = createSoundEvent("pipe_eject");
     public static final SoundEvent PIPE_ADJUST_SOUND = createSoundEvent("pipe_adjust");
@@ -160,7 +160,7 @@ public class ClassicPipes {
     public static final MenuType<AdvancedCopperPipeMenu> ADVANCED_COPPER_PIPE_MENU = Services.LOADER_SERVICE.createMenuType(AdvancedCopperPipeMenu::new, ClientBoundBoolPayload.STREAM_CODEC);
     public static final MenuType<AdvancedCopperFluidPipeMenu> ADVANCED_COPPER_FLUID_PIPE_MENU = Services.LOADER_SERVICE.createSimpleMenuType(AdvancedCopperFluidPipeMenu::new);
 
-    public static final ResourceLocation ITEMS_REQUESTED_STAT = MiscUtil.resourceLocation("items_requested");
+    public static final Identifier ITEMS_REQUESTED_STAT = MiscUtil.identifier("items_requested");
 
     private static Item createItem(String name, Function<Item.Properties, Item> factory, int stackSize, boolean fashionable, Component... lore) {
         Item.Properties props = new Item.Properties().setId(MiscUtil.makeKey(Registries.ITEM, name));
@@ -200,7 +200,7 @@ public class ClassicPipes {
     }
 
     private static SoundEvent createSoundEvent(String name) {
-        SoundEvent soundEvent = SoundEvent.createVariableRangeEvent(MiscUtil.resourceLocation(name));
+        SoundEvent soundEvent = SoundEvent.createVariableRangeEvent(MiscUtil.identifier(name));
         SOUNDS.put(name, soundEvent);
         return soundEvent;
     }

@@ -11,7 +11,7 @@ import net.minecraftforge.network.SimpleChannel;
 
 public class ForgeServerPacketHandler {
 
-    public static final SimpleChannel INSTANCE = ChannelBuilder.named(MiscUtil.resourceLocation("main")).simpleChannel();
+    public static final SimpleChannel INSTANCE = ChannelBuilder.named(MiscUtil.identifier("main")).simpleChannel();
 
     public static <T extends SelfHandler> void registerServerPayload(Class<T> clazz, StreamCodec<RegistryFriendlyByteBuf, T> codec) {
         INSTANCE.play().serverbound().add(clazz, codec, (payload, context) -> {

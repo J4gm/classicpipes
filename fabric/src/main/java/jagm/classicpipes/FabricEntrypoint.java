@@ -29,12 +29,12 @@ public class FabricEntrypoint implements ModInitializer {
     @Override
     public void onInitialize() {
 
-        ClassicPipes.ITEMS.forEach((name, item) -> Registry.register(BuiltInRegistries.ITEM, MiscUtil.resourceLocation(name), item));
-        ClassicPipes.BLOCKS.forEach((name, block) -> Registry.register(BuiltInRegistries.BLOCK, MiscUtil.resourceLocation(name), block));
-        ClassicPipes.SOUNDS.forEach((name, soundEvent) -> Registry.register(BuiltInRegistries.SOUND_EVENT, MiscUtil.resourceLocation(name), soundEvent));
+        ClassicPipes.ITEMS.forEach((name, item) -> Registry.register(BuiltInRegistries.ITEM, MiscUtil.identifier(name), item));
+        ClassicPipes.BLOCKS.forEach((name, block) -> Registry.register(BuiltInRegistries.BLOCK, MiscUtil.identifier(name), block));
+        ClassicPipes.SOUNDS.forEach((name, soundEvent) -> Registry.register(BuiltInRegistries.SOUND_EVENT, MiscUtil.identifier(name), soundEvent));
         Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, ClassicPipes.PIPES_TAB_KEY, ClassicPipes.PIPES_TAB);
         Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, ClassicPipes.LABEL_COMPONENT_KEY, ClassicPipes.LABEL_COMPONENT);
-        Registry.register(BuiltInRegistries.TRIGGER_TYPES, MiscUtil.resourceLocation("request_item"), ClassicPipes.REQUEST_ITEM_TRIGGER);
+        Registry.register(BuiltInRegistries.TRIGGER_TYPES, MiscUtil.identifier("request_item"), ClassicPipes.REQUEST_ITEM_TRIGGER);
         Registry.register(BuiltInRegistries.CUSTOM_STAT, ClassicPipes.ITEMS_REQUESTED_STAT, ClassicPipes.ITEMS_REQUESTED_STAT);
         ClassicPipes.createStats();
 
@@ -118,11 +118,11 @@ public class FabricEntrypoint implements ModInitializer {
     }
 
     private static <T extends BlockEntity> void registerBlockEntity(String name, BlockEntityType<T> blockEntityType) {
-        Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, MiscUtil.resourceLocation(name), blockEntityType);
+        Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, MiscUtil.identifier(name), blockEntityType);
     }
 
     private static <T extends AbstractContainerMenu> void registerMenu(String name, MenuType<T> menuType) {
-        Registry.register(BuiltInRegistries.MENU, MiscUtil.resourceLocation(name), menuType);
+        Registry.register(BuiltInRegistries.MENU, MiscUtil.identifier(name), menuType);
     }
 
     private static <T extends SelfHandler> void registerServerPayload(CustomPacketPayload.Type<T> type, StreamCodec<RegistryFriendlyByteBuf, T> codec) {

@@ -12,7 +12,7 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 import net.minecraft.world.item.ItemStack;
 
@@ -23,7 +23,7 @@ public class RequestAmountScreen extends Screen {
     private static final int ITEM_X = 62;
     private static final int ITEM_Y = 36;
     private static final int MAX_REQUEST = 999;
-    private static final ResourceLocation BACKGROUND = MiscUtil.resourceLocation("textures/gui/container/request_amount.png");
+    private static final Identifier BACKGROUND = MiscUtil.identifier("textures/gui/container/request_amount.png");
 
     private final RequestScreen previousScreen;
     private final ItemStack stack;
@@ -47,8 +47,8 @@ public class RequestAmountScreen extends Screen {
         this.leftPos = (this.width - IMAGE_WIDTH) / 2;
         this.topPos = (this.height - IMAGE_HEIGHT) / 2;
         this.count = 1;
-        this.increase = new IncreaseButton(this.leftPos + ITEM_X + 38, this.topPos + 26, false, this.stack.getCount() > 1 || this.craftable, button -> this.changeCount(this.minecraft != null && this.minecraft.hasShiftDown() ? 10 : 1));
-        this.decrease = new IncreaseButton(this.leftPos + ITEM_X + 38, this.topPos + 54, true, false, button -> this.changeCount(this.minecraft != null && this.minecraft.hasShiftDown() ? -10 : -1));
+        this.increase = new IncreaseButton(this.leftPos + ITEM_X + 38, this.topPos + 26, false, this.stack.getCount() > 1 || this.craftable, button -> this.changeCount(this.minecraft.hasShiftDown() ? 10 : 1));
+        this.decrease = new IncreaseButton(this.leftPos + ITEM_X + 38, this.topPos + 54, true, false, button -> this.changeCount(this.minecraft.hasShiftDown() ? -10 : -1));
         this.addRenderableWidget(Button.builder(Component.translatable("widget." + ClassicPipes.MOD_ID + ".cancel"), button -> this.onClose()).bounds(this.leftPos + 16, this.topPos + 72, 70, 16).build());
         this.addRenderableWidget(Button.builder(Component.translatable("widget." + ClassicPipes.MOD_ID + ".request"), button -> {
             Services.LOADER_SERVICE.sendToServer(new ServerBoundRequestPayload(this.stack.copyWithCount(this.count), this.previousScreen.getMenu().getRequestPos()));
@@ -88,7 +88,7 @@ public class RequestAmountScreen extends Screen {
         graphics.drawString(this.font, this.title, (IMAGE_WIDTH - this.font.width(this.title)) / 2, 6, -12566464, false);
         Component countComponent = Component.literal(String.valueOf(this.count));
         graphics.drawString(this.font, countComponent, ITEM_X + 45 - this.font.width(countComponent) / 2, ITEM_Y + 4, -12566464, false);
-        if (this.isHovering(ITEM_X, ITEM_Y, 16, 16, mouseX, mouseY) && this.minecraft != null) {
+        if (this.isHovering(ITEM_X, ITEM_Y, 16, 16, mouseX, mouseY)) {
             graphics.setTooltipForNextFrame(this.font, getTooltipFromItem(this.minecraft, this.stack), this.stack.getTooltipImage(), mouseX, mouseY, this.stack.get(DataComponents.TOOLTIP_STYLE));
         }
         graphics.pose().popMatrix();
@@ -110,16 +110,14 @@ public class RequestAmountScreen extends Screen {
 
     @Override
     public void onClose() {
-        if (this.minecraft != null) {
-            this.minecraft.setScreen(this.previousScreen);
-        }
+        this.minecraft.setScreen(this.previousScreen);
     }
 
     @Override
     public boolean keyPressed(KeyEvent event) {
         if (super.keyPressed(event)) {
             return true;
-        } else if (this.minecraft != null && this.minecraft.options.keyInventory.matches(event)) {
+        } else if (this.minecraft.options.keyInventory.matches(event)) {
             this.onClose();
             return true;
         }
@@ -128,7 +126,7 @@ public class RequestAmountScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-        this.changeCount((int) (this.minecraft != null && this.minecraft.hasShiftDown() ? 10 * scrollY : scrollY));
+        this.changeCount((int) (this.minecraft.hasShiftDown() ? 10 * scrollY : scrollY));
         return true;
     }
 

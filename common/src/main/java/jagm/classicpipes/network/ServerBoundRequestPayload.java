@@ -12,7 +12,7 @@ import net.minecraft.world.item.ItemStack;
 
 public record ServerBoundRequestPayload(ItemStack stack, BlockPos requestPos) implements SelfHandler {
 
-    public static final CustomPacketPayload.Type<ServerBoundRequestPayload> TYPE = new CustomPacketPayload.Type<>(MiscUtil.resourceLocation("request"));
+    public static final CustomPacketPayload.Type<ServerBoundRequestPayload> TYPE = new CustomPacketPayload.Type<>(MiscUtil.identifier("request"));
     public static final StreamCodec<RegistryFriendlyByteBuf, ServerBoundRequestPayload> STREAM_CODEC = StreamCodec.composite(
             ItemStack.STREAM_CODEC,
             ServerBoundRequestPayload::stack,

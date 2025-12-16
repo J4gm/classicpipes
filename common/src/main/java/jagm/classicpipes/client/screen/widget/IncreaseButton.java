@@ -5,16 +5,16 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.CommonComponents;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class IncreaseButton extends Button {
 
-    private static final ResourceLocation INCREASE_GREYED = MiscUtil.resourceLocation("widget/increase_greyed");
-    private static final ResourceLocation INCREASE_NORMAL = MiscUtil.resourceLocation("widget/increase");
-    private static final ResourceLocation INCREASE_SELECT = MiscUtil.resourceLocation("widget/increase_hovered");
-    private static final ResourceLocation DECREASE_GREYED = MiscUtil.resourceLocation("widget/decrease_greyed");
-    private static final ResourceLocation DECREASE_NORMAL = MiscUtil.resourceLocation("widget/decrease");
-    private static final ResourceLocation DECREASE_SELECT = MiscUtil.resourceLocation("widget/decrease_hovered");
+    private static final Identifier INCREASE_GREYED = MiscUtil.identifier("widget/increase_greyed");
+    private static final Identifier INCREASE_NORMAL = MiscUtil.identifier("widget/increase");
+    private static final Identifier INCREASE_SELECT = MiscUtil.identifier("widget/increase_hovered");
+    private static final Identifier DECREASE_GREYED = MiscUtil.identifier("widget/decrease_greyed");
+    private static final Identifier DECREASE_NORMAL = MiscUtil.identifier("widget/decrease");
+    private static final Identifier DECREASE_SELECT = MiscUtil.identifier("widget/decrease_hovered");
 
     private final boolean decrease;
 
@@ -25,8 +25,8 @@ public class IncreaseButton extends Button {
     }
 
     @Override
-    public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        ResourceLocation sprite = this.decrease ?
+    public void renderContents(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        Identifier sprite = this.decrease ?
                 (!this.active ? DECREASE_GREYED : (this.isHovered() ? DECREASE_SELECT : DECREASE_NORMAL)) :
                 (!this.active ? INCREASE_GREYED : (this.isHovered() ? INCREASE_SELECT : INCREASE_NORMAL));
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, this.getX(), this.getY(), this.width, this.height);

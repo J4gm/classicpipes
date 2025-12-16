@@ -12,8 +12,8 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.ItemStackWithSlot;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -45,12 +45,12 @@ public class MiscUtil {
             ItemStackWithSlot::new
     );
 
-    public static ResourceLocation resourceLocation(String name) {
-        return ResourceLocation.fromNamespaceAndPath(ClassicPipes.MOD_ID, name);
+    public static Identifier identifier(String name) {
+        return Identifier.fromNamespaceAndPath(ClassicPipes.MOD_ID, name);
     }
 
     public static <T> ResourceKey<T> makeKey(ResourceKey<? extends Registry<T>> registry, String name) {
-        return ResourceKey.create(registry, resourceLocation(name));
+        return ResourceKey.create(registry, identifier(name));
     }
 
     public static Direction nextDirection(Direction direction) {

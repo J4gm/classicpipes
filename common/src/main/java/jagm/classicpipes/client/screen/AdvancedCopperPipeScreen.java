@@ -9,12 +9,12 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 
 public class AdvancedCopperPipeScreen extends FilterScreen<AdvancedCopperPipeMenu> {
 
-    private static final ResourceLocation BACKGROUND = MiscUtil.resourceLocation("textures/gui/container/networked_pipe.png");
+    private static final Identifier BACKGROUND = MiscUtil.identifier("textures/gui/container/networked_pipe.png");
 
     public AdvancedCopperPipeScreen(AdvancedCopperPipeMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);

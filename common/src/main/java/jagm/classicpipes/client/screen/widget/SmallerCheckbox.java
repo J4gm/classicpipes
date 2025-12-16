@@ -11,13 +11,13 @@ import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 
 public class SmallerCheckbox extends AbstractButton {
 
-    private static final ResourceLocation CHECKBOX_SELECTED_SPRITE = MiscUtil.resourceLocation("widget/checkbox_selected");
-    private static final ResourceLocation CHECKBOX_SPRITE = MiscUtil.resourceLocation("widget/checkbox");
+    private static final Identifier CHECKBOX_SELECTED_SPRITE = MiscUtil.identifier("widget/checkbox_selected");
+    private static final Identifier CHECKBOX_SPRITE = MiscUtil.identifier("widget/checkbox");
     public static final int SIZE = 12;
 
     private boolean selected;
@@ -63,8 +63,8 @@ public class SmallerCheckbox extends AbstractButton {
     }
 
     @Override
-    public void renderWidget(GuiGraphics graphics, int x, int y, float f) {
-        ResourceLocation spriteLocation = this.selected() ? CHECKBOX_SELECTED_SPRITE : CHECKBOX_SPRITE;
+    public void renderContents(GuiGraphics graphics, int x, int y, float partialTicks) {
+        Identifier spriteLocation = this.selected() ? CHECKBOX_SELECTED_SPRITE : CHECKBOX_SPRITE;
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, spriteLocation, this.getX(), this.getY(), SIZE, SIZE, ARGB.white(this.alpha));
         graphics.drawString(this.font, this.label, this.getX() + SIZE + 2, this.getY() + 3, -12566464, false);
     }

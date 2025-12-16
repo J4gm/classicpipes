@@ -10,7 +10,7 @@ import net.minecraft.world.entity.player.Player;
 
 public record ServerBoundBlockingModePayload(boolean blockingMode) implements SelfHandler {
 
-    public static final Type<ServerBoundBlockingModePayload> TYPE = new Type<>(MiscUtil.resourceLocation("blocking_mode"));
+    public static final Type<ServerBoundBlockingModePayload> TYPE = new Type<>(MiscUtil.identifier("blocking_mode"));
     public static final StreamCodec<RegistryFriendlyByteBuf, ServerBoundBlockingModePayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.BOOL,
             ServerBoundBlockingModePayload::blockingMode,

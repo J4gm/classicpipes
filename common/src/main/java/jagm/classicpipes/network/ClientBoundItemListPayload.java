@@ -16,7 +16,7 @@ import java.util.List;
 
 public record ClientBoundItemListPayload(List<ItemStack> existingItems, List<ItemStack> craftableItems, SortingMode sortingMode, BlockPos networkPos, BlockPos requestPos) implements SelfHandler {
 
-    public static final Type<ClientBoundItemListPayload> TYPE = new Type<>(MiscUtil.resourceLocation("item_list"));
+    public static final Type<ClientBoundItemListPayload> TYPE = new Type<>(MiscUtil.identifier("item_list"));
     public static final StreamCodec<RegistryFriendlyByteBuf, ClientBoundItemListPayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.collection(ArrayList::new, ItemStack.STREAM_CODEC),
             ClientBoundItemListPayload::existingItems,

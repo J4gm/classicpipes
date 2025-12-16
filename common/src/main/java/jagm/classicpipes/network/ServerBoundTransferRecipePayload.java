@@ -14,7 +14,7 @@ import java.util.List;
 
 public record ServerBoundTransferRecipePayload(List<ItemStack> recipe, List<Integer> slots) implements SelfHandler {
 
-    public static final Type<ServerBoundTransferRecipePayload> TYPE = new Type<>(MiscUtil.resourceLocation("transfer_recipe"));
+    public static final Type<ServerBoundTransferRecipePayload> TYPE = new Type<>(MiscUtil.identifier("transfer_recipe"));
     public static final StreamCodec<RegistryFriendlyByteBuf, ServerBoundTransferRecipePayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.collection(ArrayList::new, ItemStack.STREAM_CODEC),
             ServerBoundTransferRecipePayload::recipe,

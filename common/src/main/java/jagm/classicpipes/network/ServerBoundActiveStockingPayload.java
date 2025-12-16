@@ -10,7 +10,7 @@ import net.minecraft.world.entity.player.Player;
 
 public record ServerBoundActiveStockingPayload(boolean activeStocking) implements SelfHandler {
 
-    public static final Type<ServerBoundActiveStockingPayload> TYPE = new Type<>(MiscUtil.resourceLocation("active_stocking"));
+    public static final Type<ServerBoundActiveStockingPayload> TYPE = new Type<>(MiscUtil.identifier("active_stocking"));
     public static final StreamCodec<RegistryFriendlyByteBuf, ServerBoundActiveStockingPayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.BOOL,
             ServerBoundActiveStockingPayload::activeStocking,

@@ -14,7 +14,6 @@ import jagm.classicpipes.util.MiscUtil;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.common.capabilities.Capability;
@@ -51,7 +50,7 @@ public class ForgeEntrypoint {
             event.register(ForgeRegistries.Keys.SOUND_EVENTS, helper -> ClassicPipes.SOUNDS.forEach(helper::register));
             event.register(Registries.CREATIVE_MODE_TAB, helper -> helper.register(ClassicPipes.PIPES_TAB_KEY, ClassicPipes.PIPES_TAB));
             event.register(Registries.DATA_COMPONENT_TYPE, helper -> helper.register(ClassicPipes.LABEL_COMPONENT_KEY, ClassicPipes.LABEL_COMPONENT));
-            event.register(Registries.TRIGGER_TYPE, helper -> helper.register(MiscUtil.resourceLocation("request_item"), ClassicPipes.REQUEST_ITEM_TRIGGER));
+            event.register(Registries.TRIGGER_TYPE, helper -> helper.register(MiscUtil.identifier("request_item"), ClassicPipes.REQUEST_ITEM_TRIGGER));
             event.register(Registries.CUSTOM_STAT, helper -> helper.register(ClassicPipes.ITEMS_REQUESTED_STAT, ClassicPipes.ITEMS_REQUESTED_STAT));
 
             event.register(ForgeRegistries.Keys.BLOCK_ENTITY_TYPES, helper -> {
@@ -120,13 +119,13 @@ public class ForgeEntrypoint {
     public static class ForgeEventHandler {
 
         @SubscribeEvent
-        public static void onRegisterCapabilities(AttachCapabilitiesEvent<BlockEntity> event) {
+        public static void onRegisterCapabilities(AttachCapabilitiesEvent event) {
             if (event.getObject() instanceof ItemPipeEntity pipe) {
                 Map<Direction, LazyOptional<IItemHandler>> wrapperForSide = new HashMap<>();
                 for (Direction side : Direction.values()) {
                     wrapperForSide.put(side, LazyOptional.of(() -> new ForgeItemPipeWrapper(pipe, side)));
                 }
-                event.addCapability(MiscUtil.resourceLocation("item_pipe"), new ICapabilityProvider() {
+                event.addCapability(MiscUtil.identifier("item_pipe"), new ICapabilityProvider() {
                     @Override
                     public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side) {
                         if (cap == ForgeCapabilities.ITEM_HANDLER && side != null) {
@@ -141,7 +140,7 @@ public class ForgeEntrypoint {
                 for (Direction side : Direction.values()) {
                     wrapperForSide.put(side, LazyOptional.of(() -> new ForgeFluidPipeWrapper(pipe, side)));
                 }
-                event.addCapability(MiscUtil.resourceLocation("fluid_pipe"), new ICapabilityProvider() {
+                event.addCapability(MiscUtil.identifier("fluid_pipe"), new ICapabilityProvider() {
                     @Override
                     public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side) {
                         if (cap == ForgeCapabilities.FLUID_HANDLER && side != null) {

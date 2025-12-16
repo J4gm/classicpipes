@@ -15,7 +15,7 @@ import net.minecraft.world.item.ItemStack;
 
 public record ServerBoundSetFilterPayload(int slot, ItemStack stack) implements SelfHandler {
 
-    public static final Type<ServerBoundSetFilterPayload> TYPE = new Type<>(MiscUtil.resourceLocation("set_filter"));
+    public static final Type<ServerBoundSetFilterPayload> TYPE = new Type<>(MiscUtil.identifier("set_filter"));
     public static final StreamCodec<RegistryFriendlyByteBuf, ServerBoundSetFilterPayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.INT,
             ServerBoundSetFilterPayload::slot,

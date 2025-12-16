@@ -4,12 +4,12 @@ import jagm.classicpipes.ClassicPipes;
 import jagm.classicpipes.inventory.container.Filter;
 import jagm.classicpipes.inventory.container.SingleItemFilterContainer;
 import jagm.classicpipes.util.MiscUtil;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 
 public class AdvancedCopperFluidPipeMenu extends FluidFilterMenu {
 
-    private static final ResourceLocation EMPTY_SLOT = MiscUtil.resourceLocation("container/slot/fluid");
+    private static final Identifier EMPTY_SLOT = MiscUtil.identifier("container/slot/fluid");
 
     public AdvancedCopperFluidPipeMenu(int id, Inventory playerInventory) {
         this(id, playerInventory, new SingleItemFilterContainer(null, 9, false));
@@ -22,7 +22,7 @@ public class AdvancedCopperFluidPipeMenu extends FluidFilterMenu {
             this.addSlot(new FilterSlot(filter, j, 8 + j * 18, 18) {
 
                 @Override
-                public ResourceLocation getNoItemIcon() {
+                public Identifier getNoItemIcon() {
                     return column == 0 ? EMPTY_SLOT : null;
                 }
 

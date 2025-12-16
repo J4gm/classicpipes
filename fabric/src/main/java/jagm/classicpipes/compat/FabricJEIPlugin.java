@@ -1,5 +1,5 @@
 package jagm.classicpipes.compat;
-
+/*
 import jagm.classicpipes.ClassicPipes;
 import jagm.classicpipes.client.screen.FilterScreen;
 import jagm.classicpipes.client.screen.FluidFilterScreen;
@@ -34,12 +34,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@JeiPlugin
-public class FabricJEIPlugin implements IModPlugin {
-
+@JeiPlugin*/
+public class FabricJEIPlugin/* implements IModPlugin */{
+/*
     @Override
     public ResourceLocation getPluginUid() {
-        return MiscUtil.resourceLocation("jei_plugin");
+        return MiscUtil.identifier("jei_plugin");
     }
 
     @Override
@@ -153,5 +153,5 @@ public class FabricJEIPlugin implements IModPlugin {
 
         });
     }
-
+*/
 }

@@ -12,7 +12,7 @@ import net.minecraft.world.entity.player.Player;
 
 public record ServerBoundMatchComponentsPayload(boolean matchComponents) implements SelfHandler {
 
-    public static final CustomPacketPayload.Type<ServerBoundMatchComponentsPayload> TYPE = new CustomPacketPayload.Type<>(MiscUtil.resourceLocation("match_components"));
+    public static final CustomPacketPayload.Type<ServerBoundMatchComponentsPayload> TYPE = new CustomPacketPayload.Type<>(MiscUtil.identifier("match_components"));
     public static final StreamCodec<RegistryFriendlyByteBuf, ServerBoundMatchComponentsPayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.BOOL,
             ServerBoundMatchComponentsPayload::matchComponents,
