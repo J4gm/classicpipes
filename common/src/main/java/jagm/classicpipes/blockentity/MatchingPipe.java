@@ -10,6 +10,8 @@ public interface MatchingPipe {
 
     void markCannotFit(ItemStack stack);
 
+    boolean itemCanFit(ItemStack stack);
+
     void updateCache();
 
 }
