@@ -203,7 +203,7 @@ public abstract class NetworkedPipeEntity extends RoundRobinPipeEntity {
                 this.schedulePath(serverLevel, item, validTargets.get(serverLevel.getRandom().nextInt(validTargets.size())));
                 this.checkRoutingSchedule(item);
             } else {
-                super.routeItem(state, item);
+                item.setEjecting(true);
             }
             for (ItemInPipe spareItem : spareItems) {
                 this.queued.add(spareItem);
