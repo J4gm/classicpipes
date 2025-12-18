@@ -163,7 +163,11 @@ public abstract class NetworkedPipeEntity extends RoundRobinPipeEntity {
                 }
             }
             if (validTargets.isEmpty()) {
-                validTargets.addAll(this.network.getDefaultRoutes());
+                for (NetworkedPipeEntity defaultRoutePipe : this.network.getDefaultRoutes()) {
+                    if (!(defaultRoutePipe instanceof MatchingPipe matchingPipe) || matchingPipe.itemCanFit(item.getStack())) {
+                        validTargets.add(defaultRoutePipe);
+                    }
+                }
             }
             if (validTargets.contains(this) && state.getBlock() instanceof NetworkedPipeBlock networkedBlock) {
                 List<Direction> validDirections = new ArrayList<>();

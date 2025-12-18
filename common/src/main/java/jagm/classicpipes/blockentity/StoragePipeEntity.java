@@ -83,17 +83,24 @@ public class StoragePipeEntity extends NetworkedPipeEntity implements MenuProvid
 
     @Override
     public boolean matches(ItemStack stack) {
+        if (this.itemCanFit(stack)) {
+            for (ItemStack containerStack : this.matchingCache) {
+                if (stack.is(containerStack.getItem()) && (!this.shouldMatchComponents() || ItemStack.isSameItemSameComponents(stack, containerStack))) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean itemCanFit(ItemStack stack) {
         for (ItemStack cannotFitStack : this.cannotFit) {
             if (ItemStack.isSameItemSameComponents(cannotFitStack, stack)) {
                 return false;
             }
         }
-        for (ItemStack containerStack : this.matchingCache) {
-            if (stack.is(containerStack.getItem()) && (!this.shouldMatchComponents() || ItemStack.isSameItemSameComponents(stack, containerStack))) {
-                return true;
-            }
-        }
-        return false;
+        return true;
     }
 
     @Override
