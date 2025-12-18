@@ -57,17 +57,24 @@ public class MatchingPipeEntity extends NetworkedPipeEntity implements MenuProvi
 
     @Override
     public boolean matches(ItemStack stack) {
+        if (this.itemCanFit(stack)) {
+            for (ItemStack containerStack : this.cache) {
+                if (stack.is(containerStack.getItem()) && (!this.shouldMatchComponents() || ItemStack.isSameItemSameTags(stack, containerStack))) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean itemCanFit(ItemStack stack) {
         for (ItemStack cannotFitStack : this.cannotFit) {
             if (ItemStack.isSameItemSameTags(cannotFitStack, stack)) {
                 return false;
             }
         }
-        for (ItemStack containerStack : this.cache) {
-            if (stack.is(containerStack.getItem()) && (!this.shouldMatchComponents() || ItemStack.isSameItemSameTags(stack, containerStack))) {
-                return true;
-            }
-        }
-        return false;
+        return true;
     }
 
     @Override
