@@ -53,7 +53,7 @@ public class RequestPipeEntity extends NetworkedPipeEntity implements MenuProvid
                     item.getTargetDirection() == Direction.NORTH ? -v : (item.getTargetDirection() == Direction.SOUTH ? v : 0.0F)
             );
             level.addFreshEntity(ejectedItem);
-            level.playSound(ejectedItem, pos, ClassicPipes.PIPE_EJECT_SOUND, SoundSource.BLOCKS);
+            level.playSound(null, pos, ClassicPipes.PIPE_EJECT_SOUND, SoundSource.BLOCKS);
         }
     }
 
