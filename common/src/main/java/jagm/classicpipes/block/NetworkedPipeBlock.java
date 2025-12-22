@@ -194,7 +194,7 @@ public class NetworkedPipeBlock extends PipeBlock {
         }
     }
 
-    private void checkPoweredState(Level level, BlockPos pos, BlockState state) {
+    protected void checkPoweredState(Level level, BlockPos pos, BlockState state) {
         level.setBlock(pos, state.setValue(ENABLED, !level.hasNeighborSignal(pos)), 2);
     }
 

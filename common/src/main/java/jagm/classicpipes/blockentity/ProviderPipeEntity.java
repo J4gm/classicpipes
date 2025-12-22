@@ -1,6 +1,7 @@
 package jagm.classicpipes.blockentity;
 
 import jagm.classicpipes.ClassicPipes;
+import jagm.classicpipes.block.MatchingPipeBlock;
 import jagm.classicpipes.block.ProviderPipeBlock;
 import jagm.classicpipes.inventory.container.Filter;
 import jagm.classicpipes.inventory.container.SingleItemFilterContainer;
@@ -26,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import static jagm.classicpipes.block.NetworkedPipeBlock.ENABLED;
 public class ProviderPipeEntity extends NetworkedPipeEntity implements MenuProvider, ProviderPipe {
 
     private final SingleItemFilterContainer filter;
@@ -43,7 +45,7 @@ public class ProviderPipeEntity extends NetworkedPipeEntity implements MenuProvi
     @Override
     public void tickServer(ServerLevel level, BlockPos pos, BlockState state) {
         if (!this.cacheInitialised && !state.getValue(ProviderPipeBlock.FACING).equals(FacingOrNone.NONE)) {
-            this.updateCache(level, pos, state.getValue(ProviderPipeBlock.FACING).getDirection());
+            this.updateCache(level, pos, state);
             this.cacheInitialised = true;
         }
         super.tickServer(level, pos, state);
@@ -111,22 +113,25 @@ public class ProviderPipeEntity extends NetworkedPipeEntity implements MenuProvi
         return this.leaveOne;
     }
 
-    private void updateCache(ServerLevel level, BlockPos pos, Direction facing) {
+    private void updateCache(ServerLevel level, BlockPos pos, BlockState state) {
         this.cache.clear();
-        List<ItemStack> stacks = Services.LOADER_SERVICE.getContainerItems(level, pos.relative(facing), facing.getOpposite());
-        Iterator<ItemStack> iterator = stacks.iterator();
-        while (iterator.hasNext()) {
-            ItemStack stack = iterator.next();
-            if (!this.filter.isEmpty() && !this.filter.matches(stack).matches) {
-                iterator.remove();
-            } else if (this.shouldLeaveOne()) {
-                stack.shrink(1);
-                if (stack.isEmpty()) {
+        if (state.getValue(ENABLED)) {
+            Direction facing = state.getValue(MatchingPipeBlock.FACING).getDirection();
+            List<ItemStack> stacks = Services.LOADER_SERVICE.getContainerItems(level, pos.relative(facing), facing.getOpposite());
+            Iterator<ItemStack> iterator = stacks.iterator();
+            while (iterator.hasNext()) {
+                ItemStack stack = iterator.next();
+                if (!this.filter.isEmpty() && !this.filter.matches(stack).matches) {
                     iterator.remove();
+                } else if (this.shouldLeaveOne()) {
+                    stack.shrink(1);
+                    if (stack.isEmpty()) {
+                        iterator.remove();
+                    }
                 }
             }
+            this.cache.addAll(stacks);
         }
-        this.cache.addAll(stacks);
         if (this.hasNetwork()) {
             this.getNetwork().cacheUpdated();
         }

@@ -272,11 +272,11 @@
       "apply": {
         "model": "classicpipes:block/routing_pipe_side_blocked",
         "uvlock": true,
-        "y": 270
+        "x": 270
       },
       "when": {
-        "west": "unlinked",
-        "facing": "north|east|south|up|down|none",
+        "up": "unlinked",
+        "facing": "north|east|south|west|down|none",
         "enabled": "false"
       }
     },
