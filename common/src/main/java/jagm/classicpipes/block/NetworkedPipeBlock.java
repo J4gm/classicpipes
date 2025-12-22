@@ -36,7 +36,10 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.BlockHitResult;
 
 import java.util.Map;
@@ -49,6 +52,11 @@ public class NetworkedPipeBlock extends PipeBlock {
     public static final EnumProperty<ConnectionState> WEST = EnumProperty.create("west", ConnectionState.class, ConnectionState.values());
     public static final EnumProperty<ConnectionState> UP = EnumProperty.create("up", ConnectionState.class, ConnectionState.values());
     public static final EnumProperty<ConnectionState> DOWN = EnumProperty.create("down", ConnectionState.class, ConnectionState.values());
+
+    /// Network pipes are enabled by default, and if disabled with a redstone signal,
+    /// the network should block all UNLINKED directions from being used on the affected pipe.
+    public static final BooleanProperty ENABLED = BlockStateProperties.ENABLED;
+
     public static final Map<Direction, EnumProperty<ConnectionState>> PROPERTY_BY_DIRECTION = ImmutableMap.copyOf(Maps.newEnumMap(Map.of(Direction.NORTH, NORTH, Direction.EAST, EAST, Direction.SOUTH, SOUTH, Direction.WEST, WEST, Direction.UP, UP, Direction.DOWN, DOWN)));
 
     public NetworkedPipeBlock(BlockBehaviour.Properties properties) {
@@ -60,6 +68,7 @@ public class NetworkedPipeBlock extends PipeBlock {
                 .setValue(WEST, ConnectionState.NONE)
                 .setValue(UP, ConnectionState.NONE)
                 .setValue(DOWN, ConnectionState.NONE)
+                .setValue(ENABLED, true)
         );
     }
 
@@ -109,7 +118,7 @@ public class NetworkedPipeBlock extends PipeBlock {
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder);
-        builder.add(NORTH, EAST, SOUTH, WEST, UP, DOWN);
+        builder.add(NORTH, EAST, SOUTH, WEST, UP, DOWN, ENABLED);
     }
 
     @Override
@@ -176,4 +185,21 @@ public class NetworkedPipeBlock extends PipeBlock {
 
     }
 
+    // --- REDSTONE METHODS (from CopperPipeBlock.java) ---
+
+    @Override
+    protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean isMoving) {
+        if (!oldState.is(state.getBlock())) {
+            this.checkPoweredState(level, pos, state);
+        }
+    }
+
+    private void checkPoweredState(Level level, BlockPos pos, BlockState state) {
+        level.setBlock(pos, state.setValue(ENABLED, !level.hasNeighborSignal(pos)), 2);
+    }
+
+    @Override
+    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, Orientation orientation, boolean b) {
+        this.checkPoweredState(level, pos, state);
+    }
 }
