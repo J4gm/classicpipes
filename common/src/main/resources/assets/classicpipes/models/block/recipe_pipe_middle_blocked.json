@@ -1,0 +1,18 @@
+{
+  "parent": "classicpipes:block/pipe_middle",
+  "textures": {
+    "texture": "classicpipes:block/recipe_pipe_blocked",
+    "interior": "classicpipes:block/routing_pipe_linked",
+    "particle": "classicpipes:block/recipe_pipe_blocked"
+  },
+  "elements": [
+    {
+      "from": [ 4, 4, 4 ],
+      "to": [ 12, 12, 4 ],
+      "faces": {
+        "north": { "texture": "#texture"},
+        "south": { "texture": "#interior"}
+      }
+    }
+  ]
+}

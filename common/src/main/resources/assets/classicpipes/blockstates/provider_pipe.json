@@ -52,7 +52,17 @@
         "model": "classicpipes:block/provider_pipe_middle"
       },
       "when": {
-        "north": "none"
+        "north": "none",
+        "enabled": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "classicpipes:block/provider_pipe_middle_blocked"
+      },
+      "when": {
+        "north": "none",
+        "enabled": "false"
       }
     },
     {
@@ -119,7 +129,19 @@
         "y": 90
       },
       "when": {
-        "east": "none"
+        "east": "none",
+        "enabled": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "classicpipes:block/provider_pipe_middle_blocked",
+        "uvlock": true,
+        "y": 90
+      },
+      "when": {
+        "east": "none",
+        "enabled": "false"
       }
     },
     {
@@ -186,7 +208,19 @@
         "y": 180
       },
       "when": {
-        "south": "none"
+        "south": "none",
+        "enabled": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "classicpipes:block/provider_pipe_middle_blocked",
+        "uvlock": true,
+        "y": 180
+      },
+      "when": {
+        "south": "none",
+        "enabled": "false"
       }
     },
     {
@@ -253,7 +287,19 @@
         "y": 270
       },
       "when": {
-        "west": "none"
+        "west": "none",
+        "enabled": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "classicpipes:block/provider_pipe_middle_blocked",
+        "uvlock": true,
+        "y": 270
+      },
+      "when": {
+        "west": "none",
+        "enabled": "false"
       }
     },
     {
@@ -320,7 +366,19 @@
         "x": 270
       },
       "when": {
-        "up": "none"
+        "up": "none",
+        "enabled": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "classicpipes:block/provider_pipe_middle_blocked",
+        "uvlock": true,
+        "x": 270
+      },
+      "when": {
+        "up": "none",
+        "enabled": "false"
       }
     },
     {
@@ -387,7 +445,19 @@
         "x": 90
       },
       "when": {
-        "down": "none"
+        "down": "none",
+        "enabled": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "classicpipes:block/provider_pipe_middle_blocked",
+        "uvlock": true,
+        "x": 90
+      },
+      "when": {
+        "down": "none",
+        "enabled": "false"
       }
     }
   ]
