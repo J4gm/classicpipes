@@ -22,6 +22,7 @@ import net.minecraft.world.level.storage.ValueOutput;
 import java.util.ArrayList;
 import java.util.List;
 
+import static jagm.classicpipes.block.NetworkedPipeBlock.ENABLED;
 public class StoragePipeEntity extends NetworkedPipeEntity implements MenuProvider, ProviderPipe, MatchingPipe {
 
     private boolean defaultRoute;
@@ -46,24 +47,27 @@ public class StoragePipeEntity extends NetworkedPipeEntity implements MenuProvid
     @Override
     public void tickServer(ServerLevel level, BlockPos pos, BlockState state) {
         if (!this.cacheInitialised && !state.getValue(MatchingPipeBlock.FACING).equals(FacingOrNone.NONE)) {
-            this.updateCache(level, pos, state.getValue(MatchingPipeBlock.FACING).getDirection());
+            this.updateCache(level, pos, state);
             this.cacheInitialised = true;
         }
         super.tickServer(level, pos, state);
     }
 
-    private void updateCache(ServerLevel level, BlockPos pos, Direction facing) {
+    private void updateCache(ServerLevel level, BlockPos pos, BlockState state) {
         this.providerCache.clear();
         this.matchingCache.clear();
-        this.cannotFit.clear();
-        List<ItemStack> stacks = Services.LOADER_SERVICE.getContainerItems(level, pos.relative(facing), facing.getOpposite());
-        for (ItemStack stack : stacks) {
-            this.matchingCache.add(stack.copy());
-            if (this.shouldLeaveOne()) {
-                stack.shrink(1);
-            }
-            if (!stack.isEmpty()) {
-                this.providerCache.add(stack);
+        if (state.getValue(ENABLED)) {
+            Direction facing = state.getValue(MatchingPipeBlock.FACING).getDirection();
+            this.cannotFit.clear();
+            List<ItemStack> stacks = Services.LOADER_SERVICE.getContainerItems(level, pos.relative(facing), facing.getOpposite());
+            for (ItemStack stack : stacks) {
+                this.matchingCache.add(stack.copy());
+                if (this.shouldLeaveOne()) {
+                    stack.shrink(1);
+                }
+                if (!stack.isEmpty()) {
+                    this.providerCache.add(stack);
+                }
             }
         }
         if (this.hasNetwork()) {

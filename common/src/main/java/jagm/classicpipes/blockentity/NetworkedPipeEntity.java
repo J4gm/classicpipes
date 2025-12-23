@@ -16,6 +16,8 @@ import net.minecraft.world.level.storage.ValueOutput;
 
 import java.util.*;
 
+import static jagm.classicpipes.block.NetworkedPipeBlock.ENABLED;
+
 public abstract class NetworkedPipeEntity extends RoundRobinPipeEntity {
 
     private final Map<ItemStack, ScheduledRoute> routingSchedule;
@@ -106,7 +108,7 @@ public abstract class NetworkedPipeEntity extends RoundRobinPipeEntity {
             for (RequestedItem requestedItem : this.getNetwork().getRequestedItems()) {
                 if (requestedItem.matches(item) && this.getLevel() != null) {
                     NetworkedPipeEntity target = requestedItem.getTarget(this.getLevel());
-                    if (target != null) {
+                    if (target != null && target.getBlockState().getValue(ENABLED)) {
                         if (item.getStack().getCount() > requestedItem.getAmountRemaining()) {
                             spareItems.add(item.copyWithCount(item.getStack().getCount() - requestedItem.getAmountRemaining()));
                             item.getStack().setCount(requestedItem.getAmountRemaining());
@@ -119,26 +121,31 @@ public abstract class NetworkedPipeEntity extends RoundRobinPipeEntity {
             }
             if (validTargets.isEmpty()) {
                 for (StockingPipeEntity stockingPipe : this.network.getStockingPipes()) {
-                    for (ItemStack stack : stockingPipe.getMissingItemsCache()) {
-                        if (stack.is(item.getStack().getItem()) && (!stockingPipe.shouldMatchComponents() || ItemStack.isSameItemSameComponents(stack, item.getStack()))) {
-                            int alreadyRequested = stockingPipe.getAlreadyRequested(stack);
-                            if (alreadyRequested < stack.getCount()) {
-                                int surplus = item.getStack().getCount() - stack.getCount() + alreadyRequested;
-                                if (surplus > 0) {
-                                    spareItems.add(item.copyWithCount(surplus));
-                                    item.getStack().setCount(stack.getCount() - alreadyRequested);
+                    BlockState networkedPipeState = stockingPipe.getBlockState();
+                    if (networkedPipeState.getValue(ENABLED)) {
+                        for (ItemStack stack : stockingPipe.getMissingItemsCache()) {
+                            if (stack.is(item.getStack().getItem()) && (!stockingPipe.shouldMatchComponents() || ItemStack.isSameItemSameComponents(stack, item.getStack()))) {
+                                int alreadyRequested = stockingPipe.getAlreadyRequested(stack);
+                                if (alreadyRequested < stack.getCount()) {
+                                    int surplus = item.getStack().getCount() - stack.getCount() + alreadyRequested;
+                                    if (surplus > 0) {
+                                        spareItems.add(item.copyWithCount(surplus));
+                                        item.getStack().setCount(stack.getCount() - alreadyRequested);
+                                    }
+                                    validTargets.add(stockingPipe);
                                 }
-                                validTargets.add(stockingPipe);
+                                break;
                             }
-                            break;
                         }
                     }
                 }
             }
             if (validTargets.isEmpty()) {
                 for (MatchingPipe matchingPipe : this.network.getMatchingPipes()) {
-                    if (matchingPipe.matches(item.getStack())) {
-                        validTargets.add(matchingPipe.getAsPipe());
+                    NetworkedPipeEntity networkedPipeEntity = matchingPipe.getAsPipe();
+                    BlockState networkedPipeState = networkedPipeEntity.getBlockState();
+                    if (networkedPipeState.getValue(ENABLED) && matchingPipe.matches(item.getStack())) {
+                        validTargets.add(networkedPipeEntity);
                     }
                 }
             }
@@ -148,9 +155,12 @@ public abstract class NetworkedPipeEntity extends RoundRobinPipeEntity {
                 matchPriority.put(Filter.MatchingResult.TAG, new ArrayList<>());
                 matchPriority.put(Filter.MatchingResult.MOD, new ArrayList<>());
                 for (RoutingPipeEntity routingPipe : this.network.getRoutingPipes()) {
-                    Filter.MatchingResult result = routingPipe.canRouteItemHere(item.getStack());
-                    if (result.matches) {
-                        matchPriority.get(result).add(routingPipe);
+                    BlockState networkedPipeState = routingPipe.getBlockState();
+                    if (networkedPipeState.getValue(ENABLED)) {
+                        Filter.MatchingResult result = routingPipe.canRouteItemHere(item.getStack());
+                        if (result.matches) {
+                            matchPriority.get(result).add(routingPipe);
+                        }
                     }
                 }
                 if (!matchPriority.get(Filter.MatchingResult.ITEM).isEmpty()) {
@@ -163,7 +173,8 @@ public abstract class NetworkedPipeEntity extends RoundRobinPipeEntity {
             }
             if (validTargets.isEmpty()) {
                 for (NetworkedPipeEntity defaultRoutePipe : this.network.getDefaultRoutes()) {
-                    if (!(defaultRoutePipe instanceof MatchingPipe matchingPipe) || matchingPipe.itemCanFit(item.getStack())) {
+                    BlockState networkedPipeState = defaultRoutePipe.getBlockState();
+                    if (networkedPipeState.getValue(ENABLED) && (!(defaultRoutePipe instanceof MatchingPipe matchingPipe) || matchingPipe.itemCanFit(item.getStack()))) {
                         validTargets.add(defaultRoutePipe);
                     }
                 }

@@ -1,0 +1,8 @@
+{
+  "parent": "classicpipes:block/pipe_side_with_interior",
+  "textures": {
+    "texture": "classicpipes:block/storage_pipe_blocked",
+    "interior": "minecraft:block/netherite_block",
+    "particle": "classicpipes:block/storage_pipe_blocked"
+  }
+}

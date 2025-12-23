@@ -1,6 +1,7 @@
 package jagm.classicpipes.block;
 
 import jagm.classicpipes.ClassicPipes;
+import jagm.classicpipes.blockentity.ProviderPipe;
 import jagm.classicpipes.blockentity.ProviderPipeEntity;
 import jagm.classicpipes.network.ClientBoundTwoBoolsPayload;
 import jagm.classicpipes.services.Services;
@@ -53,6 +54,16 @@ public class ProviderPipeBlock extends ContainerAdjacentNetworkedPipeBlock {
     public void onNeighborChange(BlockState state, LevelReader level, BlockPos pos, BlockPos neighbor) {
         Direction facing = state.getValue(FACING).getDirection();
         if (level instanceof ServerLevel && facing != null && level.getBlockEntity(pos) instanceof ProviderPipeEntity providerPipe && neighbor.equals(pos.relative(facing))) {
+            providerPipe.updateCache();
+        }
+    }
+
+    @Override
+    protected void checkPoweredState(Level level, BlockPos pos, BlockState state) {
+        boolean powered = level.hasNeighborSignal(pos);
+        level.setBlock(pos, state.setValue(ENABLED, !powered), 2);
+
+        if (level instanceof ServerLevel && level.getBlockEntity(pos) instanceof ProviderPipe providerPipe) {
             providerPipe.updateCache();
         }
     }
