@@ -101,6 +101,13 @@ public abstract class NetworkedPipeEntity extends RoundRobinPipeEntity {
             super.routeItem(state, item);
             return;
         }
+
+        NetworkedPipeBlock networkedBlock = (NetworkedPipeBlock) state.getBlock();
+
+        if (!networkedBlock.isLinked(state, item.getFromDirection()) && !state.getValue(ENABLED)) {
+            item.setEjecting(false);
+            return;
+        }
         if (!this.checkRoutingSchedule(item) && this.getLevel() instanceof ServerLevel serverLevel) {
             List<NetworkedPipeEntity> validTargets = new ArrayList<>();
             RequestedItem thisRequestedItem = null;
@@ -179,7 +186,7 @@ public abstract class NetworkedPipeEntity extends RoundRobinPipeEntity {
                     }
                 }
             }
-            if (validTargets.contains(this) && state.getBlock() instanceof NetworkedPipeBlock networkedBlock) {
+            if (validTargets.contains(this)) {
                 List<Direction> validDirections = new ArrayList<>();
                 if (networkedBlock instanceof ContainerAdjacentNetworkedPipeBlock && state.getValue(ContainerAdjacentNetworkedPipeBlock.FACING) != FacingOrNone.NONE) {
                     validDirections.add(state.getValue(ContainerAdjacentNetworkedPipeBlock.FACING).getDirection());
