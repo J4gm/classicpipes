@@ -3,10 +3,8 @@ package jagm.classicpipes.util;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Direction;
-import net.minecraft.world.phys.Vec3;
 
-public class FluidInPipe {
-
+public class FluidInPipe extends EntityInPipe {
     public static final Codec<FluidInPipe> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
                     Codec.INT.fieldOf("amount").orElse(0).forGetter(FluidInPipe::getAmount),
@@ -19,11 +17,6 @@ public class FluidInPipe {
     );
 
     private int amount;
-    private short speed;
-    private short progress;
-    private Direction fromDirection;
-    private Direction targetDirection;
-    private short age;
 
     public FluidInPipe(int amount, short speed, short progress, Direction fromDirection, Direction targetDirection, short age) {
         this.amount = amount;
@@ -38,33 +31,6 @@ public class FluidInPipe {
         this(amount, speed, progress, Direction.from3DDataValue(fromDirection), Direction.from3DDataValue(targetDirection), age);
     }
 
-    public void move(short targetSpeed, short acceleration) {
-        if (this.speed < targetSpeed) {
-            this.speed = (short) Math.min(this.speed + acceleration, Math.min(targetSpeed, ItemInPipe.SPEED_LIMIT));
-        } else if (this.speed > targetSpeed) {
-            this.speed = (short) Math.max(this.speed - acceleration, Math.max(targetSpeed, 1));
-        }
-        this.progress += this.speed;
-        this.age++;
-    }
-
-    public Vec3 getDebugRenderPosition(float partialTicks){
-        float p = (float) this.progress / ItemInPipe.PIPE_LENGTH + partialTicks * (float) this.speed / ItemInPipe.PIPE_LENGTH;
-        float q = 1.0F - p;
-        boolean h = p < 0.5F;
-        Direction d = h ? this.fromDirection : this.targetDirection;
-        return new Vec3(
-                d == Direction.WEST ? (h ? p : q) : (d == Direction.EAST ? (h ? q : p) : 0.5F),
-                d == Direction.DOWN ? (h ? p : q) : (d == Direction.UP ? (h ? q : p) : 0.5F),
-                d == Direction.NORTH ? (h ? p : q) : (d == Direction.SOUTH ? (h ? q : p) : 0.5F)
-        );
-    }
-
-    public void resetProgress(Direction direction) {
-        this.progress -= ItemInPipe.PIPE_LENGTH;
-        this.fromDirection = direction;
-        this.targetDirection = direction;
-    }
 
     public FluidInPipe copyWithAmount(int amount) {
         return new FluidInPipe(amount, this.speed, this.progress, this.fromDirection, this.targetDirection, this.age);
@@ -76,30 +42,6 @@ public class FluidInPipe {
 
     public void setAmount(int amount) {
         this.amount = amount;
-    }
-
-    public short getSpeed() {
-        return this.speed;
-    }
-
-    public short getProgress() {
-        return this.progress;
-    }
-
-    public Direction getFromDirection() {
-        return this.fromDirection;
-    }
-
-    public Direction getTargetDirection() {
-        return this.targetDirection;
-    }
-
-    public void setTargetDirection(Direction targetDirection) {
-        this.targetDirection = targetDirection;
-    }
-
-    public short getAge() {
-        return this.age;
     }
 
 }

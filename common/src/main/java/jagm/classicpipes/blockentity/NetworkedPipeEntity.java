@@ -117,7 +117,7 @@ public abstract class NetworkedPipeEntity extends RoundRobinPipeEntity {
                     NetworkedPipeEntity target = requestedItem.getTarget(this.getLevel());
                     if (target != null && target.getBlockState().getValue(ENABLED)) {
                         if (item.getStack().getCount() > requestedItem.getAmountRemaining()) {
-                            spareItems.add(item.copyWithCount(item.getStack().getCount() - requestedItem.getAmountRemaining()));
+                            spareItems.add(item.copyWithAmount(item.getStack().getCount() - requestedItem.getAmountRemaining()));
                             item.getStack().setCount(requestedItem.getAmountRemaining());
                         }
                         thisRequestedItem = requestedItem;
@@ -136,7 +136,7 @@ public abstract class NetworkedPipeEntity extends RoundRobinPipeEntity {
                                 if (alreadyRequested < stack.getCount()) {
                                     int surplus = item.getStack().getCount() - stack.getCount() + alreadyRequested;
                                     if (surplus > 0) {
-                                        spareItems.add(item.copyWithCount(surplus));
+                                        spareItems.add(item.copyWithAmount(surplus));
                                         item.getStack().setCount(stack.getCount() - alreadyRequested);
                                     }
                                     validTargets.add(stockingPipe);
@@ -213,7 +213,7 @@ public abstract class NetworkedPipeEntity extends RoundRobinPipeEntity {
                     }
                     if (leftover > 0) {
                         item.setStack(item.getStack().copyWithCount(remaining));
-                        spareItems.add(item.copyWithCount(leftover));
+                        spareItems.add(item.copyWithAmount(leftover));
                     }
                 }
             } else if (!validTargets.isEmpty()) {
