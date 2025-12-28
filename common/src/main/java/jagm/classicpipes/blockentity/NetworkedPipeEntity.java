@@ -406,12 +406,20 @@ public abstract class NetworkedPipeEntity extends RoundRobinPipeEntity {
     }
 
     @Override
-    public short getTargetSpeed() {
+    public short getTargetSpeed(BlockState state, Direction fromDirection, Direction targetDirection) {
+        NetworkedPipeBlock networkedBlock = (NetworkedPipeBlock) state.getBlock();
+        if (fromDirection == targetDirection && !networkedBlock.isLinked(state, fromDirection)) {
+            return ItemInPipe.DEFAULT_SPEED;
+        }
         return ItemInPipe.SPEED_LIMIT;
     }
 
     @Override
-    public short getAcceleration() {
+    public short getAcceleration(BlockState state, Direction fromDirection, Direction targetDirection) {
+        NetworkedPipeBlock networkedBlock = (NetworkedPipeBlock) state.getBlock();
+        if (fromDirection == targetDirection && !networkedBlock.isLinked(state, fromDirection)) {
+            return Short.MAX_VALUE;
+        }
         return ItemInPipe.DEFAULT_ACCELERATION * 64;
     }
 

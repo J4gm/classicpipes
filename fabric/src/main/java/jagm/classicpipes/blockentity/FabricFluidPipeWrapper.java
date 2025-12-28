@@ -42,7 +42,7 @@ public class FabricFluidPipeWrapper implements Storage<FluidVariant>, StorageVie
                 if (result.wasCommitted()) {
                     if (this.pipe.getLevel() instanceof ServerLevel serverLevel) {
                         this.pipe.setFluid(fluidVariant.getFluid());
-                        FluidInPipe fluidPacket = new FluidInPipe((int) (amount / FabricEntrypoint.FLUID_CONVERSION_RATE), this.pipe.getTargetSpeed(), (short) 0, this.side, this.side, (short) 0);
+                        FluidInPipe fluidPacket = new FluidInPipe((int) (amount / FabricEntrypoint.FLUID_CONVERSION_RATE), this.pipe.getTargetSpeed(this.pipe.getBlockState(), this.side, this.side), (short) 0, this.side, this.side, (short) 0);
                         this.pipe.insertFluidPacket(serverLevel, fluidPacket);
                         serverLevel.sendBlockUpdated(this.pipe.getBlockPos(), this.pipe.getBlockState(), this.pipe.getBlockState(), 2);
                     }

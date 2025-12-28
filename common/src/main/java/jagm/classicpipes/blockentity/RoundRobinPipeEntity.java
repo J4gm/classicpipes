@@ -92,12 +92,12 @@ public class RoundRobinPipeEntity extends ItemPipeEntity {
     }
 
     @Override
-    public short getTargetSpeed() {
+    public short getTargetSpeed(BlockState state, Direction fromDirection, Direction targetDirection) {
         return ItemInPipe.DEFAULT_SPEED;
     }
 
     @Override
-    public short getAcceleration() {
+    public short getAcceleration(BlockState state, Direction fromDirection, Direction targetDirection) {
         return ItemInPipe.DEFAULT_ACCELERATION;
     }
 

@@ -12,12 +12,12 @@ public abstract class EntityInPipe {
     public static final short DEFAULT_ACCELERATION = 1;
     public static final short DESPAWN_AGE = 24000;
 
-
     protected short speed;
     protected short progress;
     protected Direction fromDirection;
     protected Direction targetDirection;
     protected short age;
+
 
     public abstract EntityInPipe copyWithAmount(int amount);
 

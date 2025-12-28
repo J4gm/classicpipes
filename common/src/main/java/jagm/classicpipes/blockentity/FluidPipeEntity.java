@@ -62,7 +62,9 @@ public class FluidPipeEntity extends PipeEntity {
                     }
                     this.tickAdded.remove(fluidPacket);
                 }
-                fluidPacket.move(this.getTargetSpeed(), this.getAcceleration());
+                Direction fromDirection = fluidPacket.getFromDirection();
+                Direction targetDirection = fluidPacket.getTargetDirection();
+                fluidPacket.move(this.getTargetSpeed(state, fromDirection, targetDirection), this.getAcceleration(state, fromDirection, targetDirection));
                 if (fluidPacket.getAge() > ItemInPipe.DESPAWN_AGE) {
                     iterator.remove();
                     sendBlockUpdate = true;
@@ -111,7 +113,7 @@ public class FluidPipeEntity extends PipeEntity {
     }
 
     @Override
-    public void tickClient(Level level, BlockPos pos) {
+    public void tickClient(Level level, BlockPos pos, BlockState state) {
         this.lastRenderWidth = this.targetRenderWidth;
         if (!this.contents.isEmpty()) {
             ListIterator<FluidInPipe> iterator = this.contents.listIterator();
@@ -128,7 +130,9 @@ public class FluidPipeEntity extends PipeEntity {
                     }
                     this.tickAdded.remove(fluidPacket);
                 }
-                fluidPacket.move(this.getTargetSpeed(), this.getAcceleration());
+                Direction fromDirection = fluidPacket.getFromDirection();
+                Direction targetDirection = fluidPacket.getTargetDirection();
+                fluidPacket.move(this.getTargetSpeed(state, fromDirection, targetDirection), this.getAcceleration(state, fromDirection, targetDirection));
                 if (fluidPacket.getProgress() >= ItemInPipe.PIPE_LENGTH) {
                     BlockPos nextPos = pos.relative(fluidPacket.getTargetDirection());
                     if (level.getBlockEntity(nextPos) instanceof FluidPipeEntity nextPipe && nextPipe.emptyOrMatches(this.fluid)) {
@@ -173,7 +177,7 @@ public class FluidPipeEntity extends PipeEntity {
     }
 
     @Override
-    public short getTargetSpeed() {
+    public short getTargetSpeed(BlockState state, Direction fromDirection, Direction targetDirection) {
         FluidState fluidState = this.fluid.defaultFluidState();
         if (fluidState.is(ClassicPipes.THIN_FLUIDS)) {
             return ItemInPipe.DEFAULT_SPEED * 4;
@@ -185,7 +189,7 @@ public class FluidPipeEntity extends PipeEntity {
     }
 
     @Override
-    public short getAcceleration() {
+    public short getAcceleration(BlockState state, Direction fromDirection, Direction targetDirection) {
         return ItemInPipe.DEFAULT_ACCELERATION;
     }
 

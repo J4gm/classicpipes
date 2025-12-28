@@ -272,7 +272,7 @@ public class NeoForgeService implements LoaderService {
                 int amountExtracted = fluidHandler.extract(FluidResource.of(fluid), amountToDrain, transaction);
                 if (amountExtracted > 0) {
                     pipe.setFluid(fluid);
-                    pipe.insertFluidPacket(level, new FluidInPipe(amountExtracted, pipe.getTargetSpeed(), (short) 0, face.getOpposite(), face.getOpposite(), (short) 0));
+                    pipe.insertFluidPacket(level, new FluidInPipe(amountExtracted, pipe.getTargetSpeed(state, face.getOpposite(), face.getOpposite()), (short) 0, face.getOpposite(), face.getOpposite(), (short) 0));
                     transaction.commit();
                     return true;
                 }

@@ -3,6 +3,7 @@ package jagm.classicpipes.blockentity;
 import jagm.classicpipes.ClassicPipes;
 import jagm.classicpipes.util.ItemInPipe;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -44,12 +45,12 @@ public class ObsidianPipeEntity extends ItemPipeEntity {
     }
 
     @Override
-    public short getTargetSpeed() {
+    public short getTargetSpeed(BlockState state, Direction fromDirection, Direction targetDirection) {
         return ItemInPipe.DEFAULT_SPEED;
     }
 
     @Override
-    public short getAcceleration() {
+    public short getAcceleration(BlockState state, Direction fromDirection, Direction targetDirection) {
         return ItemInPipe.DEFAULT_ACCELERATION;
     }
 
