@@ -106,6 +106,8 @@ public abstract class NetworkedPipeEntity extends RoundRobinPipeEntity {
 
         if (!networkedBlock.isLinked(state, item.getFromDirection()) && !state.getValue(ENABLED)) {
             item.setEjecting(false);
+            // Make sure item ALWAYS returns to its fromDirection
+            item.setTargetDirection(item.getFromDirection());
             return;
         }
         if (!this.checkRoutingSchedule(item) && this.getLevel() instanceof ServerLevel serverLevel) {
