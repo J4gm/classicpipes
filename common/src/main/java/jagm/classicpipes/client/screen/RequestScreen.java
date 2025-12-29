@@ -23,12 +23,16 @@ import net.minecraft.util.ARGB;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.Iterator;
+
+import static jagm.classicpipes.block.NetworkedPipeBlock.ENABLED;
 
 public class RequestScreen extends AbstractContainerScreen<RequestMenu> {
 
     private static final Identifier BACKGROUND = MiscUtil.identifier("textures/gui/container/request.png");
+    private static final Identifier BACKGROUND_DISABLED = MiscUtil.identifier("textures/gui/container/request_disabled.png");
     private static final WidgetSprites X_BUTTON = new WidgetSprites(MiscUtil.identifier("widget/x"), MiscUtil.identifier("widget/x_hovered"));
     private static final Identifier SLOT_HIGHLIGHT_BACK_SPRITE = Identifier.withDefaultNamespace("container/slot_highlight_back");
     private static final Identifier SLOT_HIGHLIGHT_FRONT_SPRITE = Identifier.withDefaultNamespace("container/slot_highlight_front");
@@ -84,17 +88,19 @@ public class RequestScreen extends AbstractContainerScreen<RequestMenu> {
     @Override
     public void renderContents(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         super.renderContents(graphics, mouseX, mouseY, partialTicks);
-        graphics.pose().pushMatrix();
-        graphics.pose().translate((float) this.leftPos, (float) this.topPos);
-        this.hoveredSlot = this.getHoveredSlot(mouseX, mouseY);
-        if (this.hoveredSlot != null && this.hoveredSlot.isHighlightable()) {
-            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT_HIGHLIGHT_BACK_SPRITE, this.hoveredSlot.x - 4, this.hoveredSlot.y - 4, 24, 24);
+        if (this.menu.requestPipe == null || this.menu.requestPipe.getBlockState().getValue(ENABLED)) {
+            graphics.pose().pushMatrix();
+            graphics.pose().translate((float) this.leftPos, (float) this.topPos);
+            this.hoveredSlot = this.getHoveredSlot(mouseX, mouseY);
+            if (this.hoveredSlot != null && this.hoveredSlot.isHighlightable()) {
+                graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT_HIGHLIGHT_BACK_SPRITE, this.hoveredSlot.x - 4, this.hoveredSlot.y - 4, 24, 24);
+            }
+            this.renderSlots(graphics, mouseX, mouseY);
+            if (this.hoveredSlot != null && this.hoveredSlot.isHighlightable()) {
+                graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT_HIGHLIGHT_FRONT_SPRITE, this.hoveredSlot.x - 4, this.hoveredSlot.y - 4, 24, 24);
+            }
+            graphics.pose().popMatrix();
         }
-        this.renderSlots(graphics, mouseX, mouseY);
-        if (this.hoveredSlot != null && this.hoveredSlot.isHighlightable()) {
-            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT_HIGHLIGHT_FRONT_SPRITE, this.hoveredSlot.x - 4, this.hoveredSlot.y - 4, 24, 24);
-        }
-        graphics.pose().popMatrix();
     }
 
     private Slot getHoveredSlot(double mouseX, double mouseY) {
@@ -122,6 +128,13 @@ public class RequestScreen extends AbstractContainerScreen<RequestMenu> {
     protected void renderBg(GuiGraphics graphics, float f, int x, int y) {
         int i = (this.width - this.imageWidth) / 2;
         int j = (this.height - this.imageHeight) / 2;
+        if (this.menu.requestPipe != null) {
+            BlockState state = this.menu.requestPipe.getBlockState();
+            if (!state.getValue(ENABLED)) {
+                graphics.blit(RenderPipelines.GUI_TEXTURED, BACKGROUND_DISABLED, i, j, 0.0F, 0.0F, this.imageWidth, this.imageHeight, 256, 256);
+                return;
+            }
+        }
         graphics.blit(RenderPipelines.GUI_TEXTURED, BACKGROUND, i, j, 0.0F, 0.0F, this.imageWidth, this.imageHeight, 256, 256);
     }
 
@@ -202,20 +215,22 @@ public class RequestScreen extends AbstractContainerScreen<RequestMenu> {
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
         this.setFocused(null);
-        Slot slot = this.getHoveredSlot(event.x(), event.y());
-        if (slot != null) {
-            ItemStack toRequest = slot.getItem();
-            if (!toRequest.isEmpty()) {
-                boolean craftable = this.menu.itemCraftable(toRequest);
-                if (event.hasShiftDown() || event.button() == 1) {
-                    int amount = event.hasShiftDown() ? Math.min(toRequest.getCount() - (craftable ? 1 : 0), toRequest.getMaxStackSize()) : 1;
-                    if (amount > 0) {
-                        Services.LOADER_SERVICE.sendToServer(new ServerBoundRequestPayload(toRequest.copyWithCount(amount), this.menu.getRequestPos()));
-                        toRequest.shrink(amount);
-                        this.menu.update();
+        if (this.menu.requestPipe == null || this.menu.requestPipe.getBlockState().getValue(ENABLED)) {
+            Slot slot = this.getHoveredSlot(event.x(), event.y());
+            if (slot != null) {
+                ItemStack toRequest = slot.getItem();
+                if (!toRequest.isEmpty()) {
+                    boolean craftable = this.menu.itemCraftable(toRequest);
+                    if (event.hasShiftDown() || event.button() == 1) {
+                        int amount = event.hasShiftDown() ? Math.min(toRequest.getCount() - (craftable ? 1 : 0), toRequest.getMaxStackSize()) : 1;
+                        if (amount > 0) {
+                            Services.LOADER_SERVICE.sendToServer(new ServerBoundRequestPayload(toRequest.copyWithCount(amount), this.menu.getRequestPos()));
+                            toRequest.shrink(amount);
+                            this.menu.update();
+                        }
+                    } else {
+                        this.minecraft.setScreen(new RequestAmountScreen(toRequest, this, craftable));
                     }
-                } else {
-                    this.minecraft.setScreen(new RequestAmountScreen(toRequest, this, craftable));
                 }
             }
         }

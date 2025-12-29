@@ -42,7 +42,7 @@ public class RequestMenu extends AbstractContainerMenu {
     private final BlockPos networkPos;
     private final BlockPos requestPos;
     private final BlockEntity controllerPipe;
-    private final BlockEntity requestPipe;
+    public final BlockEntity requestPipe;
 
     public RequestMenu(int id, Inventory inventory, ClientBoundItemListPayload payload) {
         super(ClassicPipes.REQUEST_MENU, id);

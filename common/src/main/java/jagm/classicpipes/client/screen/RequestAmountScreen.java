@@ -16,6 +16,8 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 import net.minecraft.world.item.ItemStack;
 
+import static jagm.classicpipes.block.NetworkedPipeBlock.ENABLED;
+
 public class RequestAmountScreen extends Screen {
 
     private static final int IMAGE_WIDTH = 176;
@@ -33,6 +35,11 @@ public class RequestAmountScreen extends Screen {
     private int count;
     private IncreaseButton increase;
     private IncreaseButton decrease;
+
+    @Override
+    public boolean isPauseScreen() {
+        return false;
+    }
 
     protected RequestAmountScreen(ItemStack stack, RequestScreen previousScreen, boolean craftable) {
         super(Component.translatable("container." + ClassicPipes.MOD_ID + ".request.amount"));
@@ -75,6 +82,9 @@ public class RequestAmountScreen extends Screen {
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        if (this.previousScreen.getMenu().requestPipe != null && !this.previousScreen.getMenu().requestPipe.getBlockState().getValue(ENABLED)) {
+            this.onClose();
+        }
         super.render(graphics, mouseX, mouseY, partialTicks);
         graphics.pose().pushMatrix();
         graphics.pose().translate(this.leftPos, this.topPos);
