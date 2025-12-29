@@ -1,6 +1,5 @@
 package jagm.classicpipes.util;
 
-import com.mojang.serialization.Codec;
 import net.minecraft.core.Direction;
 import net.minecraft.world.phys.Vec3;
 
@@ -12,11 +11,11 @@ public abstract class EntityInPipe {
     public static final short DEFAULT_ACCELERATION = 1;
     public static final short DESPAWN_AGE = 24000;
 
-    protected short speed;
-    protected short progress;
-    protected Direction fromDirection;
-    protected Direction targetDirection;
-    protected short age;
+    short speed;
+    short progress;
+    Direction fromDirection;
+    Direction targetDirection;
+    short age;
 
 
     public abstract EntityInPipe copyWithAmount(int amount);
