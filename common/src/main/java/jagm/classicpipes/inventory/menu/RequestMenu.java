@@ -37,6 +37,7 @@ public class RequestMenu extends AbstractContainerMenu {
 
     private static final Pattern MOD_LOOKUP = Pattern.compile("@\\S+");
     private static final Pattern TAG_LOOKUP = Pattern.compile("#\\S+");
+    private static final Pattern NON_ALNUM_UNICODE = Pattern.compile("[^\\p{L}\\p{N}]+");
 
     private List<Tuple<ItemStack, Boolean>> networkItems;
     private final Container toDisplay;
@@ -254,7 +255,7 @@ public class RequestMenu extends AbstractContainerMenu {
 
     private static String normalise(String s) {
         String normalized = Normalizer.normalize(s, Normalizer.Form.NFKC);
-        return normalized.toLowerCase(Locale.ROOT).replaceAll("[^\\p{L}\\p{N}]+", "");
+        return NON_ALNUM_UNICODE.matcher(normalized.toLowerCase(Locale.ROOT)).replaceAll("");
     }
 
 }
