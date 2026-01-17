@@ -254,7 +254,7 @@ public class RequestMenu extends AbstractContainerMenu {
 
     private static String normalise(String s) {
         String normalized = Normalizer.normalize(s, Normalizer.Form.NFKC);
-        return normalized.toLowerCase(Locale.ROOT).replaceAll("\\s+", "");
+        return normalized.toLowerCase(Locale.ROOT).replaceAll("[^\\p{L}\\p{N}]+", "");
     }
 
 }
