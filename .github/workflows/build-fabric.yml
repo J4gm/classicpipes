@@ -1,5 +1,6 @@
-name: Build Fabric
-
+- name: Build Fabric
+  run: ./gradlew --no-daemon :fabric:build -x test --stacktrace --info
+  
 on:
   workflow_dispatch:
   push:
@@ -35,3 +36,16 @@ jobs:
             fabric/build/libs/*.jar
             !fabric/build/libs/*-dev.jar
             !fabric/build/libs/*-sources.jar
+
+- name: Upload Gradle reports (always)
+  if: always()
+  uses: actions/upload-artifact@v4
+  with:
+    name: gradle-reports
+    path: |
+      **/build/reports/**
+      **/build/reports/problems/**
+      **/build/reports/problems/problems-report.html
+      **/build/reports/*
+      **/build/**/logs/**
+      **/.gradle/**/notifications/**
