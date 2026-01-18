@@ -19,6 +19,11 @@ jobs:
           distribution: temurin
           java-version: '21'
 
+      - name: Prepare Gradle wrapper
+        run: |
+          sed -i 's/\r$//' ./gradlew
+          chmod +x ./gradlew
+
       - name: Build Fabric
         run: ./gradlew --no-daemon :fabric:build -x test
 
