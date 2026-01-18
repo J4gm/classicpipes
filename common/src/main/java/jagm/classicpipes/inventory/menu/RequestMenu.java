@@ -11,6 +11,7 @@ import jagm.classicpipes.util.SortingMode;
 import jagm.classicpipes.util.Tuple;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
@@ -22,7 +23,13 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
-import java.util.*;
+import java.text.Normalizer;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,6 +37,7 @@ public class RequestMenu extends AbstractContainerMenu {
 
     private static final Pattern MOD_LOOKUP = Pattern.compile("@\\S+");
     private static final Pattern TAG_LOOKUP = Pattern.compile("#\\S+");
+    private static final Pattern NON_ALNUM_UNICODE = Pattern.compile("[^\\p{L}\\p{N}]+");
 
     private List<Tuple<ItemStack, Boolean>> networkItems;
     private final Container toDisplay;
@@ -213,8 +221,8 @@ public class RequestMenu extends AbstractContainerMenu {
             boolean foundTag = false;
             String match = tagMatcher.group();
             search = search.replace(match, "");
+            String searchedTag = normalise(match.replaceFirst("#", ""));
             for (TagKey<Item> tag : stack.getTags().toList()) {
-                String searchedTag = normalise(match.replaceFirst("#", ""));
                 String itemTag = normalise(tag.location().toString());
                 if (itemTag.contains(searchedTag)) {
                     foundTag = true;
@@ -226,12 +234,28 @@ public class RequestMenu extends AbstractContainerMenu {
             }
         }
         search = normalise(search);
-        String itemName = normalise(stack.getItemName().getString());
-        return itemName.contains(search);
+        if (search.isEmpty()) {
+            return true;
+        }
+        for (String candidate : buildItemSearchCandidates(stack)) {
+            if (normalise(candidate).contains(search)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static List<String> buildItemSearchCandidates(ItemStack stack) {
+        List<String> candidates = new ArrayList<>();
+        candidates.add(stack.getItemName().getString());
+        candidates.add(stack.getItem().getDescriptionId());
+        candidates.add(BuiltInRegistries.ITEM.getKey(stack.getItem()).toString());
+        return candidates;
     }
 
     private static String normalise(String s) {
-        return s.toLowerCase().replaceAll("[^a-z0-9]", "");
+        String normalized = Normalizer.normalize(s, Normalizer.Form.NFKC);
+        return NON_ALNUM_UNICODE.matcher(normalized.toLowerCase(Locale.ROOT)).replaceAll("");
     }
 
 }

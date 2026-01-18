@@ -1,0 +1,32 @@
+name: Build Fabric
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-fabric:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Build Fabric
+        run: ./gradlew --no-daemon :fabric:build -x test
+
+      - name: Upload Fabric jars
+        uses: actions/upload-artifact@v4
+        with:
+          name: fabric-jars
+          path: |
+            fabric/build/libs/*.jar
+            !fabric/build/libs/*-dev.jar
+            !fabric/build/libs/*-sources.jar
