@@ -9,15 +9,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 
-public class ItemInPipe {
-
-    public static final short PIPE_LENGTH = 2048;
-    public static final short HALFWAY = PIPE_LENGTH / 2;
-    public static final short DEFAULT_SPEED = 64;
-    public static final short DEFAULT_ACCELERATION = 1;
-    public static final short SPEED_LIMIT = HALFWAY;
-    public static final short DESPAWN_AGE = 24000;
-
+public class ItemInPipe extends EntityInPipe {
     public static final Codec<ItemInPipe> CODEC = RecordCodecBuilder.create(instance ->
         instance.group(
                 ItemStack.CODEC.fieldOf("item").orElse(ItemStack.EMPTY).forGetter(ItemInPipe::getStack),
@@ -31,12 +23,7 @@ public class ItemInPipe {
     );
 
     private ItemStack stack;
-    private short speed;
-    private short progress;
-    private Direction fromDirection;
-    private Direction targetDirection;
     private boolean ejecting;
-    private short age;
 
     public ItemInPipe(ItemStack stack, short speed, short progress, Direction fromDirection, Direction targetDirection, boolean ejecting, short age) {
         this.stack = stack;
@@ -60,18 +47,8 @@ public class ItemInPipe {
         this(stack, speed, progress, Direction.from3DDataValue(fromDirection), Direction.from3DDataValue(targetDirection), ejecting, age);
     }
 
-    public ItemInPipe copyWithCount(int count) {
+    public ItemInPipe copyWithAmount(int count) {
         return new ItemInPipe(this.getStack().copyWithCount(count), this.speed, this.progress, this.fromDirection, this.targetDirection, this.ejecting, this.age);
-    }
-
-    public void move(short targetSpeed, short acceleration) {
-        if (this.speed < targetSpeed) {
-            this.speed = (short) Math.min(this.speed + acceleration, Math.min(targetSpeed, SPEED_LIMIT));
-        } else if (this.speed > targetSpeed) {
-            this.speed = (short) Math.max(this.speed - acceleration, Math.max(targetSpeed, 1));
-        }
-        this.progress += this.speed;
-        this.age++;
     }
 
     public void drop(ServerLevel level, BlockPos pos) {
@@ -83,34 +60,12 @@ public class ItemInPipe {
         }
     }
 
-    public Vec3 getRenderPosition(float partialTicks){
-        float p = (float) this.progress / PIPE_LENGTH + partialTicks * (float) this.speed / PIPE_LENGTH;
-        float q = 1.0F - p;
-        boolean h = p < 0.5F;
-        Direction d = h ? this.fromDirection : this.targetDirection;
-        return new Vec3(
-                d == Direction.WEST ? (h ? p : q) : (d == Direction.EAST ? (h ? q : p) : 0.5F),
-                d == Direction.DOWN ? (h ? p : q) : (d == Direction.UP ? (h ? q : p) : 0.5F),
-                d == Direction.NORTH ? (h ? p : q) : (d == Direction.SOUTH ? (h ? q : p) : 0.5F)
-        );
-    }
-
     public ItemStack getStack() {
         return this.stack;
     }
 
     public void setStack(ItemStack stack) {
         this.stack = stack;
-    }
-
-    public short getProgress() {
-        return this.progress;
-    }
-
-    public void resetProgress(Direction direction) {
-        this.progress -= PIPE_LENGTH;
-        this.fromDirection = direction;
-        this.targetDirection = direction;
     }
 
     public boolean isEjecting() {
@@ -121,24 +76,12 @@ public class ItemInPipe {
         this.ejecting = ejecting;
     }
 
-    public Direction getFromDirection() {
-        return fromDirection;
+    public int getAmount() {
+        return this.stack.getCount();
     }
 
-    public Direction getTargetDirection() {
-        return targetDirection;
-    }
-
-    public void setTargetDirection(Direction direction) {
-        this.targetDirection = direction;
-    }
-
-    public short getSpeed() {
-        return this.speed;
-    }
-
-    public short getAge() {
-        return this.age;
+    public void setAmount(int count) {
+        this.stack.setCount(count);
     }
 
 }

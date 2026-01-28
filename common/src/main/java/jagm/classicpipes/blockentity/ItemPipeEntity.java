@@ -56,7 +56,9 @@ public abstract class ItemPipeEntity extends PipeEntity {
                     }
                     this.tickAdded.remove(item);
                 }
-                item.move(this.getTargetSpeed(), this.getAcceleration());
+                Direction fromDirection = item.getFromDirection();
+                Direction targetDirection = item.getTargetDirection();
+                item.move(this.getTargetSpeed(state, fromDirection, targetDirection), this.getAcceleration(state, fromDirection, targetDirection));
                 if (item.getAge() > ItemInPipe.DESPAWN_AGE) {
                     iterator.remove();
                     sendBlockUpdate = true;
@@ -87,7 +89,7 @@ public abstract class ItemPipeEntity extends PipeEntity {
     }
 
     @Override
-    public void tickClient(Level level, BlockPos pos) {
+    public void tickClient(Level level, BlockPos pos, BlockState state) {
         if (!this.isEmpty()) {
             ListIterator<ItemInPipe> iterator = this.contents.listIterator();
             while (iterator.hasNext()) {
@@ -98,7 +100,9 @@ public abstract class ItemPipeEntity extends PipeEntity {
                     }
                     this.tickAdded.remove(item);
                 }
-                item.move(this.getTargetSpeed(), this.getAcceleration());
+                Direction fromDirection = item.getFromDirection();
+                Direction targetDirection = item.getTargetDirection();
+                item.move(this.getTargetSpeed(state, fromDirection, targetDirection), this.getAcceleration(state, fromDirection, targetDirection));
                 if (item.getProgress() >= ItemInPipe.PIPE_LENGTH) {
                     BlockPos nextPos = pos.relative(item.getTargetDirection());
                     if (level.getBlockEntity(nextPos) instanceof ItemPipeEntity nextPipe) {

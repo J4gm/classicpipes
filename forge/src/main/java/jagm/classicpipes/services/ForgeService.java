@@ -258,7 +258,7 @@ public class ForgeService implements LoaderService {
                     FluidStack drainedStack = pipe.isEmpty() ? fluidHandler.drain(amountToDrain, IFluidHandler.FluidAction.EXECUTE) : fluidHandler.drain(new FluidStack(pipe.getFluid(), amountToDrain), IFluidHandler.FluidAction.EXECUTE);
                     if (!drainedStack.isEmpty()) {
                         pipe.setFluid(drainedStack.getFluid());
-                        pipe.insertFluidPacket(level, new FluidInPipe(drainedStack.getAmount(), pipe.getTargetSpeed(), (short) 0, face.getOpposite(), face.getOpposite(), (short) 0));
+                        pipe.insertFluidPacket(level, new FluidInPipe(drainedStack.getAmount(), pipe.getTargetSpeed(pipeState, face.getOpposite(), face.getOpposite()), (short) 0, face.getOpposite(), face.getOpposite(), (short) 0));
                         return true;
                     }
                 }

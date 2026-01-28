@@ -6,6 +6,7 @@ import jagm.classicpipes.inventory.container.SingleItemFilterContainer;
 import jagm.classicpipes.inventory.menu.AdvancedCopperPipeMenu;
 import jagm.classicpipes.util.ItemInPipe;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.ItemStackWithSlot;
 import net.minecraft.world.MenuProvider;
@@ -49,12 +50,12 @@ public class AdvancedCopperPipeEntity extends CopperPipeEntity implements MenuPr
     }
 
     @Override
-    public short getTargetSpeed() {
+    public short getTargetSpeed(BlockState state, Direction fromDirection, Direction targetDirection) {
         return ItemInPipe.DEFAULT_SPEED * 8;
     }
 
     @Override
-    public short getAcceleration() {
+    public short getAcceleration(BlockState state, Direction fromDirection, Direction targetDirection) {
         return ItemInPipe.DEFAULT_ACCELERATION * 16;
     }
 

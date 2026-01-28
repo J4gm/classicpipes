@@ -307,7 +307,7 @@ public class FabricService implements LoaderService {
                 }
             }
             if (extracted > 0) {
-                pipe.insertFluidPacket(level, new FluidInPipe((int) (extracted / FabricEntrypoint.FLUID_CONVERSION_RATE), pipe.getTargetSpeed(), (short) 0, face.getOpposite(), face.getOpposite(), (short) 0));
+                pipe.insertFluidPacket(level, new FluidInPipe((int) (extracted / FabricEntrypoint.FLUID_CONVERSION_RATE), pipe.getTargetSpeed(state, face.getOpposite(), face.getOpposite()), (short) 0, face.getOpposite(), face.getOpposite(), (short) 0));
                 return true;
             }
         }

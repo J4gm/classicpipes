@@ -35,14 +35,14 @@ public abstract class PipeEntity extends BlockEntity {
                 }
                 pipe.updates.clear();
             } else {
-                pipe.tickClient(level, pos);
+                pipe.tickClient(level, pos, state);
             }
         }
     }
 
     public abstract void tickServer(ServerLevel level, BlockPos pos, BlockState state);
 
-    public abstract void tickClient(Level level, BlockPos pos);
+    public abstract void tickClient(Level level, BlockPos pos, BlockState state);
 
     public final void scheduleUpdate(ServerLevel level, BlockState state, BlockPos pos, Direction direction, boolean wasConnected) {
         this.updates.add(new ScheduledPipeUpdate(level, state, pos, direction, wasConnected));
@@ -52,9 +52,9 @@ public abstract class PipeEntity extends BlockEntity {
 
     public abstract int getComparatorOutput();
 
-    public abstract short getTargetSpeed();
+    public abstract short getTargetSpeed(BlockState state, Direction fromDirection, Direction targetDirection);
 
-    public abstract short getAcceleration();
+    public abstract short getAcceleration(BlockState state, Direction fromDirection, Direction targetDirection);
 
     protected final boolean isPipeConnected(BlockState state, Direction direction) {
         if (state.getBlock() instanceof PipeBlock pipeBlock) {

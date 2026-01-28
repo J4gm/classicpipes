@@ -5,7 +5,17 @@
         "model": "classicpipes:block/recipe_pipe_side_north"
       },
       "when": {
-        "north": "unlinked"
+        "north": "unlinked",
+        "enabled": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "classicpipes:block/recipe_pipe_side_north_blocked"
+      },
+      "when": {
+        "north": "unlinked",
+        "enabled": "false"
       }
     },
     {
@@ -21,7 +31,17 @@
         "model": "classicpipes:block/recipe_pipe_middle"
       },
       "when": {
-        "north": "none"
+        "north": "none",
+        "enabled": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "classicpipes:block/recipe_pipe_middle_blocked"
+      },
+      "when": {
+        "north": "none",
+        "enabled": "false"
       }
     },
     {
@@ -31,7 +51,19 @@
         "y": 90
       },
       "when": {
-        "east": "unlinked"
+        "east": "unlinked",
+        "enabled": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "classicpipes:block/recipe_pipe_side_east_blocked",
+        "uvlock": true,
+        "y": 90
+      },
+      "when": {
+        "east": "unlinked",
+        "enabled": "false"
       }
     },
     {
@@ -51,7 +83,19 @@
         "y": 90
       },
       "when": {
-        "east": "none"
+        "east": "none",
+        "enabled": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "classicpipes:block/recipe_pipe_middle_blocked",
+        "uvlock": true,
+        "y": 90
+      },
+      "when": {
+        "east": "none",
+        "enabled": "false"
       }
     },
     {
@@ -61,7 +105,19 @@
         "y": 180
       },
       "when": {
-        "south": "unlinked"
+        "south": "unlinked",
+        "enabled": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "classicpipes:block/recipe_pipe_side_south_blocked",
+        "uvlock": true,
+        "y": 180
+      },
+      "when": {
+        "south": "unlinked",
+        "enabled": "false"
       }
     },
     {
@@ -81,7 +137,19 @@
         "y": 180
       },
       "when": {
-        "south": "none"
+        "south": "none",
+        "enabled": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "classicpipes:block/recipe_pipe_middle_blocked",
+        "uvlock": true,
+        "y": 180
+      },
+      "when": {
+        "south": "none",
+        "enabled": "false"
       }
     },
     {
@@ -91,7 +159,19 @@
         "y": 270
       },
       "when": {
-        "west": "unlinked"
+        "west": "unlinked",
+        "enabled": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "classicpipes:block/recipe_pipe_side_west_blocked",
+        "uvlock": true,
+        "y": 270
+      },
+      "when": {
+        "west": "unlinked",
+        "enabled": "false"
       }
     },
     {
@@ -111,7 +191,19 @@
         "y": 270
       },
       "when": {
-        "west": "none"
+        "west": "none",
+        "enabled": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "classicpipes:block/recipe_pipe_middle_blocked",
+        "uvlock": true,
+        "y": 270
+      },
+      "when": {
+        "west": "none",
+        "enabled": "false"
       }
     },
     {
@@ -121,7 +213,19 @@
         "x": 270
       },
       "when": {
-        "up": "unlinked"
+        "up": "unlinked",
+        "enabled": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "classicpipes:block/recipe_pipe_side_up_blocked",
+        "uvlock": true,
+        "x": 270
+      },
+      "when": {
+        "up": "unlinked",
+        "enabled": "false"
       }
     },
     {
@@ -141,7 +245,19 @@
         "x": 270
       },
       "when": {
-        "up": "none"
+        "up": "none",
+        "enabled": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "classicpipes:block/recipe_pipe_middle_blocked",
+        "uvlock": true,
+        "x": 270
+      },
+      "when": {
+        "up": "none",
+        "enabled": "false"
       }
     },
     {
@@ -151,7 +267,19 @@
         "x": 90
       },
       "when": {
-        "down": "unlinked"
+        "down": "unlinked",
+        "enabled": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "classicpipes:block/recipe_pipe_side_down_blocked",
+        "uvlock": true,
+        "x": 90
+      },
+      "when": {
+        "down": "unlinked",
+        "enabled": "false"
       }
     },
     {
@@ -171,7 +299,19 @@
         "x": 90
       },
       "when": {
-        "down": "none"
+        "down": "none",
+        "enabled": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "classicpipes:block/recipe_pipe_middle_blocked",
+        "uvlock": true,
+        "x": 90
+      },
+      "when": {
+        "down": "none",
+        "enabled": "false"
       }
     }
   ]

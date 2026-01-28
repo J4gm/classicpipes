@@ -50,7 +50,7 @@ public class NeoForgeFluidPipeWrapper implements ResourceHandler<FluidResource> 
             int amount = Math.min(this.pipe.remainingCapacity(), maxAmount);
             if (this.pipe.getLevel() instanceof ServerLevel serverLevel) {
                 this.pipe.setFluid(fluidResource.getFluid());
-                FluidInPipe fluidPacket = new FluidInPipe(amount, this.pipe.getTargetSpeed(), (short) 0, this.side, this.side, (short) 0);
+                FluidInPipe fluidPacket = new FluidInPipe(amount, this.pipe.getTargetSpeed(this.pipe.getBlockState(), this.side, this.side), (short) 0, this.side, this.side, (short) 0);
                 this.pipe.insertFluidPacket(serverLevel, fluidPacket);
                 serverLevel.sendBlockUpdated(this.pipe.getBlockPos(), this.pipe.getBlockState(), this.pipe.getBlockState(), 2);
             }
