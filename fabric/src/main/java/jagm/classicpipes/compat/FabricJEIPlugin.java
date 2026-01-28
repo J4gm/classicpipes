@@ -1,5 +1,5 @@
 package jagm.classicpipes.compat;
-/*
+
 import jagm.classicpipes.ClassicPipes;
 import jagm.classicpipes.client.screen.FilterScreen;
 import jagm.classicpipes.client.screen.FluidFilterScreen;
@@ -22,7 +22,7 @@ import mezz.jei.api.recipe.transfer.IUniversalRecipeTransferHandler;
 import mezz.jei.api.registration.IGuiHandlerRegistration;
 import mezz.jei.api.registration.IRecipeTransferRegistration;
 import net.minecraft.client.renderer.Rect2i;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
@@ -34,11 +34,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@JeiPlugin*/
-public class FabricJEIPlugin/* implements IModPlugin */{
-/*
+@JeiPlugin
+public class FabricJEIPlugin implements IModPlugin {
+
     @Override
-    public ResourceLocation getPluginUid() {
+    public Identifier getPluginUid() {
         return MiscUtil.identifier("jei_plugin");
     }
 
@@ -153,5 +153,5 @@ public class FabricJEIPlugin/* implements IModPlugin */{
 
         });
     }
-*/
+
 }
