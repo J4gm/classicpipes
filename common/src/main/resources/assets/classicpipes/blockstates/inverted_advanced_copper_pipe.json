@@ -1,0 +1,266 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "classicpipes:block/advanced_copper_pipe_side"
+      },
+      "when": {
+        "north": "true",
+        "facing": "east|south|west|up|down|none"
+      }
+    },
+    {
+      "apply": {
+        "model": "classicpipes:block/advanced_copper_pipe_side_attached"
+      },
+      "when": {
+        "north": "true",
+        "facing": "north",
+        "enabled": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "classicpipes:block/advanced_copper_pipe_side_enabled"
+      },
+      "when": {
+        "north": "true",
+        "facing": "north",
+        "enabled": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "classicpipes:block/inverted_advanced_copper_pipe_middle"
+      },
+      "when": {
+        "north": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "classicpipes:block/advanced_copper_pipe_side",
+        "uvlock": true,
+        "y": 90
+      },
+      "when": {
+        "east": "true",
+        "facing": "north|south|west|up|down|none"
+      }
+    },
+    {
+      "apply": {
+        "model": "classicpipes:block/advanced_copper_pipe_side_attached",
+        "uvlock": true,
+        "y": 90
+      },
+      "when": {
+        "east": "true",
+        "facing": "east",
+        "enabled": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "classicpipes:block/advanced_copper_pipe_side_enabled",
+        "uvlock": true,
+        "y": 90
+      },
+      "when": {
+        "east": "true",
+        "facing": "east",
+        "enabled": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "classicpipes:block/inverted_advanced_copper_pipe_middle",
+        "uvlock": true,
+        "y": 90
+      },
+      "when": {
+        "east": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "classicpipes:block/advanced_copper_pipe_side",
+        "uvlock": true,
+        "y": 180
+      },
+      "when": {
+        "south": "true",
+        "facing": "north|east|west|up|down|none"
+      }
+    },
+    {
+      "apply": {
+        "model": "classicpipes:block/advanced_copper_pipe_side_attached",
+        "uvlock": true,
+        "y": 180
+      },
+      "when": {
+        "south": "true",
+        "facing": "south",
+        "enabled": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "classicpipes:block/advanced_copper_pipe_side_enabled",
+        "uvlock": true,
+        "y": 180
+      },
+      "when": {
+        "south": "true",
+        "facing": "south",
+        "enabled": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "classicpipes:block/inverted_advanced_copper_pipe_middle",
+        "uvlock": true,
+        "y": 180
+      },
+      "when": {
+        "south": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "classicpipes:block/advanced_copper_pipe_side",
+        "uvlock": true,
+        "y": 270
+      },
+      "when": {
+        "west": "true",
+        "facing": "north|east|south|up|down|none"
+      }
+    },
+    {
+      "apply": {
+        "model": "classicpipes:block/advanced_copper_pipe_side_attached",
+        "uvlock": true,
+        "y": 270
+      },
+      "when": {
+        "west": "true",
+        "facing": "west",
+        "enabled": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "classicpipes:block/advanced_copper_pipe_side_enabled",
+        "uvlock": true,
+        "y": 270
+      },
+      "when": {
+        "west": "true",
+        "facing": "west",
+        "enabled": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "classicpipes:block/inverted_advanced_copper_pipe_middle",
+        "uvlock": true,
+        "y": 270
+      },
+      "when": {
+        "west": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "classicpipes:block/advanced_copper_pipe_side",
+        "uvlock": true,
+        "x": 270
+      },
+      "when": {
+        "up": "true",
+        "facing": "north|east|south|west|down|none"
+      }
+    },
+    {
+      "apply": {
+        "model": "classicpipes:block/advanced_copper_pipe_side_attached",
+        "uvlock": true,
+        "x": 270
+      },
+      "when": {
+        "up": "true",
+        "facing": "up",
+        "enabled": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "classicpipes:block/advanced_copper_pipe_side_enabled",
+        "uvlock": true,
+        "x": 270
+      },
+      "when": {
+        "up": "true",
+        "facing": "up",
+        "enabled": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "classicpipes:block/inverted_advanced_copper_pipe_middle",
+        "uvlock": true,
+        "x": 270
+      },
+      "when": {
+        "up": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "classicpipes:block/advanced_copper_pipe_side",
+        "uvlock": true,
+        "x": 90
+      },
+      "when": {
+        "down": "true",
+        "facing": "north|east|south|west|up|none"
+      }
+    },
+    {
+      "apply": {
+        "model": "classicpipes:block/advanced_copper_pipe_side_attached",
+        "uvlock": true,
+        "x": 90
+      },
+      "when": {
+        "down": "true",
+        "facing": "down",
+        "enabled": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "classicpipes:block/advanced_copper_pipe_side_enabled",
+        "uvlock": true,
+        "x": 90
+      },
+      "when": {
+        "down": "true",
+        "facing": "down",
+        "enabled": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "classicpipes:block/inverted_advanced_copper_pipe_middle",
+        "uvlock": true,
+        "x": 90
+      },
+      "when": {
+        "down": "false"
+      }
+    }
+  ]
+}

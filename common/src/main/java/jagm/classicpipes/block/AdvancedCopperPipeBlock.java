@@ -18,8 +18,8 @@ import net.minecraft.world.phys.BlockHitResult;
 
 public class AdvancedCopperPipeBlock extends CopperPipeBlock {
 
-    public AdvancedCopperPipeBlock(Properties properties) {
-        super(properties);
+    public AdvancedCopperPipeBlock(Properties properties, boolean inverted) {
+        super(properties, inverted);
     }
 
     @Override

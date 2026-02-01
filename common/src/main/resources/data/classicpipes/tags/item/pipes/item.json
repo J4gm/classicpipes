@@ -28,6 +28,8 @@
     "classicpipes:spruce_pipe",
     "classicpipes:warped_pipe",
     "classicpipes:bone_pipe",
-    "classicpipes:advanced_copper_pipe"
+    "classicpipes:advanced_copper_pipe",
+    "classicpipes:inverted_copper_pipe",
+    "classicpipes:inverted_advanced_copper_pipe"
   ]
 }

@@ -23,6 +23,10 @@
     "classicpipes:lapis_fluid_pipe",
     "classicpipes:obsidian_fluid_pipe",
     "classicpipes:advanced_copper_pipe",
-    "classicpipes:advanced_copper_fluid_pipe"
+    "classicpipes:advanced_copper_fluid_pipe",
+    "classicpipes:inverted_copper_pipe",
+    "classicpipes:inverted_advanced_copper_pipe",
+    "classicpipes:inverted_copper_fluid_pipe",
+    "classicpipes:inverted_advanced_copper_fluid_pipe"
   ]
 }
