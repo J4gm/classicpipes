@@ -17,6 +17,8 @@
     "classicpipes:oak_fluid_pipe",
     "classicpipes:spruce_fluid_pipe",
     "classicpipes:warped_fluid_pipe",
-    "classicpipes:advanced_copper_fluid_pipe"
+    "classicpipes:advanced_copper_fluid_pipe",
+    "classicpipes:inverted_copper_fluid_pipe",
+    "classicpipes:inverted_advanced_copper_fluid_pipe"
   ]
 }
