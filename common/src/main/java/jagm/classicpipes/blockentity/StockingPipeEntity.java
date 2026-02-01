@@ -60,8 +60,9 @@ public class StockingPipeEntity extends NetworkedPipeEntity implements MenuProvi
                 }
                 MiscUtil.mergeStackIntoList(filterItems, stack.copy());
             }
-            if (!filterItems.isEmpty()) {
-                List<ItemStack> containerItems = Services.LOADER_SERVICE.getContainerItems(level, this.getBlockPos().relative(facing), facing.getOpposite());
+            BlockPos containerPos = this.getBlockPos().relative(facing);
+            if (!filterItems.isEmpty() && Services.LOADER_SERVICE.canAccessContainer(level, containerPos, facing.getOpposite())) {
+                List<ItemStack> containerItems = Services.LOADER_SERVICE.getContainerItems(level, containerPos, facing.getOpposite());
                 for (ItemStack filterStack : filterItems) {
                     boolean matched = false;
                     for (ItemStack containerStack : containerItems) {
@@ -78,10 +79,10 @@ public class StockingPipeEntity extends NetworkedPipeEntity implements MenuProvi
                         this.missingItemsCache.add(filterStack);
                     }
                 }
+                if (this.activeStocking) {
+                    this.tryRequests(level);
+                }
             }
-        }
-        if (this.activeStocking) {
-            this.tryRequests(level);
         }
     }
 
