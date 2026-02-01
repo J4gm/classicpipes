@@ -1,0 +1,51 @@
+{
+  "parent": "classicpipes:item/pipe",
+  "textures": {
+    "texture": "classicpipes:block/inverted_copper_fluid_pipe",
+    "enabled": "classicpipes:block/copper_fluid_pipe_enabled",
+    "interior": "minecraft:block/copper_block",
+    "particle": "classicpipes:block/inverted_copper_fluid_pipe"
+  },
+  "elements": [
+    {
+      "from": [ 4, 4, 4 ],
+      "to": [ 12, 16, 12 ],
+      "faces": {
+        "north": { "texture": "#texture"},
+        "south": { "texture": "#texture"},
+        "east": { "texture": "#texture"},
+        "west": { "texture": "#texture"}
+      }
+    },
+    {
+      "from": [ 12, 16, 12 ],
+      "to": [ 4, 4, 4 ],
+      "faces": {
+        "north": { "texture": "#texture"},
+        "south": { "texture": "#texture"},
+        "east": { "texture": "#texture"},
+        "west": { "texture": "#texture"}
+      }
+    },
+    {
+      "from": [ 4, 0, 4 ],
+      "to": [ 12, 4, 12 ],
+      "faces": {
+        "north": { "texture": "#enabled"},
+        "south": { "texture": "#enabled"},
+        "east": { "texture": "#enabled"},
+        "west": { "texture": "#enabled"}
+      }
+    },
+    {
+      "from": [ 12, 4, 12 ],
+      "to": [ 4, 0, 4 ],
+      "faces": {
+        "north": { "texture": "#interior"},
+        "south": { "texture": "#interior"},
+        "east": { "texture": "#interior"},
+        "west": { "texture": "#interior"}
+      }
+    }
+  ]
+}
