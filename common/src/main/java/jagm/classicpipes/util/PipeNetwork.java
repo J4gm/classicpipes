@@ -280,9 +280,7 @@ public class PipeNetwork {
                 }
             }
             for (StockingPipeEntity stockingPipe : this.stockingPipes) {
-                if (stockingPipe.isActiveStocking()) {
-                    stockingPipe.tryRequests(level);
-                }
+                stockingPipe.updateCache();
             }
             this.cacheChanged = false;
             this.cacheCooldown = DEFAULT_COOLDOWN;
