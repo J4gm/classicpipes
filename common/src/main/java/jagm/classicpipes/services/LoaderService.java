@@ -74,4 +74,20 @@ public interface LoaderService {
 
     DispenseItemBehavior getDispenserBehaviour(ItemStack stack);
 
+    default boolean quarkInstalled() {
+        return false;
+    }
+
+    default boolean isQuarkCrafter(BlockEntity container) {
+        return false;
+    }
+
+    default void setQuarkCrafterSlotState(BlockEntity crafter, int slot, boolean state) {
+
+    }
+
+    default void quarkCrafterCraft(ServerLevel level, BlockEntity crafter) {
+
+    }
+
 }

@@ -23,3 +23,9 @@ mandatory = true
 versionRange = "${minecraft_version_range}"
 ordering = "NONE"
 side = "BOTH"
+[[dependencies.${mod_id}]]
+modId = "quark"
+mandatory = false
+versionRange = "[${quark_min_version},)"
+ordering = "BEFORE"
+side = "BOTH"

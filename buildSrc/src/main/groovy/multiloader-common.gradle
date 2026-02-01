@@ -100,7 +100,8 @@ processResources {
             'credits'                      : credits,
             'java_version'                 : java_version,
             'logo'                         : logo,
-            'issues'                       : issues
+            'issues'                       : issues,
+            'quark_min_version'            : quark_min_version
     ]
 
     var jsonExpandProps = expandProps.collectEntries {

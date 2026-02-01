@@ -4,6 +4,7 @@ import jagm.classicpipes.blockentity.FluidPipeEntity;
 import jagm.classicpipes.blockentity.ItemPipeEntity;
 import jagm.classicpipes.client.network.ForgeClientNetworkHandler;
 import jagm.classicpipes.client.renderer.FluidRenderInfo;
+import jagm.classicpipes.compat.QuarkHelper;
 import jagm.classicpipes.network.ForgeServerNetworkHandler;
 import jagm.classicpipes.network.PayloadWrapper;
 import jagm.classicpipes.network.SelfHandler;
@@ -304,6 +305,33 @@ public class ForgeService implements LoaderService {
     @Override
     public DispenseItemBehavior getDispenserBehaviour(ItemStack stack) {
         return DispenserBlock.DISPENSER_REGISTRY.get(stack.getItem());
+    }
+
+    @Override
+    public boolean quarkInstalled() {
+        return ModList.get().isLoaded("quark");
+    }
+
+    @Override
+    public boolean isQuarkCrafter(BlockEntity container) {
+        if (this.quarkInstalled()) {
+            return QuarkHelper.isCrafter(container);
+        }
+        return false;
+    }
+
+    @Override
+    public void setQuarkCrafterSlotState(BlockEntity crafter, int slot, boolean state) {
+        if (this.quarkInstalled()) {
+            QuarkHelper.setCrafterSlotState(crafter, slot, state);
+        }
+    }
+
+    @Override
+    public void quarkCrafterCraft(ServerLevel level, BlockEntity crafter) {
+        if (this.quarkInstalled()) {
+            QuarkHelper.crafterCraft(level, crafter);
+        }
     }
 
 }

@@ -17,6 +17,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
@@ -27,9 +29,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class RecipePipeEntity extends NetworkedPipeEntity implements MenuProvider {
 
@@ -38,7 +38,9 @@ public class RecipePipeEntity extends NetworkedPipeEntity implements MenuProvide
     private final FilterContainer filter;
     private final Direction[] slotDirections;
     private final NonNullList<ItemStack> heldItems;
+    private final boolean quarkInstalled;
     private int waitingForCraft;
+    private boolean crafterTicked;
     private byte cooldown;
     private boolean blockingMode;
 
@@ -50,6 +52,7 @@ public class RecipePipeEntity extends NetworkedPipeEntity implements MenuProvide
         Arrays.fill(this.slotDirections, buttonDirections.isEmpty() ? Direction.DOWN : buttonDirections.get(0));
         this.heldItems = NonNullList.withSize(9, ItemStack.EMPTY);
         this.blockingMode = true;
+        this.quarkInstalled = Services.LOADER_SERVICE.quarkInstalled();
     }
 
     public Direction[] getSlotDirections() {
@@ -64,9 +67,26 @@ public class RecipePipeEntity extends NetworkedPipeEntity implements MenuProvide
     public void tickServer(ServerLevel level, BlockPos pos, BlockState state) {
         super.tickServer(level, pos, state);
         BlockPos crafterPos = pos.relative(this.slotDirections[9]);
-        if (this.waitingForCraft > 0) {
+        if (quarkInstalled && this.crafterTicked && this.hasNetwork()) {
+            for (RequestedItem requestedItem : this.getNetwork().getRequestedItems()) {
+                if (requestedItem.matches(this.getResult())) {
+                    requestedItem.sendMessage(level, Component.translatable("chat." + ClassicPipes.MOD_ID + ".crafter_jammed", crafterPos.toShortString()).withStyle(ChatFormatting.RED));
+                }
+            }
+            this.getNetwork().resetRequests(level);
+            this.crafterTicked = false;
+            this.waitingForCraft = 0;
+            this.setChanged();
+            level.sendBlockUpdated(pos, state, state, 2);
+        } else if (this.waitingForCraft > 0) {
             BlockEntity container = level.getBlockEntity(crafterPos);
-            if (this.cooldown-- <= 0) {
+            if (quarkInstalled && Services.LOADER_SERVICE.isQuarkCrafter(container)) {
+                if (this.isEmpty()) {
+                    this.crafterTicked = true;
+                    Services.LOADER_SERVICE.quarkCrafterCraft(level, container);
+                    level.playSound(null, crafterPos, SoundEvents.DISPENSER_DISPENSE, SoundSource.BLOCKS);
+                }
+            } else if (this.cooldown-- <= 0) {
                 if (!(container instanceof ItemPipeEntity) && Services.LOADER_SERVICE.extractSpecificItem(this, level, crafterPos, this.slotDirections[9].getOpposite(), this.getResult().copyWithCount(1))) {
                     level.sendBlockUpdated(pos, state, state, 2);
                     this.setChanged();
@@ -148,6 +168,7 @@ public class RecipePipeEntity extends NetworkedPipeEntity implements MenuProvide
                                 requestedItem.sendMessage(serverLevel, Component.translatable("chat." + ClassicPipes.MOD_ID + ".missing_recipe_pipe_direction", this.getBlockPos().toShortString()).withStyle(ChatFormatting.RED));
                             }
                         }
+                        this.crafterTicked = false;
                         this.waitingForCraft = 0;
                         this.getNetwork().resetRequests(serverLevel);
                         this.setChanged();
@@ -157,9 +178,21 @@ public class RecipePipeEntity extends NetworkedPipeEntity implements MenuProvide
                 }
             }
             if (readyToCraft > 0 && readyToCraft < Integer.MAX_VALUE) {
+                Map<Direction, BlockEntity> crafters = new HashMap<>();
                 for (int i = 0; i < readyToCraft; i++) {
                     for (int slot = 0; slot < 9; slot++) {
                         ItemStack ingredient = this.filter.getItem(slot);
+                        if (quarkInstalled) {
+                            if (crafters.containsKey(this.slotDirections[slot])) {
+                                Services.LOADER_SERVICE.setQuarkCrafterSlotState(crafters.get(this.slotDirections[slot]), slot, !ingredient.isEmpty());
+                            } else if (this.getLevel() != null) {
+                                BlockEntity container = this.getLevel().getBlockEntity(this.getBlockPos().relative(this.slotDirections[slot]));
+                                if (Services.LOADER_SERVICE.isQuarkCrafter(container)) {
+                                    crafters.put(this.slotDirections[slot], container);
+                                    Services.LOADER_SERVICE.setQuarkCrafterSlotState(container, slot, !ingredient.isEmpty());
+                                }
+                            }
+                        }
                         if (!ingredient.isEmpty()) {
                             this.heldItems.get(slot).shrink(ingredient.getCount());
                             this.queued.add(new ItemInPipe(
@@ -236,6 +269,7 @@ public class RecipePipeEntity extends NetworkedPipeEntity implements MenuProvide
         ItemStack stack = item.getStack();
         if (!stack.isEmpty() && this.waitingForCraft > 0 && item.getFromDirection().equals(this.slotDirections[9]) && ItemStack.isSameItemSameTags(this.getResult(), stack)) {
             this.waitingForCraft -= stack.getCount();
+            this.crafterTicked = false;
             if (this.waitingForCraft <= 0) {
                 this.waitingForCraft = 0;
                 this.attemptCraft();
@@ -295,6 +329,9 @@ public class RecipePipeEntity extends NetworkedPipeEntity implements MenuProvide
             }
         });
         this.waitingForCraft = valueInput.getInt("waiting_for_craft");
+        if (quarkInstalled) {
+            this.crafterTicked = valueInput.getBoolean("crafter_ticked");
+        }
         this.cooldown = valueInput.getByte("cooldown");
         this.blockingMode = valueInput.getBoolean("blocking_mode");
     }
@@ -328,6 +365,9 @@ public class RecipePipeEntity extends NetworkedPipeEntity implements MenuProvide
         }
         valueOutput.put("held_items", heldItemList);
         valueOutput.putInt("waiting_for_craft", this.waitingForCraft);
+        if (quarkInstalled) {
+            valueOutput.putBoolean("crafter_ticked", this.crafterTicked);
+        }
         valueOutput.putByte("cooldown", this.cooldown);
         valueOutput.putBoolean("blocking_mode", this.blockingMode);
     }

@@ -2,18 +2,15 @@ plugins {
     // https://fabricmc.net/develop/
     id 'fabric-loom' version '1.10-SNAPSHOT' apply false
     // https://projects.neoforged.net/neoforged/moddevgradle
-    id 'net.neoforged.moddev' version '2.0.103' apply false
+    id 'net.neoforged.moddev.legacyforge' version '2.0.103' apply false
 }
 
-// JEI
 repositories {
     maven {
-        // location of the maven that hosts JEI files since January 2023
         name = "Jared's maven"
         url = "https://maven.blamejared.com/"
     }
     maven {
-        // location of a maven mirror for JEI files, as a fallback
         name = "ModMaven"
         url = "https://modmaven.dev"
     }
