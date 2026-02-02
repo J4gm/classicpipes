@@ -2,8 +2,12 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "O": "classicpipes:inverted_copper_pipe",
-    "W": "minecraft:honeycomb"
+    "O": {
+      "item": "classicpipes:inverted_copper_pipe"
+    },
+    "W": {
+      "item": "minecraft:honeycomb"
+    }
   },
   "pattern": [
     "OOO",
