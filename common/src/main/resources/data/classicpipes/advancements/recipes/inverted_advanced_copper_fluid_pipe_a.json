@@ -5,7 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": "classicpipes:advanced_copper_fluid_pipe"
+            "items": ["classicpipes:advanced_copper_fluid_pipe"]
           }
         ]
       },
