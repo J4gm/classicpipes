@@ -55,9 +55,10 @@ public class PipeNetwork {
         int amount = 0;
         boolean hasRecipe = false;
         int missingStacksSize = requestState.missingStacksSize();
+        boolean isLabel = stack.getItem() instanceof LabelItem;
         for (RecipePipeEntity recipePipe : this.recipePipes) {
             ItemStack resultStack = recipePipe.getResult();
-            if (ItemStack.isSameItemSameTags(resultStack, stack)) {
+            if (!isLabel && ItemStack.isSameItemSameTags(resultStack, stack) || isLabel && ((LabelItem)stack.getItem()).itemMatches(stack, resultStack)) {
                 hasRecipe = true;
                 requestState.reduceMissingStacks(missingStacksSize);
                 List<ItemStack> ingredients = recipePipe.getIngredientsCollated();
@@ -104,7 +105,7 @@ public class PipeNetwork {
                         requestState.addCraftedItem(resultStack);
                         if (requiredAmount <= 0) {
                             if (requiredAmount < 0) {
-                                requestState.addSpareStack(stack.copyWithCount(-requiredAmount));
+                                requestState.addSpareStack(resultStack.copyWithCount(-requiredAmount));
                             }
                             break;
                         }
@@ -196,7 +197,6 @@ public class PipeNetwork {
             } else if (player != null) {
                 player.displayClientMessage(Component.translatable("chat." + ClassicPipes.MOD_ID + ".missing_item.a", stack.getCount(), stack.getItem().getDescription()).withStyle(ChatFormatting.RED), false);
                 for (ItemStack missingStack : requestState.collateMissingStacks()) {
-                    // TODO alternate display for tags
                     player.displayClientMessage(Component.translatable("chat." + ClassicPipes.MOD_ID + ".missing_item.b", missingStack.getCount(), missingStack.getItem().getDescription()).withStyle(ChatFormatting.YELLOW), false);
                 }
             }

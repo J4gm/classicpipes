@@ -6,9 +6,10 @@ import jagm.classicpipes.blockentity.RecipePipeEntity;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.core.NonNullList;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+
+import java.util.List;
 
 public class RecipePipeRenderer implements BlockEntityRenderer<RecipePipeEntity> {
 
@@ -21,9 +22,9 @@ public class RecipePipeRenderer implements BlockEntityRenderer<RecipePipeEntity>
     @Override
     public void render(RecipePipeEntity pipe, float partialTicks, PoseStack poses, MultiBufferSource bufferSource, int light, int overlay) {
         PipeRenderer.renderPipeItems(this.context, pipe, partialTicks, poses, bufferSource, light, overlay);
-        NonNullList<ItemStack> heldItems = pipe.getHeldItems();
+        List<List<ItemStack>> heldItems = pipe.getHeldItems();
         for (int i = 0; i < heldItems.size(); i++) {
-            ItemStack stack = heldItems.get(i);
+            ItemStack stack = heldItems.get(i).get(0);
             if (!stack.isEmpty() && pipe.getLevel() != null) {
                 int a = i;
                 float xOff = a % 2 == 0 ? 0.05F : -0.05F;
