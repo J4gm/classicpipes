@@ -4,6 +4,7 @@ import jagm.classicpipes.ClassicPipes;
 import jagm.classicpipes.block.MatchingPipeBlock;
 import jagm.classicpipes.block.ProviderPipeBlock;
 import jagm.classicpipes.inventory.menu.StoragePipeMenu;
+import jagm.classicpipes.item.LabelItem;
 import jagm.classicpipes.services.Services;
 import jagm.classicpipes.util.FacingOrNone;
 import net.minecraft.core.BlockPos;
@@ -62,7 +63,7 @@ public class StoragePipeEntity extends NetworkedPipeEntity implements MenuProvid
             if (this.shouldLeaveOne()) {
                 stack.shrink(1);
             }
-            if (!stack.isEmpty()) {
+            if (!stack.isEmpty() && !(stack.getItem() instanceof LabelItem)) {
                 this.providerCache.add(stack);
             }
         }
@@ -85,7 +86,7 @@ public class StoragePipeEntity extends NetworkedPipeEntity implements MenuProvid
     public boolean matches(ItemStack stack) {
         if (this.itemCanFit(stack)) {
             for (ItemStack containerStack : this.matchingCache) {
-                if (stack.is(containerStack.getItem()) && (!this.shouldMatchComponents() || ItemStack.isSameItemSameComponents(stack, containerStack))) {
+                if (containerStack.getItem() instanceof LabelItem labelItem && labelItem.itemMatches(containerStack, stack) || stack.is(containerStack.getItem()) && (!this.shouldMatchComponents() || ItemStack.isSameItemSameComponents(stack, containerStack))) {
                     return true;
                 }
             }

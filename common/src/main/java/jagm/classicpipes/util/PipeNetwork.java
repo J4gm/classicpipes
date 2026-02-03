@@ -3,6 +3,7 @@ package jagm.classicpipes.util;
 import jagm.classicpipes.ClassicPipes;
 import jagm.classicpipes.blockentity.*;
 import jagm.classicpipes.inventory.menu.RequestMenu;
+import jagm.classicpipes.item.LabelItem;
 import jagm.classicpipes.network.ClientBoundItemListPayload;
 import jagm.classicpipes.services.Services;
 import net.minecraft.ChatFormatting;
@@ -108,28 +109,6 @@ public class PipeNetwork {
                             break;
                         }
                     }
-                    /*boolean craftFailed = false;
-                    for (int i = 0; i < requiredCrafts; i++) {
-                        RequestState backupState = requestState.copy();
-                        for (ItemStack ingredientStack : ingredients) {
-                            List<ItemStack> newBranchItems = new ArrayList<>(itemsInThisBranch);
-                            newBranchItems.add(ingredientStack);
-                            int ingredientAmount = this.availableAmount(ingredientStack, recipePipe.getBlockPos(), requestState, newBranchItems);
-                            if (ingredientAmount < ingredientStack.getCount()) {
-                                craftFailed = true;
-                            }
-                        }
-                        if (!craftFailed) {
-                            int amountToDeliver = Math.min(resultStack.getCount(), requiredAmount);
-                            amount += amountToDeliver;
-                            requestState.scheduleItemRouting(requestPos, resultStack.copyWithCount(amountToDeliver));
-                            requiredAmount -= resultStack.getCount();
-                            missingStacksSize = requestState.missingStacksSize();
-                            requestState.addCraftedItem(resultStack);
-                        } else {
-                            requestState.restore(backupState);
-                        }
-                    }*/
                 }
             }
         }
@@ -138,13 +117,26 @@ public class PipeNetwork {
 
     private int amountInNetwork(ItemStack stack, BlockPos requestPos, RequestState requestState) {
         int amount = 0;
+        boolean isLabel = stack.getItem() instanceof LabelItem;
         for (ItemStack spareStack : requestState.getSpareStacks()) {
-            if (ItemStack.isSameItemSameComponents(spareStack, stack)) {
+            if (isLabel) {
+                if (((LabelItem)stack.getItem()).itemMatches(stack, spareStack)) {
+                    int spareAmount = Math.min(spareStack.getCount(), stack.getCount());
+                    if (spareAmount > 0) {
+                        amount += spareAmount;
+                        spareStack.shrink(spareAmount);
+                        requestState.scheduleItemRouting(requestPos, spareStack.copyWithCount(spareAmount));
+                    }
+                    if (amount >= stack.getCount()) {
+                        break;
+                    }
+                }
+            } else if (ItemStack.isSameItemSameComponents(spareStack, stack)) {
                 int spareAmount = Math.min(spareStack.getCount(), stack.getCount());
                 if (spareAmount > 0) {
                     amount += spareAmount;
                     spareStack.shrink(spareAmount);
-                    requestState.scheduleItemRouting(requestPos, stack.copyWithCount(spareAmount));
+                    requestState.scheduleItemRouting(requestPos, spareStack.copyWithCount(spareAmount));
                 }
                 break;
             }
@@ -153,12 +145,24 @@ public class PipeNetwork {
         if (amount < stack.getCount()) {
             for (ProviderPipe providerPipe : this.providerPipes) {
                 for (ItemStack cacheStack : providerPipe.getCache()) {
-                    if (ItemStack.isSameItemSameComponents(cacheStack, stack)) {
-                        int amountProvidable = Math.min(stack.getCount() - amount, cacheStack.getCount() - requestState.amountAlreadyWithdrawing(providerPipe, stack));
+                    if (isLabel) {
+                        if (((LabelItem)stack.getItem()).itemMatches(stack, cacheStack)) {
+                            int amountProvidable = Math.min(stack.getCount() - amount, cacheStack.getCount() - requestState.amountAlreadyWithdrawing(providerPipe, cacheStack));
+                            if (amountProvidable > 0) {
+                                amount += amountProvidable;
+                                requestState.scheduleItemWithdrawal(providerPipe, cacheStack.copyWithCount(amountProvidable));
+                                requestState.scheduleItemRouting(requestPos, cacheStack.copyWithCount(amountProvidable));
+                            }
+                            if (amount >= stack.getCount()) {
+                                break;
+                            }
+                        }
+                    } else if (ItemStack.isSameItemSameComponents(cacheStack, stack)) {
+                        int amountProvidable = Math.min(stack.getCount() - amount, cacheStack.getCount() - requestState.amountAlreadyWithdrawing(providerPipe, cacheStack));
                         if (amountProvidable > 0) {
                             amount += amountProvidable;
-                            requestState.scheduleItemWithdrawal(providerPipe, stack.copyWithCount(amountProvidable));
-                            requestState.scheduleItemRouting(requestPos, stack.copyWithCount(amountProvidable));
+                            requestState.scheduleItemWithdrawal(providerPipe, cacheStack.copyWithCount(amountProvidable));
+                            requestState.scheduleItemRouting(requestPos, cacheStack.copyWithCount(amountProvidable));
                         }
                         break;
                     }
@@ -192,6 +196,7 @@ public class PipeNetwork {
             } else if (player != null) {
                 player.displayClientMessage(Component.translatable("chat." + ClassicPipes.MOD_ID + ".missing_item.a", stack.getCount(), stack.getItemName()).withStyle(ChatFormatting.RED), false);
                 for (ItemStack missingStack : requestState.collateMissingStacks()) {
+                    // TODO alternate display for tags
                     player.displayClientMessage(Component.translatable("chat." + ClassicPipes.MOD_ID + ".missing_item.b", missingStack.getCount(), missingStack.getItemName()).withStyle(ChatFormatting.YELLOW), false);
                 }
             }

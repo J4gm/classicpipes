@@ -3,6 +3,7 @@ package jagm.classicpipes.blockentity;
 import jagm.classicpipes.ClassicPipes;
 import jagm.classicpipes.block.MatchingPipeBlock;
 import jagm.classicpipes.inventory.menu.MatchingPipeMenu;
+import jagm.classicpipes.item.LabelItem;
 import jagm.classicpipes.services.Services;
 import jagm.classicpipes.util.FacingOrNone;
 import net.minecraft.core.BlockPos;
@@ -60,7 +61,7 @@ public class MatchingPipeEntity extends NetworkedPipeEntity implements MenuProvi
     public boolean matches(ItemStack stack) {
         if (this.itemCanFit(stack)) {
             for (ItemStack containerStack : this.cache) {
-                if (stack.is(containerStack.getItem()) && (!this.shouldMatchComponents() || ItemStack.isSameItemSameComponents(stack, containerStack))) {
+                if (containerStack.getItem() instanceof LabelItem labelItem && labelItem.itemMatches(containerStack, stack) || stack.is(containerStack.getItem()) && (!this.shouldMatchComponents() || ItemStack.isSameItemSameComponents(stack, containerStack))) {
                     return true;
                 }
             }
