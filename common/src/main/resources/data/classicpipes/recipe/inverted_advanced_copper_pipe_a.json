@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "O": "classicpipes:advanced_copper_pipe",
+    "W": "minecraft:redstone_torch"
+  },
+  "pattern": [
+    "OOO",
+    "OWO",
+    "OOO"
+  ],
+  "result": {
+    "count": 8,
+    "id": "classicpipes:inverted_advanced_copper_pipe"
+  }
+}

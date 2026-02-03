@@ -231,7 +231,7 @@ public class RequestMenu extends AbstractContainerMenu {
     }
 
     private static String normalise(String s) {
-        return s.toLowerCase().replaceAll("[^a-z0-9]", "");
+        return s.toLowerCase().replaceAll("[\\p{Punct}\\s]", "");
     }
 
 }

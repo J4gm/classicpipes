@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "O": "minecraft:copper_ingot",
+    "W": "minecraft:glass",
+    "X": "minecraft:redstone_torch"
+  },
+  "pattern": [
+    "OWO",
+    " X "
+  ],
+  "result": {
+    "count": 8,
+    "id": "classicpipes:inverted_copper_pipe"
+  }
+}

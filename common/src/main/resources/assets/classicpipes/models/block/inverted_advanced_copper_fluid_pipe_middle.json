@@ -1,0 +1,7 @@
+{
+  "parent": "classicpipes:block/pipe_middle",
+  "textures": {
+    "texture": "classicpipes:block/inverted_advanced_copper_fluid_pipe",
+    "particle": "classicpipes:block/inverted_advanced_copper_fluid_pipe"
+  }
+}

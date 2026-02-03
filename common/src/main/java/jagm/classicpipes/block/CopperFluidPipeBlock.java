@@ -33,12 +33,15 @@ public class CopperFluidPipeBlock extends FluidPipeBlock {
     public static final EnumProperty<FacingOrNone> FACING = FacingOrNone.BLOCK_PROPERTY;
     public static final BooleanProperty ENABLED = BlockStateProperties.ENABLED;
 
-    public CopperFluidPipeBlock(Properties properties) {
+    private final boolean inverted;
+
+    public CopperFluidPipeBlock(Properties properties, boolean inverted) {
         super(properties);
         this.registerDefaultState(this.defaultBlockState()
                 .setValue(FACING, FacingOrNone.NONE)
                 .setValue(ENABLED, false)
         );
+        this.inverted = inverted;
     }
 
     @Override
@@ -110,9 +113,9 @@ public class CopperFluidPipeBlock extends FluidPipeBlock {
     }
 
     private void checkPoweredState(Level level, BlockPos pos, BlockState state) {
-        if (state.getValue(ENABLED) && !level.hasNeighborSignal(pos)) {
+        if (state.getValue(ENABLED) && level.hasNeighborSignal(pos) == this.inverted) {
             level.setBlock(pos, state.setValue(ENABLED, false), 2);
-        } else if (!state.getValue(ENABLED) && level.hasNeighborSignal(pos)) {
+        } else if (!state.getValue(ENABLED) && level.hasNeighborSignal(pos) != this.inverted) {
             level.setBlock(pos, state.setValue(ENABLED, true), 2);
         }
     }
