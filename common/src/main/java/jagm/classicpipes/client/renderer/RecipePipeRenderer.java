@@ -28,10 +28,10 @@ public class RecipePipeRenderer extends PipeRenderer<RecipePipeEntity> {
         List<ItemStackRenderState> heldItems = new ArrayList<>();
         List<Float> angles = new ArrayList<>();
         int i = 0;
-        for (ItemStack stack : pipe.getHeldItems()) {
-            if (!stack.isEmpty() && pipe.getLevel() != null) {
+        for (List<ItemStack> list : pipe.getHeldItems()) {
+            if (!list.isEmpty() && !list.getFirst().isEmpty() && pipe.getLevel() != null) {
                 ItemStackRenderState stackState = new ItemStackRenderState();
-                this.context.itemModelResolver().updateForTopItem(stackState, stack, ItemDisplayContext.FIXED, pipe.getLevel(), null, 0);
+                this.context.itemModelResolver().updateForTopItem(stackState, list.getFirst(), ItemDisplayContext.FIXED, pipe.getLevel(), null, 0);
                 heldItems.add(stackState);
                 angles.add(((pipe.getLevel().getGameTime() + i * 8) % 80 + partialTicks) * 2 * (float) Math.PI / 80);
             } else {
