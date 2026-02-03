@@ -4,6 +4,7 @@ import jagm.classicpipes.ClassicPipes;
 import jagm.classicpipes.block.ProviderPipeBlock;
 import jagm.classicpipes.inventory.container.SingleItemFilterContainer;
 import jagm.classicpipes.inventory.menu.ProviderPipeMenu;
+import jagm.classicpipes.item.LabelItem;
 import jagm.classicpipes.services.Services;
 import jagm.classicpipes.util.FacingOrNone;
 import jagm.classicpipes.util.MiscUtil;
@@ -123,7 +124,7 @@ public class ProviderPipeEntity extends NetworkedPipeEntity implements MenuProvi
         Iterator<ItemStack> iterator = stacks.iterator();
         while (iterator.hasNext()) {
             ItemStack stack = iterator.next();
-            if (!this.filter.isEmpty() && !this.filter.matches(stack).matches) {
+            if (stack.getItem() instanceof LabelItem || !this.filter.isEmpty() && !this.filter.matches(stack).matches) {
                 iterator.remove();
             } else if (this.shouldLeaveOne()) {
                 stack.shrink(1);

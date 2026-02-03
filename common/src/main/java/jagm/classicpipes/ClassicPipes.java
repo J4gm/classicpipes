@@ -130,8 +130,8 @@ public class ClassicPipes {
     public static final BlockEntityType<AdvancedCopperFluidPipeEntity> ADVANCED_COPPER_FLUID_PIPE_ENTITY = Services.LOADER_SERVICE.createBlockEntityType(AdvancedCopperFluidPipeEntity::new, ADVANCED_COPPER_FLUID_PIPE, INVERTED_ADVANCED_COPPER_FLUID_PIPE);
 
     public static final Item PIPE_SLICER = createItem("pipe_slicer", Item::new, 1, translateDesc("pipe_slicer"));
-    public static final Item TAG_LABEL = createItem("tag_label", TagLabelItem::new, 1);
-    public static final Item MOD_LABEL = createItem("mod_label", ModLabelItem::new, 1);
+    public static final Item TAG_LABEL = createItem("tag_label", TagLabelItem::new, 64);
+    public static final Item MOD_LABEL = createItem("mod_label", ModLabelItem::new, 64);
 
     public static final DataComponentType<String> LABEL_COMPONENT = DataComponentType.<String>builder().persistent(Codec.STRING).networkSynchronized(ByteBufCodecs.STRING_UTF8).build();
     public static final ResourceKey<DataComponentType<?>> LABEL_COMPONENT_KEY = MiscUtil.makeKey(BuiltInRegistries.DATA_COMPONENT_TYPE.key(), "label");
