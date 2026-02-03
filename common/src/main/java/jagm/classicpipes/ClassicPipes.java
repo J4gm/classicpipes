@@ -129,8 +129,8 @@ public class ClassicPipes {
     public static final BlockEntityType<AdvancedCopperFluidPipeEntity> ADVANCED_COPPER_FLUID_PIPE_ENTITY = Services.LOADER_SERVICE.createBlockEntityType(AdvancedCopperFluidPipeEntity::new, ADVANCED_COPPER_FLUID_PIPE, INVERTED_ADVANCED_COPPER_FLUID_PIPE);
 
     public static final Item PIPE_SLICER = createItem("pipe_slicer", props -> new LoreItem(props, translateDesc("pipe_slicer")), 1);
-    public static final Item TAG_LABEL = createItem("tag_label", TagLabelItem::new, 1);
-    public static final Item MOD_LABEL = createItem("mod_label", ModLabelItem::new, 1);
+    public static final Item TAG_LABEL = createItem("tag_label", TagLabelItem::new, 64);
+    public static final Item MOD_LABEL = createItem("mod_label", ModLabelItem::new, 64);
 
     public static final RequestItemTrigger REQUEST_ITEM_TRIGGER = new RequestItemTrigger();
 

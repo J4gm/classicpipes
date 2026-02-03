@@ -4,6 +4,7 @@ import jagm.classicpipes.ClassicPipes;
 import jagm.classicpipes.block.StockingPipeBlock;
 import jagm.classicpipes.inventory.container.FilterContainer;
 import jagm.classicpipes.inventory.menu.StockingPipeMenu;
+import jagm.classicpipes.item.LabelItem;
 import jagm.classicpipes.services.Services;
 import jagm.classicpipes.util.FacingOrNone;
 import jagm.classicpipes.util.ItemInPipe;
@@ -64,19 +65,20 @@ public class StockingPipeEntity extends NetworkedPipeEntity implements MenuProvi
             if (!filterItems.isEmpty() && Services.LOADER_SERVICE.canAccessContainer(level, containerPos, facing.getOpposite())) {
                 List<ItemStack> containerItems = Services.LOADER_SERVICE.getContainerItems(level, containerPos, facing.getOpposite());
                 for (ItemStack filterStack : filterItems) {
-                    boolean matched = false;
+                    int amountFound = 0;
+                    boolean isLabel = filterStack.getItem() instanceof LabelItem;
                     for (ItemStack containerStack : containerItems) {
-                        if (ItemStack.isSameItemSameTags(filterStack, containerStack)) {
-                            matched = true;
-                            int missing = filterStack.getCount() - containerStack.getCount();
-                            if (missing > 0) {
-                                this.missingItemsCache.add(containerStack.copyWithCount(missing));
+                        if (isLabel) {
+                            if (((LabelItem) filterStack.getItem()).itemMatches(filterStack, containerStack)) {
+                                amountFound += containerStack.getCount();
                             }
+                        } else if (ItemStack.isSameItemSameTags(filterStack, containerStack)) {
+                            amountFound += containerStack.getCount();
                             break;
                         }
                     }
-                    if (!matched) {
-                        this.missingItemsCache.add(filterStack);
+                    if (amountFound < filterStack.getCount()) {
+                        this.missingItemsCache.add(filterStack.copyWithCount(filterStack.getCount() - amountFound));
                     }
                 }
                 if (this.activeStocking) {
@@ -102,14 +104,16 @@ public class StockingPipeEntity extends NetworkedPipeEntity implements MenuProvi
     }
 
     public int getAlreadyRequested(ItemStack stack) {
+        boolean isLabel = stack.getItem() instanceof LabelItem;
         int alreadyRequested = 0;
         for (ItemInPipe item : this.contents) {
-            if (ItemStack.isSameItemSameTags(stack, item.getStack())) {
-                alreadyRequested += item.getStack().getCount();
+            ItemStack pipeStack = item.getStack();
+            if (ItemStack.isSameItemSameTags(stack, pipeStack) || isLabel && ((LabelItem) stack.getItem()).itemMatches(stack, pipeStack)) {
+                alreadyRequested += pipeStack.getCount();
             }
         }
         for (RequestedItem requestedItem : this.getNetwork().getRequestedItems()) {
-            if (requestedItem.matches(stack) && requestedItem.getDestination().equals(this.getBlockPos())) {
+            if (requestedItem.getDestination().equals(this.getBlockPos()) && (requestedItem.matches(stack) || isLabel && ((LabelItem) stack.getItem()).itemMatches(stack, requestedItem.getStack()))) {
                 alreadyRequested += requestedItem.getAmountRemaining();
             }
         }
