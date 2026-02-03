@@ -5,6 +5,7 @@ import jagm.classicpipes.block.NetworkedPipeBlock;
 import jagm.classicpipes.block.RecipePipeBlock;
 import jagm.classicpipes.inventory.container.FilterContainer;
 import jagm.classicpipes.inventory.menu.RecipePipeMenu;
+import jagm.classicpipes.item.LabelItem;
 import jagm.classicpipes.services.Services;
 import jagm.classicpipes.util.ItemInPipe;
 import jagm.classicpipes.util.MiscUtil;
@@ -13,9 +14,9 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -39,7 +40,7 @@ public class RecipePipeEntity extends NetworkedPipeEntity implements MenuProvide
 
     private final FilterContainer filter;
     private final Direction[] slotDirections;
-    private final NonNullList<ItemStack> heldItems;
+    private final List<List<ItemStack>> heldItems;
     private int waitingForCraft;
     private boolean crafterTicked;
     private byte cooldown;
@@ -51,7 +52,11 @@ public class RecipePipeEntity extends NetworkedPipeEntity implements MenuProvide
         this.slotDirections = new Direction[10];
         List<Direction> buttonDirections = this.getDirectionsForButtons(state);
         Arrays.fill(this.slotDirections, buttonDirections.isEmpty() ? Direction.DOWN : buttonDirections.getFirst());
-        this.heldItems = NonNullList.withSize(9, ItemStack.EMPTY);
+        this.heldItems = new ArrayList<>();
+        for (int i = 0; i < 9; i++) {
+            List<ItemStack> list = new ArrayList<>();
+            this.heldItems.add(list);
+        }
         this.blockingMode = true;
     }
 
@@ -125,24 +130,31 @@ public class RecipePipeEntity extends NetworkedPipeEntity implements MenuProvide
     @Override
     public void eject(ServerLevel level, BlockPos pos, ItemInPipe item) {
         List<Integer> matchingSlots = new ArrayList<>();
+        ItemStack stack = item.getStack().copy();
         for (int slot = 0; slot < 9; slot++) {
-            if (ItemStack.isSameItemSameComponents(this.filter.getItem(slot), item.getStack())) {
+            ItemStack slotStack = this.filter.getItem(slot);
+            if (!(stack.getItem() instanceof LabelItem) && ItemStack.isSameItemSameComponents(slotStack, stack) || slotStack.getItem() instanceof LabelItem labelItem && labelItem.itemMatches(slotStack, stack)) {
                 matchingSlots.add(slot);
             }
         }
         if (!matchingSlots.isEmpty()) {
-            ItemStack stack = item.getStack().copy();
             while (!stack.isEmpty()) {
                 int minSlot = matchingSlots.getFirst();
-                int minAmount = this.heldItems.get(minSlot).getCount();
+                int minAmount = 0;
+                for (ItemStack heldStack : this.heldItems.get(minSlot)) {
+                    minAmount += heldStack.getCount();
+                }
                 for (int slot : matchingSlots) {
-                    int slotAmount = this.heldItems.get(slot).getCount();
+                    int slotAmount = 0;
+                    for (ItemStack heldStack : this.heldItems.get(slot)) {
+                        slotAmount += heldStack.getCount();
+                    }
                     if (slotAmount < minAmount) {
                         minSlot = slot;
                         minAmount = slotAmount;
                     }
                 }
-                this.heldItems.set(minSlot, stack.copyWithCount(this.heldItems.get(minSlot).getCount() + 1));
+                MiscUtil.mergeStackIntoList(this.heldItems.get(minSlot), stack.copyWithCount(1));
                 stack.shrink(1);
             }
         } else {
@@ -157,7 +169,11 @@ public class RecipePipeEntity extends NetworkedPipeEntity implements MenuProvide
             int readyToCraft = Integer.MAX_VALUE;
             for (int slot = 0; slot < 9; slot++) {
                 if (!this.filter.getItem(slot).isEmpty()) {
-                    readyToCraft = Math.min(readyToCraft, this.heldItems.get(slot).getCount() / this.filter.getItem(slot).getCount());
+                    int heldAmount = 0;
+                    for (ItemStack heldStack : this.heldItems.get(slot)) {
+                        heldAmount += heldStack.getCount();
+                    }
+                    readyToCraft = Math.min(readyToCraft, heldAmount / this.filter.getItem(slot).getCount());
                 }
                 BlockState state = this.getBlockState();
                 if (!this.filter.getItem(slot).isEmpty() && !state.getValue(RecipePipeBlock.PROPERTY_BY_DIRECTION.get(this.slotDirections[slot])).equals(NetworkedPipeBlock.ConnectionState.UNLINKED)) {
@@ -189,16 +205,26 @@ public class RecipePipeEntity extends NetworkedPipeEntity implements MenuProvide
                             crafter.setSlotState(slot, !ingredient.isEmpty());
                         }
                         if (!ingredient.isEmpty()) {
-                            this.heldItems.get(slot).shrink(ingredient.getCount());
-                            this.queued.add(new ItemInPipe(
-                                    ingredient.copy(),
-                                    ItemInPipe.DEFAULT_SPEED,
-                                    ItemInPipe.HALFWAY,
-                                    Direction.DOWN,
-                                    this.slotDirections[slot],
-                                    false,
-                                    (short) 0
-                            ));
+                            int ingredientRemaining = ingredient.getCount();
+                            while (ingredientRemaining > 0) {
+                                ItemStack heldStack = this.heldItems.get(slot).getFirst();
+                                int amountToTake = Math.min(heldStack.getCount(), ingredientRemaining);
+                                ClassicPipes.LOGGER.info(heldStack.getItem().getDescription().getString());
+                                this.queued.add(new ItemInPipe(
+                                        heldStack.copyWithCount(amountToTake),
+                                        ItemInPipe.DEFAULT_SPEED,
+                                        ItemInPipe.HALFWAY,
+                                        Direction.DOWN,
+                                        this.slotDirections[slot],
+                                        false,
+                                        (short) 0
+                                ));
+                                heldStack.shrink(amountToTake);
+                                if (heldStack.isEmpty()) {
+                                    this.heldItems.get(slot).removeFirst();
+                                }
+                                ingredientRemaining -= amountToTake;
+                            }
                         }
                     }
                     this.waitingForCraft += this.getResult().getCount();
@@ -230,19 +256,21 @@ public class RecipePipeEntity extends NetworkedPipeEntity implements MenuProvide
         return collated;
     }
 
-    public NonNullList<ItemStack> getHeldItems() {
+    public List<List<ItemStack>> getHeldItems() {
         return heldItems;
     }
 
     public void dropHeldItems(ServerLevel serverLevel, BlockPos pos) {
-        for (ItemStack stack : this.heldItems) {
-            if (!stack.isEmpty()) {
-                ItemEntity droppedItem = new ItemEntity(serverLevel, pos.getX() + 0.5F, pos.getY() + 0.5F, pos.getZ() + 0.5F, stack);
-                droppedItem.setDefaultPickUpDelay();
-                serverLevel.addFreshEntity(droppedItem);
+        for (List<ItemStack> list : this.heldItems) {
+            for (ItemStack stack : list) {
+                if (!stack.isEmpty()) {
+                    ItemEntity droppedItem = new ItemEntity(serverLevel, pos.getX() + 0.5F, pos.getY() + 0.5F, pos.getZ() + 0.5F, stack);
+                    droppedItem.setDefaultPickUpDelay();
+                    serverLevel.addFreshEntity(droppedItem);
+                }
             }
         }
-        this.heldItems.clear();
+        this.heldItems.forEach(List::clear);
     }
 
     @Override
@@ -296,7 +324,7 @@ public class RecipePipeEntity extends NetworkedPipeEntity implements MenuProvide
     @Override
     protected void loadAdditional(CompoundTag valueInput, HolderLookup.Provider registries) {
         this.filter.clearContent();
-        this.heldItems.clear();
+        this.heldItems.forEach(List::clear);
         super.loadAdditional(valueInput, registries);
         byte[] directionsByteList = valueInput.getByteArray("slot_directions");
         int i = 0;
@@ -319,7 +347,12 @@ public class RecipePipeEntity extends NetworkedPipeEntity implements MenuProvide
             if (tag instanceof CompoundTag compoundTag) {
                 int slot = compoundTag.getInt("slot");
                 if (slot >= 0 && slot < 9) {
-                    MiscUtil.loadFromTag(tag, ItemStack.CODEC, registries, stack -> this.heldItems.set(slot, stack));
+                    List<ItemStack> stacks = new ArrayList<>();
+                    ListTag stacksList = compoundTag.getList("stacks", ListTag.TAG_LIST);
+                    for (Tag stackTag: stacksList) {
+                        MiscUtil.loadFromTag(stackTag, ItemStack.CODEC, registries, stacks::add);
+                    }
+                    this.heldItems.set(slot, stacks);
                 }
             }
         });
@@ -349,12 +382,18 @@ public class RecipePipeEntity extends NetworkedPipeEntity implements MenuProvide
         valueOutput.put("filter", filterList);
         ListTag heldItemList = new ListTag();
         for (int slot = 0; slot < this.heldItems.size(); slot++) {
-            ItemStack stack = this.heldItems.get(slot);
-            if (!stack.isEmpty()) {
-                CompoundTag tag = new CompoundTag();
-                tag.putInt("slot", slot);
-                MiscUtil.saveToTag(tag, stack, ItemStack.CODEC, registries, heldItemList::add);
+            List<ItemStack> stacks = this.heldItems.get(slot);
+            ListTag stacksList = new ListTag();
+            for (ItemStack stack : stacks) {
+                if (!stack.isEmpty()) {
+                    CompoundTag stackTag = new CompoundTag();
+                    MiscUtil.saveToTag(stackTag, stack, ItemStack.CODEC, registries, stacksList::add);
+                }
             }
+            CompoundTag tag = new CompoundTag();
+            tag.putInt("slot", slot);
+            tag.put("stacks", stacksList);
+            heldItemList.add(tag);
         }
         valueOutput.put("held_items", heldItemList);
         valueOutput.putInt("waiting_for_craft", this.waitingForCraft);
