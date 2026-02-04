@@ -4,12 +4,15 @@ import jagm.classicpipes.ClassicPipes;
 import jagm.classicpipes.blockentity.*;
 import jagm.classicpipes.inventory.menu.RequestMenu;
 import jagm.classicpipes.item.LabelItem;
+import jagm.classicpipes.item.ModLabelItem;
+import jagm.classicpipes.item.TagLabelItem;
 import jagm.classicpipes.network.ClientBoundItemListPayload;
 import jagm.classicpipes.services.Services;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -197,7 +200,24 @@ public class PipeNetwork {
             } else if (player != null) {
                 player.displayClientMessage(Component.translatable("chat." + ClassicPipes.MOD_ID + ".missing_item.a", stack.getCount(), stack.getItem().getDescription()).withStyle(ChatFormatting.RED), false);
                 for (ItemStack missingStack : requestState.collateMissingStacks()) {
-                    player.displayClientMessage(Component.translatable("chat." + ClassicPipes.MOD_ID + ".missing_item.b", missingStack.getCount(), missingStack.getItem().getDescription()).withStyle(ChatFormatting.YELLOW), false);
+                    if (missingStack.getItem() instanceof TagLabelItem) {
+                        String label = missingStack.get(ClassicPipes.LABEL_COMPONENT);
+                        if (label != null) {
+                            MutableComponent tagTranslation = Component.translatableWithFallback(TagLabelItem.labelToTranslationKey(label), "");
+                            if (!tagTranslation.getString().isEmpty()) {
+                                player.displayClientMessage(Component.translatable("chat." + ClassicPipes.MOD_ID + ".missing_item.translated_tag", missingStack.getCount(), "#" + label, tagTranslation).withStyle(ChatFormatting.YELLOW), false);
+                            } else {
+                                player.displayClientMessage(Component.translatable("chat." + ClassicPipes.MOD_ID + ".missing_item.b", missingStack.getCount(), "#" + label).withStyle(ChatFormatting.YELLOW), false);
+                            }
+                        }
+                    } else if (missingStack.getItem() instanceof ModLabelItem) {
+                        String label = missingStack.get(ClassicPipes.LABEL_COMPONENT);
+                        if (label != null) {
+                            player.displayClientMessage(Component.translatable("chat." + ClassicPipes.MOD_ID + ".missing_item.mod", missingStack.getCount(), Services.LOADER_SERVICE.getModName(label)).withStyle(ChatFormatting.YELLOW), false);
+                        }
+                    } else {
+                        player.displayClientMessage(Component.translatable("chat." + ClassicPipes.MOD_ID + ".missing_item.b", missingStack.getCount(), missingStack.getItem().getDescription()).withStyle(ChatFormatting.YELLOW), false);
+                    }
                 }
             }
         } else {

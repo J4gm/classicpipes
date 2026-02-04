@@ -3,6 +3,7 @@ package jagm.classicpipes.inventory.menu;
 import jagm.classicpipes.ClassicPipes;
 import jagm.classicpipes.blockentity.RecipePipeEntity;
 import jagm.classicpipes.inventory.container.FilterContainer;
+import jagm.classicpipes.item.LabelItem;
 import jagm.classicpipes.network.ClientBoundRecipePipePayload;
 import jagm.classicpipes.util.MiscUtil;
 import net.minecraft.core.BlockPos;
@@ -103,7 +104,7 @@ public class RecipePipeMenu extends FilterMenu {
             ItemStack stack = slot.getItem();
             if (clickType == ClickType.QUICK_MOVE) {
                 slot.set(ItemStack.EMPTY);
-            } else if (clickType == ClickType.PICKUP) {
+            } else if (clickType == ClickType.PICKUP && (index != 9 || !(this.getCarried().getItem() instanceof LabelItem))) {
                 if (stack.isEmpty()) {
                     slot.set(this.getCarried().copyWithCount(button == 0 ? this.getCarried().getCount() : 1));
                 } else {
