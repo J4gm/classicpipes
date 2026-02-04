@@ -1,10 +1,12 @@
 package jagm.classicpipes.util;
 
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import jagm.classicpipes.ClassicPipes;
 import jagm.classicpipes.block.PipeBlock;
 import jagm.classicpipes.services.Services;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
@@ -13,13 +15,19 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public class MiscUtil {
 
@@ -113,6 +121,26 @@ public class MiscUtil {
                 list.add(stack.copy());
             }
         }
+    }
+
+    public static <VALUE, STACK> Optional<TagKey<?>> getTagEquivalent(Collection<STACK> stacks, Function<STACK, VALUE> stackToValue, Supplier<Stream<Pair<TagKey<VALUE>, HolderSet.Named<VALUE>>>> tagSupplier) {
+        List<VALUE> values = stacks.stream().map(stackToValue).toList();
+        return tagSupplier.get().filter(pair -> areEquivalent(pair.getSecond(), values)).<TagKey<?>>map(pair -> pair.getSecond().key()).findFirst();
+    }
+
+    private static <VALUE> boolean areEquivalent(HolderSet.Named<VALUE> tag, List<VALUE> values) {
+        int count = tag.size();
+        if (count != values.size()) {
+            return false;
+        }
+        for (int i = 0; i < count; i++) {
+            VALUE tagValue = tag.get(i).value();
+            VALUE value = values.get(i);
+            if (!value.equals(tagValue)) {
+                return false;
+            }
+        }
+        return true;
     }
 
 }
