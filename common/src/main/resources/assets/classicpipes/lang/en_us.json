@@ -143,6 +143,8 @@
   "tooltip.classicpipes.recipe_pipe_result": "Expecting result from %s",
   "chat.classicpipes.missing_item.a": "Could not request %sx %s:",
   "chat.classicpipes.missing_item.b": "  Missing %sx %s",
+  "chat.classicpipes.missing_item.translated_tag": "  Missing %sx %s (%s)",
+  "chat.classicpipes.missing_item.mod": "  Missing %sx any item from %s",
   "chat.classicpipes.could_not_extract": "Request for %sx %s cancelled, as the Provider Pipe at [%s] could not extract from its adjacent container.",
   "chat.classicpipes.crafter_jammed": "All requests cancelled as the Crafter at [%s] didn't output the expected result. Make sure it is pointing into the Recipe Pipe and isn't jammed.",
   "chat.classicpipes.missing_recipe_pipe_direction": "All requests cancelled as the Recipe Pipe at [%s] isn't attached to a Crafter or other processing system.",

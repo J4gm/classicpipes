@@ -74,7 +74,7 @@ public class TagLabelItem extends LabelItem {
         }
     }
 
-    private static String labelToTranslationKey(String label) {
+    public static String labelToTranslationKey(String label) {
         String[] split = label.split(":");
         if (split.length < 2) {
             return "tag.item.minecraft." + label.replace("/", ".");
