@@ -195,7 +195,7 @@ public class RecipePipeEntity extends NetworkedPipeEntity implements MenuProvide
             }
             if (readyToCraft > 0 && readyToCraft < Integer.MAX_VALUE) {
                 Map<Direction, CrafterBlockEntity> crafters = new HashMap<>();
-                for (int i = 0; i < readyToCraft; i++) {
+                for (int i = 0; i < (this.blockingMode ? 1 : readyToCraft); i++) {
                     for (int slot = 0; slot < 9; slot++) {
                         ItemStack ingredient = this.filter.getItem(slot);
                         if (crafters.containsKey(this.slotDirections[slot])) {
