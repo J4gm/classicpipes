@@ -188,7 +188,7 @@ public class RecipePipeEntity extends NetworkedPipeEntity implements MenuProvide
                         this.waitingForCraft = 0;
                         this.getNetwork().resetRequests(serverLevel);
                         this.setChanged();
-                        serverLevel.sendBlockUpdated(this.getBlockPos(),state, state, 2);
+                        serverLevel.sendBlockUpdated(this.getBlockPos(), state, state, 2);
                     }
                     break;
                 }
@@ -347,12 +347,10 @@ public class RecipePipeEntity extends NetworkedPipeEntity implements MenuProvide
             if (tag instanceof CompoundTag compoundTag) {
                 int slot = compoundTag.getInt("slot");
                 if (slot >= 0 && slot < 9) {
-                    List<ItemStack> stacks = new ArrayList<>();
-                    ListTag stacksList = compoundTag.getList("stacks", ListTag.TAG_LIST);
+                    ListTag stacksList = compoundTag.getList("stacks", ListTag.TAG_COMPOUND);
                     for (Tag stackTag: stacksList) {
-                        MiscUtil.loadFromTag(stackTag, ItemStack.CODEC, registries, stacks::add);
+                        MiscUtil.loadFromTag(stackTag, ItemStack.CODEC, registries, stack -> this.heldItems.get(slot).add(stack));
                     }
-                    this.heldItems.set(slot, stacks);
                 }
             }
         });
