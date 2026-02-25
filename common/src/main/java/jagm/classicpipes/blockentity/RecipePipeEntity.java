@@ -211,7 +211,6 @@ public class RecipePipeEntity extends NetworkedPipeEntity implements MenuProvide
                             while (ingredientRemaining > 0) {
                                 ItemStack heldStack = this.heldItems.get(slot).getFirst();
                                 int amountToTake = Math.min(heldStack.getCount(), ingredientRemaining);
-                                ClassicPipes.LOGGER.info(heldStack.getItemName().getString());
                                 this.queued.add(new ItemInPipe(
                                         heldStack.copyWithCount(amountToTake),
                                         ItemInPipe.DEFAULT_SPEED,
