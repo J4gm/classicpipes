@@ -71,6 +71,7 @@ public abstract class FilterScreen<T extends FilterMenu> extends AbstractContain
             graphics.renderItem(stackToRender, slot.x, slot.y, seed);
             graphics.renderItemDecorations(this.font, stack, slot.x, slot.y, null);
             graphics.pose().pushPose();
+            graphics.pose().translate(0.0F, 0.0F, 200.0F);
             graphics.drawString(this.font, "#", slot.x, slot.y, -256, true);
             graphics.pose().popPose();
         } else {
