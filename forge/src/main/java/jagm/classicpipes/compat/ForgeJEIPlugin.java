@@ -80,6 +80,7 @@ public class ForgeJEIPlugin implements IModPlugin {
                                 if (inputStacks.size() > 1) {
                                     Optional<TagKey<?>> optionalTag = MiscUtil.getTagEquivalent(inputStacks, ItemStack::getItem, itemRegistry::getTags);
                                     if (optionalTag.isPresent()) {
+                                        stack = new ItemStack(ClassicPipes.TAG_LABEL, inputStacks.getFirst().getCount());
                                         stack.set(ClassicPipes.LABEL_COMPONENT, optionalTag.get().location().toString());
                                     }
                                 }
