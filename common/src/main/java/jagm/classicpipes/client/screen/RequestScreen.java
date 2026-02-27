@@ -100,7 +100,7 @@ public class RequestScreen extends AbstractContainerScreen<RequestMenu> {
     protected void renderSlots(GuiGraphics graphics) {
         for (Slot slot : this.menu.displaySlots) {
             if (slot.isActive()) {
-                this.renderSlot(graphics, slot);
+                this.renderSlot2(graphics, slot);
             }
         }
     }
@@ -121,7 +121,7 @@ public class RequestScreen extends AbstractContainerScreen<RequestMenu> {
         graphics.drawString(this.font, sortBy, this.imageWidth / 2 - 29 - this.font.width(sortBy), 202, -12566464, false);
     }
 
-    private void renderSlot(GuiGraphics graphics, Slot slot) {
+    private void renderSlot2(GuiGraphics graphics, Slot slot) {
         ItemStack stack = slot.getItem();
         int seed = slot.x + slot.y * this.imageWidth;
         graphics.renderItem(stack, slot.x, slot.y, seed);

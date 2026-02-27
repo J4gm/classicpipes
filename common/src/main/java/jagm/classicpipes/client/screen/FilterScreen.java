@@ -1,6 +1,5 @@
 package jagm.classicpipes.client.screen;
 
-import jagm.classicpipes.ClassicPipes;
 import jagm.classicpipes.inventory.menu.FilterMenu;
 import jagm.classicpipes.item.TagLabelItem;
 import net.minecraft.client.Minecraft;
@@ -8,6 +7,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -53,16 +53,17 @@ public abstract class FilterScreen<T extends FilterMenu> extends AbstractContain
     }
 
     @Override
-    protected void renderSlot(GuiGraphics graphics, Slot slot) {
+    public void renderSlot(GuiGraphics graphics, Slot slot) {
         ItemStack stack = slot.getItem();
-        String label = stack.get(ClassicPipes.LABEL_COMPONENT);
-        if (slot.index < this.filterSlots() && stack.getItem() instanceof TagLabelItem && label != null && this.itemRegistry != null) {
+        CompoundTag compoundTag = stack.getOrCreateTag();
+        String label = compoundTag.getString("classic_pipes_label");
+        if (slot.index < this.filterSlots() && stack.getItem() instanceof TagLabelItem && !label.isEmpty() && this.itemRegistry != null) {
             List<Item> itemList;
             if (this.tagCache.containsKey(label)) {
                 itemList = this.tagCache.get(label);
             } else {
                 itemList = new ArrayList<>();
-                TagKey<Item> tagKey = TagKey.create(this.itemRegistry.key(), ResourceLocation.parse(label));
+                TagKey<Item> tagKey = TagKey.create(this.itemRegistry.key(), ResourceLocation.of(label, ':'));
                 this.itemRegistry.getTagOrEmpty(tagKey).forEach(holder -> itemList.add(holder.value()));
                 this.tagCache.put(label, itemList);
             }
