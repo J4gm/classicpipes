@@ -5,6 +5,7 @@ import jagm.classicpipes.blockentity.ItemPipeEntity;
 import jagm.classicpipes.client.renderer.FluidRenderInfo;
 import jagm.classicpipes.util.FluidInPipe;
 import jagm.classicpipes.util.ItemInPipe;
+import jagm.classicpipes.util.MiscUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
@@ -16,7 +17,9 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Container;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -29,6 +32,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.entity.HopperBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
@@ -49,6 +53,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
+import java.util.stream.IntStream;
 
 public class NeoForgeService implements LoaderService {
 
@@ -92,8 +97,9 @@ public class NeoForgeService implements LoaderService {
         IItemHandler itemHandler = level.getCapability(Capabilities.ItemHandler.BLOCK, containerPos, state, blockEntity, face);
         if (itemHandler != null) {
             return itemHandler.getSlots() > 0;
+        } else {
+            return MiscUtil.canAccessVanillaContainer(level, blockEntity, state, containerPos, face);
         }
-        return false;
     }
 
     @Override
@@ -118,6 +124,15 @@ public class NeoForgeService implements LoaderService {
                 }
             }
             item.setStack(stack);
+        } else {
+            Container container = MiscUtil.getVanillaContainer(level, blockEntity, state, containerPos);
+            if (container != null) {
+                ItemStack remaining = HopperBlockEntity.addItem(null, container, item.getStack(), face);
+                if (remaining.isEmpty()) {
+                    return true;
+                }
+                item.setStack(remaining);
+            }
         }
         item.resetProgress(item.getTargetDirection());
         pipe.routeItem(pipeState, item);
@@ -138,6 +153,24 @@ public class NeoForgeService implements LoaderService {
                     ItemStack stack = itemHandler.extractItem(slot, amount, false);
                     if (!stack.isEmpty()) {
                         pipe.setItem(face.getOpposite(), stack);
+                        return true;
+                    }
+                }
+            }
+        } else {
+            Container container = MiscUtil.getVanillaContainer(level, blockEntity, state, containerPos);
+            if (container != null) {
+                int[] slots = container instanceof WorldlyContainer worldlyContainer ? worldlyContainer.getSlotsForFace(face) : IntStream.range(0, container.getContainerSize()).toArray();
+                for (int i = slots.length - 1; i >= 0; i--) {
+                    int slot = slots[i];
+                    ItemStack slotStack = container.getItem(slot);
+                    int amountToTake = Math.min(slotStack.getCount(), amount);
+                    ItemStack extracted = slotStack.copyWithCount(amountToTake);
+                    if (predicate.test(slotStack) && !extracted.isEmpty() && MiscUtil.canTakeItemFromVanillaContainer(container, slot, extracted, face)) {
+                        int amountRemaining = slotStack.getCount() - amountToTake;
+                        container.setItem(slot, amountRemaining == 0 ? ItemStack.EMPTY : slotStack.copyWithCount(amountRemaining));
+                        container.setChanged();
+                        pipe.setItem(face.getOpposite(), slotStack.copyWithCount(amountToTake));
                         return true;
                     }
                 }
@@ -163,34 +196,55 @@ public class NeoForgeService implements LoaderService {
                     }
                 }
             }
+        } else {
+            Container container = MiscUtil.getVanillaContainer(level, level.getBlockState(containerPos), containerPos);
+            if (container != null) {
+                int[] slots = container instanceof WorldlyContainer worldlyContainer ? worldlyContainer.getSlotsForFace(face) : IntStream.range(0, container.getContainerSize()).toArray();
+                for (int i = slots.length - 1; i >= 0; i--) {
+                    int slot = slots[i];
+                    ItemStack slotStack = container.getItem(slot);
+                    if (ItemStack.isSameItemSameComponents(target, slotStack)) {
+                        int amountToTake = Math.min(slotStack.getCount(), target.getCount());
+                        ItemStack extracted = slotStack.copyWithCount(amountToTake);
+                        if (!extracted.isEmpty() && MiscUtil.canTakeItemFromVanillaContainer(container, slot, extracted, face)) {
+                            int amountRemaining = slotStack.getCount() - amountToTake;
+                            container.setItem(slot, amountRemaining <= 0 ? ItemStack.EMPTY : slotStack.copyWithCount(amountRemaining));
+                            container.setChanged();
+                            target.shrink(amountToTake);
+                            pipe.setItem(face.getOpposite(), extracted);
+                            if (target.isEmpty()) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
         }
         return false;
     }
 
     public List<ItemStack> getContainerItems(ServerLevel level, BlockPos pos, Direction face) {
         IItemHandler itemHandler = level.getCapability(Capabilities.ItemHandler.BLOCK, pos, face);
+        List<ItemStack> stacks = new ArrayList<>();
         if (itemHandler != null) {
-            List<ItemStack> stacks = new ArrayList<>();
-            for (int slot = 0; slot < itemHandler.getSlots(); slot++) {
-                ItemStack slotStack = itemHandler.getStackInSlot(slot);
-                if (slotStack.isEmpty()) {
-                    continue;
-                }
-                boolean matched = false;
-                for (ItemStack stack : stacks) {
-                    if (ItemStack.isSameItemSameComponents(stack, slotStack)) {
-                        stack.setCount(stack.getCount() + slotStack.getCount());
-                        matched = true;
-                        break;
+            for (int slot = itemHandler.getSlots() - 1; slot >= 0; slot--) {
+                ItemStack extractable = itemHandler.extractItem(slot, itemHandler.getStackInSlot(slot).getCount(), true);
+                MiscUtil.mergeStackIntoList(stacks, extractable);
+            }
+        } else {
+            Container container = MiscUtil.getVanillaContainer(level, level.getBlockState(pos), pos);
+            if (container != null) {
+                int[] slots = container instanceof WorldlyContainer worldlyContainer ? worldlyContainer.getSlotsForFace(face) : IntStream.range(0, container.getContainerSize()).toArray();
+                for (int i = slots.length - 1; i >= 0; i--) {
+                    int slot = slots[i];
+                    ItemStack extractable = container.getItem(slot);
+                    if (MiscUtil.canTakeItemFromVanillaContainer(container, slot, extractable, face)) {
+                        MiscUtil.mergeStackIntoList(stacks, extractable);
                     }
                 }
-                if (!matched) {
-                    stacks.add(slotStack.copy());
-                }
             }
-            return stacks;
         }
-        return List.of();
+        return stacks;
     }
 
     @Override
