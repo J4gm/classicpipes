@@ -10,6 +10,7 @@ import jagm.classicpipes.network.PayloadWrapper;
 import jagm.classicpipes.network.SelfHandler;
 import jagm.classicpipes.util.FluidInPipe;
 import jagm.classicpipes.util.ItemInPipe;
+import jagm.classicpipes.util.MiscUtil;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -188,26 +189,21 @@ public class FabricService implements LoaderService {
 
     public List<ItemStack> getContainerItems(ServerLevel level, BlockPos pos, Direction face) {
         Storage<ItemVariant> itemHandler = ItemStorage.SIDED.find(level, pos, face);
+        List<ItemStack> stacks = new ArrayList<>();
         if (itemHandler != null) {
-            List<ItemStack> stacks = new ArrayList<>();
-            Iterator<StorageView<ItemVariant>> iterator = itemHandler.nonEmptyIterator();
-            while (iterator.hasNext()) {
-                StorageView<ItemVariant> itemView = iterator.next();
-                boolean matched = false;
-                for (ItemStack stack : stacks) {
-                    if (itemView.getResource().matches(stack)) {
-                        stack.setCount(stack.getCount() + (int) itemView.getAmount());
-                        matched = true;
-                        break;
-                    }
+            List<StorageView<ItemVariant>> itemViewList = new ArrayList<>();
+            itemHandler.nonEmptyIterator().forEachRemaining(itemViewList::add);
+            try (Transaction transaction = Transaction.openOuter()) {
+                for (int i = itemViewList.size() - 1; i >= 0; i--) {
+                    StorageView<ItemVariant> itemView = itemViewList.get(i);
+                    ItemVariant itemVariant = itemView.getResource();
+                    long extracted = itemView.extract(itemView.getResource(), itemView.getAmount(), transaction);
+                    MiscUtil.mergeStackIntoList(stacks, itemVariant.toStack((int) extracted));
                 }
-                if (!matched) {
-                    stacks.add(itemView.getResource().toStack((int) itemView.getAmount()));
-                }
+                transaction.abort();
             }
-            return stacks;
         }
-        return List.of();
+        return stacks;
     }
 
     @Override

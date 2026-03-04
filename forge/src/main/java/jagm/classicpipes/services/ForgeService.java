@@ -10,6 +10,7 @@ import jagm.classicpipes.network.PayloadWrapper;
 import jagm.classicpipes.network.SelfHandler;
 import jagm.classicpipes.util.FluidInPipe;
 import jagm.classicpipes.util.ItemInPipe;
+import jagm.classicpipes.util.MiscUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
@@ -18,7 +19,9 @@ import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Container;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -32,6 +35,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.entity.HopperBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
@@ -53,6 +57,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
+import java.util.stream.IntStream;
 
 public class ForgeService implements LoaderService {
 
@@ -98,7 +103,7 @@ public class ForgeService implements LoaderService {
                 return itemHandlerOptional.get().getSlots() > 0;
             }
         }
-        return false;
+        return MiscUtil.canAccessVanillaContainer(level, blockEntity, level.getBlockState(containerPos), containerPos, face);
     }
 
     @Override
@@ -112,9 +117,11 @@ public class ForgeService implements LoaderService {
             return true;
         }
         Direction face = item.getTargetDirection().getOpposite();
+        boolean hasItemHandler = false;
         if (blockEntity != null) {
             Optional<IItemHandler> itemHandlerOptional = blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, face).resolve();
             if (itemHandlerOptional.isPresent()) {
+                hasItemHandler = true;
                 IItemHandler itemHandler = itemHandlerOptional.get();
                 ItemStack stack = item.getStack();
                 for (int slot = 0; slot < itemHandler.getSlots(); slot++) {
@@ -124,6 +131,16 @@ public class ForgeService implements LoaderService {
                     }
                 }
                 item.setStack(stack);
+            }
+        }
+        if (!hasItemHandler) {
+            Container container = MiscUtil.getVanillaContainer(level, blockEntity, level.getBlockState(containerPos), containerPos);
+            if (container != null) {
+                ItemStack remaining = HopperBlockEntity.addItem(null, container, item.getStack(), face);
+                if (remaining.isEmpty()) {
+                    return true;
+                }
+                item.setStack(remaining);
             }
         }
         item.resetProgress(item.getTargetDirection());
@@ -137,9 +154,11 @@ public class ForgeService implements LoaderService {
         if (blockEntity instanceof ItemPipeEntity) {
             return false;
         }
+        boolean hasItemHandler = false;
         if (blockEntity != null) {
             Optional<IItemHandler> itemHandlerOptional = blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, face).resolve();
             if (itemHandlerOptional.isPresent()) {
+                hasItemHandler = true;
                 IItemHandler itemHandler = itemHandlerOptional.get();
                 for (int slot = itemHandler.getSlots() - 1; slot >= 0; slot--) {
                     if (predicate.test(itemHandler.getStackInSlot(slot))) {
@@ -152,52 +171,95 @@ public class ForgeService implements LoaderService {
                 }
             }
         }
+        if (!hasItemHandler) {
+            Container container = MiscUtil.getVanillaContainer(level, blockEntity, level.getBlockState(containerPos), containerPos);
+            if (container != null) {
+                int[] slots = container instanceof WorldlyContainer worldlyContainer ? worldlyContainer.getSlotsForFace(face) : IntStream.range(0, container.getContainerSize()).toArray();
+                for (int i = slots.length - 1; i >= 0; i--) {
+                    int slot = slots[i];
+                    ItemStack slotStack = container.getItem(slot);
+                    int amountToTake = Math.min(slotStack.getCount(), amount);
+                    ItemStack extracted = slotStack.copyWithCount(amountToTake);
+                    if (predicate.test(slotStack) && !extracted.isEmpty() && MiscUtil.canTakeItemFromVanillaContainer(container, slot, extracted, face)) {
+                        int amountRemaining = slotStack.getCount() - amountToTake;
+                        container.setItem(slot, amountRemaining == 0 ? ItemStack.EMPTY : slotStack.copyWithCount(amountRemaining));
+                        container.setChanged();
+                        pipe.setItem(face.getOpposite(), slotStack.copyWithCount(amountToTake));
+                        return true;
+                    }
+                }
+            }
+        }
         return false;
     }
 
     public List<ItemStack> getContainerItems(ServerLevel level, BlockPos pos, Direction face) {
         BlockEntity blockEntity = level.getBlockEntity(pos);
+        List<ItemStack> stacks = new ArrayList<>();
         if (blockEntity != null) {
             Optional<IItemHandler> itemHandlerOptional = blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, face).resolve();
             if (itemHandlerOptional.isPresent()) {
                 IItemHandler itemHandler = itemHandlerOptional.get();
-                List<ItemStack> stacks = new ArrayList<>();
-                for (int slot = 0; slot < itemHandler.getSlots(); slot++) {
-                    ItemStack slotStack = itemHandler.getStackInSlot(slot);
-                    if (slotStack.isEmpty()) {
-                        continue;
-                    }
-                    boolean matched = false;
-                    for (ItemStack stack : stacks) {
-                        if (ItemStack.isSameItemSameTags(stack, slotStack)) {
-                            stack.setCount(stack.getCount() + slotStack.getCount());
-                            matched = true;
-                            break;
-                        }
-                    }
-                    if (!matched) {
-                        stacks.add(slotStack.copy());
-                    }
+                for (int slot = itemHandler.getSlots() - 1; slot >= 0; slot--) {
+                    ItemStack extractable = itemHandler.extractItem(slot, itemHandler.getStackInSlot(slot).getCount(), true);
+                    MiscUtil.mergeStackIntoList(stacks, extractable);
                 }
                 return stacks;
             }
         }
-        return List.of();
+        Container container = MiscUtil.getVanillaContainer(level, level.getBlockState(pos), pos);
+        if (container != null) {
+            int[] slots = container instanceof WorldlyContainer worldlyContainer ? worldlyContainer.getSlotsForFace(face) : IntStream.range(0, container.getContainerSize()).toArray();
+            for (int i = slots.length - 1; i >= 0; i--) {
+                int slot = slots[i];
+                ItemStack extractable = container.getItem(slot);
+                if (MiscUtil.canTakeItemFromVanillaContainer(container, slot, extractable, face)) {
+                    MiscUtil.mergeStackIntoList(stacks, extractable);
+                }
+            }
+        }
+        return stacks;
     }
 
     @Override
     public boolean extractSpecificItem(ItemPipeEntity pipe, ServerLevel level, BlockPos containerPos, Direction face, ItemStack stack) {
         BlockEntity blockEntity = level.getBlockEntity(containerPos);
+        ItemStack target = stack.copy();
+        boolean hasItemHandler = false;
         if (blockEntity != null) {
-            ItemStack target = stack.copy();
             Optional<IItemHandler> itemHandlerOptional = blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, face).resolve();
             if (itemHandlerOptional.isPresent()) {
+                hasItemHandler = true;
                 IItemHandler itemHandler = itemHandlerOptional.get();
                 for (int slot = itemHandler.getSlots() - 1; slot >= 0; slot--) {
                     if (ItemStack.isSameItemSameTags(stack, itemHandler.getStackInSlot(slot))) {
                         ItemStack extracted = itemHandler.extractItem(slot, target.getCount(), false);
                         if (!extracted.isEmpty()) {
                             target.shrink(extracted.getCount());
+                            pipe.setItem(face.getOpposite(), extracted);
+                            if (target.isEmpty()) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (!hasItemHandler) {
+            Container container = MiscUtil.getVanillaContainer(level, level.getBlockState(containerPos), containerPos);
+            if (container != null) {
+                int[] slots = container instanceof WorldlyContainer worldlyContainer ? worldlyContainer.getSlotsForFace(face) : IntStream.range(0, container.getContainerSize()).toArray();
+                for (int i = slots.length - 1; i >= 0; i--) {
+                    int slot = slots[i];
+                    ItemStack slotStack = container.getItem(slot);
+                    if (ItemStack.isSameItemSameTags(target, slotStack)) {
+                        int amountToTake = Math.min(slotStack.getCount(), target.getCount());
+                        ItemStack extracted = slotStack.copyWithCount(amountToTake);
+                        if (!extracted.isEmpty() && MiscUtil.canTakeItemFromVanillaContainer(container, slot, extracted, face)) {
+                            int amountRemaining = slotStack.getCount() - amountToTake;
+                            container.setItem(slot, amountRemaining <= 0 ? ItemStack.EMPTY : slotStack.copyWithCount(amountRemaining));
+                            container.setChanged();
+                            target.shrink(amountToTake);
                             pipe.setItem(face.getOpposite(), extracted);
                             if (target.isEmpty()) {
                                 return true;

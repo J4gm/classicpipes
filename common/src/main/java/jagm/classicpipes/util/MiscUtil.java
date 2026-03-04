@@ -5,6 +5,7 @@ import com.mojang.serialization.Codec;
 import jagm.classicpipes.ClassicPipes;
 import jagm.classicpipes.block.PipeBlock;
 import jagm.classicpipes.services.Services;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
@@ -16,9 +17,17 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.Container;
+import net.minecraft.world.WorldlyContainer;
+import net.minecraft.world.WorldlyContainerHolder;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.ChestBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.ChestBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.Collection;
 import java.util.Comparator;
@@ -141,6 +150,39 @@ public class MiscUtil {
             }
         }
         return true;
+    }
+
+    public static Container getVanillaContainer(Level level, BlockEntity blockEntity, BlockState state, BlockPos pos) {
+        if (state.getBlock() instanceof WorldlyContainerHolder containerHolder) {
+            return containerHolder.getContainer(state, level, pos);
+        } else if ((blockEntity != null ? blockEntity : level.getBlockEntity(pos))  instanceof Container container) {
+            if (container instanceof ChestBlockEntity && state.getBlock() instanceof ChestBlock chestBlock) {
+                return ChestBlock.getContainer(chestBlock, state, level, pos, true);
+            } else {
+                return container;
+            }
+        }
+        return null;
+    }
+
+    public static Container getVanillaContainer(Level level, BlockState state, BlockPos pos) {
+        return getVanillaContainer(level, null, state, pos);
+    }
+
+    public static boolean canAccessVanillaContainer(Level level, BlockEntity blockEntity, BlockState state, BlockPos pos, Direction face) {
+        Container container = getVanillaContainer(level, blockEntity, state, pos);
+        return container instanceof WorldlyContainer worldlyContainer ? worldlyContainer.getSlotsForFace(face).length > 0 : container != null;
+    }
+
+    public static boolean canTakeItemFromVanillaContainer(Container container, int slot, ItemStack stack, Direction face) {
+        if (!container.canTakeItem(new DummyContainer(), slot, stack)) {
+            return false;
+        } else {
+            if (container instanceof WorldlyContainer worldlyContainer) {
+                return worldlyContainer.canTakeItemThroughFace(slot, stack, face);
+            }
+            return true;
+        }
     }
 
 }
