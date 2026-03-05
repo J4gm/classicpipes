@@ -1,0 +1,7 @@
+{
+  "parent": "classicpipes:item/pipe",
+  "textures": {
+    "texture": "classicpipes:block/nether_brick_pipe",
+    "particle": "classicpipes:block/nether_brick_pipe"
+  }
+}

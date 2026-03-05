@@ -19,6 +19,7 @@
     "classicpipes:warped_fluid_pipe",
     "classicpipes:advanced_copper_fluid_pipe",
     "classicpipes:inverted_copper_fluid_pipe",
-    "classicpipes:inverted_advanced_copper_fluid_pipe"
+    "classicpipes:inverted_advanced_copper_fluid_pipe",
+    "classicpipes:nether_brick_fluid_pipe"
   ]
 }

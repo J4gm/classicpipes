@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "O": "classicpipes:nether_brick_pipe",
+    "W": "minecraft:honeycomb"
+  },
+  "pattern": [
+    "OOO",
+    "OWO",
+    "OOO"
+  ],
+  "result": {
+    "count": 8,
+    "id": "classicpipes:nether_brick_fluid_pipe"
+  }
+}
