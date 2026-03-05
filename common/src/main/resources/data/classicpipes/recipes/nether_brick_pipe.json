@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "O": "minecraft:nether_bricks",
+    "W": "minecraft:glass"
+  },
+  "pattern": [
+    "OWO"
+  ],
+  "result": {
+    "count": 8,
+    "item": "classicpipes:nether_brick_pipe"
+  }
+}

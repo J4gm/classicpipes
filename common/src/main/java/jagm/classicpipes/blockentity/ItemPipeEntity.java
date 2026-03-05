@@ -314,6 +314,11 @@ public abstract class ItemPipeEntity extends PipeEntity implements WorldlyContai
     }
 
     @Override
+    public int getComparatorOutput() {
+        return Math.min(15, this.getContents().size());
+    }
+
+    @Override
     public void load(CompoundTag valueInput) {
         this.clearContent();
         this.networkDistances.clear();

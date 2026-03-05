@@ -73,6 +73,7 @@ public class ClassicPipes {
     public static final Block DIAMOND_PIPE = createPipe("diamond_pipe", DiamondPipeBlock::new, SoundType.COPPER, MapColor.DIAMOND, 0.25F, translateDesc("diamond_pipe"));
     public static final Block FLINT_PIPE = createPipe("flint_pipe", FlintPipeBlock::new, SoundType.DECORATED_POT, MapColor.COLOR_GRAY, 0.25F, translateDesc("flint_pipe"));
     public static final Block BRICK_PIPE = createPipe("brick_pipe", BrickPipeBlock::new, SoundType.DECORATED_POT, MapColor.COLOR_RED, 0.25F, translateDesc("brick_pipe"));
+    public static final Block NETHER_BRICK_PIPE = createPipe("nether_brick_pipe", NetherBrickPipeBlock::new, SoundType.DECORATED_POT, MapColor.COLOR_RED, 0.25F, translateDesc("nether_brick_pipe"));
     public static final Block OBSIDIAN_PIPE = createPipe("obsidian_pipe", ObsidianPipeBlock::new, SoundType.DECORATED_POT, MapColor.COLOR_BLACK, 0.25F, translateDesc("obsidian_pipe"));
     public static final Block BONE_PIPE = createPipe("bone_pipe", BonePipeBlock::new, SoundType.BONE_BLOCK, MapColor.SAND, 0.25F, translateDesc("bone_pipe"));
     public static final Block ROUTING_PIPE = createPipe("routing_pipe", NetworkedPipeBlock::new, SoundType.COPPER, MapColor.COLOR_BLACK, 0.25F, translateDesc("routing_pipe.a"), translateDesc("routing_pipe.b"));
@@ -101,9 +102,10 @@ public class ClassicPipes {
     public static final Block LAPIS_FLUID_PIPE = createPipe("lapis_fluid_pipe", LapisFluidPipeBlock::new, SoundType.COPPER, MapColor.LAPIS, 0.25F, translateDesc("lapis_fluid_pipe"));
     public static final Block DIAMOND_FLUID_PIPE = createPipe("diamond_fluid_pipe", DiamondFluidPipeBlock::new, SoundType.COPPER, MapColor.DIAMOND, 0.25F, translateDesc("diamond_fluid_pipe"));
     public static final Block BRICK_FLUID_PIPE = createPipe("brick_fluid_pipe", BrickFluidPipeBlock::new, SoundType.DECORATED_POT, MapColor.COLOR_RED, 0.25F, translateDesc("brick_fluid_pipe"));
+    public static final Block NETHER_BRICK_FLUID_PIPE = createPipe("nether_brick_fluid_pipe", NetherBrickFluidPipeBlock::new, SoundType.DECORATED_POT, MapColor.COLOR_RED, 0.25F, translateDesc("nether_brick_fluid_pipe"));
     public static final Block OBSIDIAN_FLUID_PIPE = createPipe("obsidian_fluid_pipe", ObsidianFluidPipeBlock::new, SoundType.DECORATED_POT, MapColor.COLOR_BLACK, 0.25F, translateDesc("obsidian_fluid_pipe"));
 
-    public static final BlockEntityType<RoundRobinPipeEntity> BASIC_PIPE_ENTITY = Services.LOADER_SERVICE.createBlockEntityType(RoundRobinPipeEntity::new, OAK_PIPE, SPRUCE_PIPE, BIRCH_PIPE, JUNGLE_PIPE, ACACIA_PIPE, DARK_OAK_PIPE, MANGROVE_PIPE, CHERRY_PIPE, BAMBOO_PIPE, CRIMSON_PIPE, WARPED_PIPE, BRICK_PIPE);
+    public static final BlockEntityType<RoundRobinPipeEntity> BASIC_PIPE_ENTITY = Services.LOADER_SERVICE.createBlockEntityType(RoundRobinPipeEntity::new, OAK_PIPE, SPRUCE_PIPE, BIRCH_PIPE, JUNGLE_PIPE, ACACIA_PIPE, DARK_OAK_PIPE, MANGROVE_PIPE, CHERRY_PIPE, BAMBOO_PIPE, CRIMSON_PIPE, WARPED_PIPE, BRICK_PIPE, NETHER_BRICK_PIPE);
     public static final BlockEntityType<GoldenPipeEntity> GOLDEN_PIPE_ENTITY = Services.LOADER_SERVICE.createBlockEntityType(GoldenPipeEntity::new, GOLDEN_PIPE);
     public static final BlockEntityType<CopperPipeEntity> COPPER_PIPE_ENTITY = Services.LOADER_SERVICE.createBlockEntityType(CopperPipeEntity::new, COPPER_PIPE, INVERTED_COPPER_PIPE);
     public static final BlockEntityType<IronPipeEntity> IRON_PIPE_ENTITY = Services.LOADER_SERVICE.createBlockEntityType(IronPipeEntity::new, IRON_PIPE);
@@ -119,7 +121,7 @@ public class ClassicPipes {
     public static final BlockEntityType<MatchingPipeEntity> MATCHING_PIPE_ENTITY = Services.LOADER_SERVICE.createBlockEntityType(MatchingPipeEntity::new, MATCHING_PIPE);
     public static final BlockEntityType<StoragePipeEntity> STORAGE_PIPE_ENTITY = Services.LOADER_SERVICE.createBlockEntityType(StoragePipeEntity::new, STORAGE_PIPE);
     public static final BlockEntityType<RecipePipeEntity> RECIPE_PIPE_ENTITY = Services.LOADER_SERVICE.createBlockEntityType(RecipePipeEntity::new, RECIPE_PIPE);
-    public static final BlockEntityType<FluidPipeEntity> FLUID_PIPE_ENTITY = Services.LOADER_SERVICE.createBlockEntityType(FluidPipeEntity::new, OAK_FLUID_PIPE, SPRUCE_FLUID_PIPE, BIRCH_FLUID_PIPE, JUNGLE_FLUID_PIPE, ACACIA_FLUID_PIPE, DARK_OAK_FLUID_PIPE, MANGROVE_FLUID_PIPE, CHERRY_FLUID_PIPE, BAMBOO_FLUID_PIPE, CRIMSON_FLUID_PIPE, WARPED_FLUID_PIPE, BRICK_FLUID_PIPE);
+    public static final BlockEntityType<FluidPipeEntity> FLUID_PIPE_ENTITY = Services.LOADER_SERVICE.createBlockEntityType(FluidPipeEntity::new, OAK_FLUID_PIPE, SPRUCE_FLUID_PIPE, BIRCH_FLUID_PIPE, JUNGLE_FLUID_PIPE, ACACIA_FLUID_PIPE, DARK_OAK_FLUID_PIPE, MANGROVE_FLUID_PIPE, CHERRY_FLUID_PIPE, BAMBOO_FLUID_PIPE, CRIMSON_FLUID_PIPE, WARPED_FLUID_PIPE, BRICK_FLUID_PIPE, NETHER_BRICK_FLUID_PIPE);
     public static final BlockEntityType<CopperFluidPipeEntity> COPPER_FLUID_PIPE_ENTITY = Services.LOADER_SERVICE.createBlockEntityType(CopperFluidPipeEntity::new, COPPER_FLUID_PIPE, INVERTED_COPPER_FLUID_PIPE);
     public static final BlockEntityType<IronFluidPipeEntity> IRON_FLUID_PIPE_ENTITY = Services.LOADER_SERVICE.createBlockEntityType(IronFluidPipeEntity::new, IRON_FLUID_PIPE);
     public static final BlockEntityType<LapisFluidPipeEntity> LAPIS_FLUID_PIPE_ENTITY = Services.LOADER_SERVICE.createBlockEntityType(LapisFluidPipeEntity::new, LAPIS_FLUID_PIPE);
