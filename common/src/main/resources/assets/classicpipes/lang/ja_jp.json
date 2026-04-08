@@ -160,5 +160,16 @@
   "item.classicpipes.pale_oak_fluid_pipe": "ペールオークの液体パイプ",
   "widget.classicpipes.blocking_mode": "1つずつ処理",
   "tooltip.classicpipes.blocking_mode": "これにチェックを入れると、前回の処理結果が届くまで材料を保持します。",
-  "stat.classicpipes.items_requested": "パイプネットワークからのリクエストアイテム"
+  "stat.classicpipes.items_requested": "パイプネットワークからのリクエストアイテム",
+  "item.classicpipes.inverted_copper_pipe": "反転した銅のパイプ",
+  "item.classicpipes.inverted_copper_fluid_pipe": "反転した銅の液体パイプ",
+  "item.classicpipes.inverted_advanced_copper_pipe": "反転した高度な銅のパイプ",
+  "item.classicpipes.inverted_advanced_copper_fluid_pipe": "反転した高度な銅の液体パイプ",
+  "item.classicpipes.nether_brick_pipe": "ネザーレンガのパイプ",
+  "item.classicpipes.nether_brick_fluid_pipe": "ネザーレンガの液体パイプ",
+  "item.classicpipes.inverted.desc": "レッドストーン入力による挙動が逆になります。",
+  "item.classicpipes.nether_brick_pipe.desc": "木製およびレンガ製のパイプにのみ接続できます。",
+  "item.classicpipes.nether_brick_fluid_pipe.desc": "木製およびレンガ製のパイプにのみ接続できます。",
+  "chat.classicpipes.missing_item.translated_tag": "  %s（%s）があと%s個足りません",
+  "chat.classicpipes.missing_item.mod": "  %sから任意のアイテムがあと%s個足りません"
 }
