@@ -6,11 +6,11 @@ plugins {
 base {
     archivesName = "${mod_id}-forge-${minecraft_version}"
 }
-jar {
-    manifest {
-        attributes["MixinConfigs"] = "${mod_id}.mixins.json,${mod_id}.forge.mixins.json"
-    }
-}
+//jar {
+//    manifest {
+//        attributes["MixinConfigs"] = "${mod_id}.mixins.json,${mod_id}.forge.mixins.json"
+//    }
+//}
 
 minecraft {
 
