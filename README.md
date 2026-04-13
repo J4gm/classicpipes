@@ -14,13 +14,15 @@ For information about getting started with this mod, see the above video tutoria
 * Logistics Pipes: Krapht and team
 * [MultiLoader template](https://github.com/jaredlll08/MultiLoader-Template): Jaredlll08 and contributors
 * My beta testers: Tipsy, Sketti, and Charlie <3
-* Translators: 
-  * **Português brasileiro** (Brazilian Portuguese): pGabrielVP and PrincessStellar
+* Translators:
+  * **Français** (French): Jagm
   * **Italiano** (Italian): Anonymous
   * **日本語** (Japanese): Hamutaromaru
+  * **Português** (Portuguese): pGabrielVP and PrincessStellar
   * **Русский** (Russian): AstardGrimoire
+  * **toki pona** (Toki Pona): Jagm
 
-If you'd like to help translate the mod to another language, please get in touch! (Or submit a pull request on the Github if you know how to do that.)
+If you'd like to help translate the mod to another language, please get in touch on Discord (jagm)! (Or submit a pull request on the Github if you know how to do that.)
 
 ## NOTES
 
