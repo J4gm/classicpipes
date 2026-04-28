@@ -405,10 +405,7 @@ public class PipeNetwork {
                 boolean alreadyThere = false;
                 for (ItemStack inStack : existingItems) {
                     if (ItemStack.isSameItemSameTags(stack, inStack)) {
-                        inStack.grow(stack.getCount());
-                        if (inStack.getCount() < 0) {
-                            inStack.setCount(Integer.MAX_VALUE);
-                        }
+                        inStack.grow(Math.min(Integer.MAX_VALUE - inStack.getCount(), stack.getCount()));
                         alreadyThere = true;
                         break;
                     }
