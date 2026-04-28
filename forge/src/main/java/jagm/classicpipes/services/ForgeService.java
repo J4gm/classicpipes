@@ -172,8 +172,7 @@ public class ForgeService implements LoaderService {
                     int amountToTake = Math.min(slotStack.getCount(), amount);
                     ItemStack extracted = slotStack.copyWithCount(amountToTake);
                     if (predicate.test(slotStack) && !extracted.isEmpty() && MiscUtil.canTakeItemFromVanillaContainer(container, slot, extracted, face)) {
-                        int amountRemaining = slotStack.getCount() - amountToTake;
-                        container.setItem(slot, amountRemaining == 0 ? ItemStack.EMPTY : slotStack.copyWithCount(amountRemaining));
+                        container.removeItem(slot, amountToTake);
                         container.setChanged();
                         pipe.setItem(face.getOpposite(), slotStack.copyWithCount(amountToTake));
                         return true;
@@ -247,8 +246,7 @@ public class ForgeService implements LoaderService {
                         int amountToTake = Math.min(slotStack.getCount(), target.getCount());
                         ItemStack extracted = slotStack.copyWithCount(amountToTake);
                         if (!extracted.isEmpty() && MiscUtil.canTakeItemFromVanillaContainer(container, slot, extracted, face)) {
-                            int amountRemaining = slotStack.getCount() - amountToTake;
-                            container.setItem(slot, amountRemaining <= 0 ? ItemStack.EMPTY : slotStack.copyWithCount(amountRemaining));
+                            container.removeItem(slot, amountToTake);
                             container.setChanged();
                             target.shrink(amountToTake);
                             pipe.setItem(face.getOpposite(), extracted);
