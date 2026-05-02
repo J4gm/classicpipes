@@ -194,7 +194,11 @@ public class FabricService implements LoaderService {
                 for (int i = itemViewList.size() - 1; i >= 0; i--) {
                     StorageView<ItemVariant> itemView = itemViewList.get(i);
                     ItemVariant itemVariant = itemView.getResource();
+                    long prevAmount = itemView.getAmount();
                     long extracted = itemView.extract(itemView.getResource(), itemView.getAmount(), transaction);
+                    if (extracted >= itemVariant.getItem().getDefaultMaxStackSize()) {
+                        extracted = prevAmount;
+                    }
                     MiscUtil.mergeStackIntoList(stacks, itemVariant.toStack((int) extracted));
                 }
                 transaction.abort();

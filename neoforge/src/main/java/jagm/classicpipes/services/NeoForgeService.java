@@ -185,12 +185,16 @@ public class NeoForgeService implements LoaderService {
         if (itemHandler != null) {
             for (int slot = itemHandler.getSlots() - 1; slot >= 0; slot--) {
                 if (ItemStack.isSameItemSameComponents(target, itemHandler.getStackInSlot(slot))) {
-                    ItemStack extracted = itemHandler.extractItem(slot, target.getCount(), false);
-                    if (!extracted.isEmpty()) {
-                        target.shrink(extracted.getCount());
-                        pipe.setItem(face.getOpposite(), extracted);
-                        if (target.isEmpty()) {
-                            return true;
+                    while (!itemHandler.getStackInSlot(slot).isEmpty()) {
+                        ItemStack extracted = itemHandler.extractItem(slot, target.getCount(), false);
+                        if (!extracted.isEmpty()) {
+                            target.shrink(extracted.getCount());
+                            pipe.setItem(face.getOpposite(), extracted);
+                            if (target.isEmpty()) {
+                                return true;
+                            }
+                        } else {
+                            break;
                         }
                     }
                 }
@@ -226,7 +230,11 @@ public class NeoForgeService implements LoaderService {
         List<ItemStack> stacks = new ArrayList<>();
         if (itemHandler != null) {
             for (int slot = itemHandler.getSlots() - 1; slot >= 0; slot--) {
-                ItemStack extractable = itemHandler.extractItem(slot, itemHandler.getStackInSlot(slot).getCount(), true);
+                ItemStack slotStack = itemHandler.getStackInSlot(slot);
+                ItemStack extractable = itemHandler.extractItem(slot, slotStack.getCount(), true);
+                if (extractable.getCount() >= slotStack.getMaxStackSize()) {
+                    extractable.setCount(slotStack.getCount());
+                }
                 MiscUtil.mergeStackIntoList(stacks, extractable);
             }
         } else {
