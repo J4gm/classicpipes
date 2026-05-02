@@ -208,7 +208,7 @@ public class RequestMenu extends AbstractContainerMenu {
     }
 
     public boolean itemCraftable(ItemStack stack) {
-        return this.craftableCache.get(stack);
+        return this.craftableCache.getOrDefault(stack, false);
     }
 
     private static boolean itemMatchesSearch(ItemStack stack, String search, String searchedMod, List<String> searchedTags) {
