@@ -194,13 +194,17 @@ public class NeoForgeService implements LoaderService {
                 for (int slot = itemHandler.size() - 1; slot >= 0; slot--) {
                     ItemResource itemResource = itemHandler.getResource(slot);
                     if (!itemResource.isEmpty() && itemResource.matches(target)) {
-                        ItemStack extracted = itemResource.toStack(itemHandler.extract(slot, itemResource, target.getCount(), transaction));
-                        if (!extracted.isEmpty()) {
-                            target.shrink(extracted.getCount());
-                            pipe.setItem(face.getOpposite(), extracted);
-                            if (target.isEmpty()) {
-                                transaction.commit();
-                                return true;
+                        while (itemHandler.getAmountAsInt(slot) > 0) {
+                            ItemStack extracted = itemResource.toStack(itemHandler.extract(slot, itemResource, target.getCount(), transaction));
+                            if (!extracted.isEmpty()) {
+                                target.shrink(extracted.getCount());
+                                pipe.setItem(face.getOpposite(), extracted);
+                                if (target.isEmpty()) {
+                                    transaction.commit();
+                                    return true;
+                                }
+                            } else {
+                                break;
                             }
                         }
                     }
@@ -240,7 +244,11 @@ public class NeoForgeService implements LoaderService {
                 for (int slot = itemHandler.size() - 1; slot >= 0; slot--) {
                     ItemResource itemResource = itemHandler.getResource(slot);
                     if (!itemResource.isEmpty()) {
-                        int extractable = itemHandler.extract(slot, itemResource, itemHandler.getAmountAsInt(slot), transaction);
+                        int prevAmount = itemHandler.getAmountAsInt(slot);
+                        int extractable = itemHandler.extract(slot, itemResource, prevAmount, transaction);
+                        if (extractable >= itemResource.getMaxStackSize()) {
+                            extractable = prevAmount;
+                        }
                         MiscUtil.mergeStackIntoList(stacks, itemResource.toStack(extractable));
                     }
                 }

@@ -191,7 +191,11 @@ public class ForgeService implements LoaderService {
             if (itemHandlerOptional.isPresent()) {
                 IItemHandler itemHandler = itemHandlerOptional.get();
                 for (int slot = itemHandler.getSlots() - 1; slot >= 0; slot--) {
-                    ItemStack extractable = itemHandler.extractItem(slot, itemHandler.getStackInSlot(slot).getCount(), true);
+                    ItemStack slotStack = itemHandler.getStackInSlot(slot);
+                    ItemStack extractable = itemHandler.extractItem(slot, slotStack.getCount(), true);
+                    if (extractable.getCount() >= slotStack.getMaxStackSize()) {
+                        extractable.setCount(slotStack.getCount());
+                    }
                     MiscUtil.mergeStackIntoList(stacks, extractable);
                 }
                 return stacks;
@@ -223,12 +227,16 @@ public class ForgeService implements LoaderService {
                 IItemHandler itemHandler = itemHandlerOptional.get();
                 for (int slot = itemHandler.getSlots() - 1; slot >= 0; slot--) {
                     if (ItemStack.isSameItemSameComponents(stack, itemHandler.getStackInSlot(slot))) {
-                        ItemStack extracted = itemHandler.extractItem(slot, target.getCount(), false);
-                        if (!extracted.isEmpty()) {
-                            target.shrink(extracted.getCount());
-                            pipe.setItem(face.getOpposite(), extracted);
-                            if (target.isEmpty()) {
-                                return true;
+                        while (!itemHandler.getStackInSlot(slot).isEmpty()) {
+                            ItemStack extracted = itemHandler.extractItem(slot, target.getCount(), false);
+                            if (!extracted.isEmpty()) {
+                                target.shrink(extracted.getCount());
+                                pipe.setItem(face.getOpposite(), extracted);
+                                if (target.isEmpty()) {
+                                    return true;
+                                }
+                            } else {
+                                break;
                             }
                         }
                     }
