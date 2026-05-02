@@ -85,10 +85,10 @@ public class RequestAmountScreen extends Screen {
         graphics.drawString(this.font, this.title, (IMAGE_WIDTH - this.font.width(this.title)) / 2, 6, -12566464, false);
         Component countComponent = Component.literal(String.valueOf(this.count));
         graphics.drawString(this.font, countComponent, ITEM_X + 45 - this.font.width(countComponent) / 2, ITEM_Y + 4, -12566464, false);
+        graphics.pose().popPose();
         if (this.isHovering(ITEM_X, ITEM_Y, 16, 16, mouseX, mouseY) && this.minecraft != null) {
             graphics.renderTooltip(this.font, getTooltipFromItem(this.minecraft, this.stack), this.stack.getTooltipImage(), mouseX, mouseY);
         }
-        graphics.pose().popPose();
     }
 
     private boolean isHovering(int x, int y, int width, int height, double mouseX, double mouseY) {
