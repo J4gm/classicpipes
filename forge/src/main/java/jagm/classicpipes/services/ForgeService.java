@@ -91,7 +91,7 @@ public class ForgeService implements LoaderService {
         if (blockEntity != null) {
             Optional<IItemHandler> itemHandlerOptional = blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, face).resolve();
             if (itemHandlerOptional.isPresent()) {
-                return itemHandlerOptional.get().getSlots() > 0;
+                return true;
             }
         }
         return MiscUtil.canAccessVanillaContainer(level, blockEntity, level.getBlockState(containerPos), containerPos, face);
@@ -295,11 +295,7 @@ public class ForgeService implements LoaderService {
         if (blockEntity instanceof FluidPipeEntity) {
             return false;
         } else if (blockEntity != null) {
-            Optional<IFluidHandler> fluidHandlerOptional = blockEntity.getCapability(ForgeCapabilities.FLUID_HANDLER, face).resolve();
-            if (fluidHandlerOptional.isPresent()) {
-                IFluidHandler fluidHandler = fluidHandlerOptional.get();
-                return fluidHandler.getTanks() > 0;
-            }
+            return blockEntity.getCapability(ForgeCapabilities.FLUID_HANDLER, face).resolve().isPresent();
         }
         return false;
     }
