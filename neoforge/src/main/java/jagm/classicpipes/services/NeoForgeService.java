@@ -96,7 +96,7 @@ public class NeoForgeService implements LoaderService {
         BlockState state = level.getBlockState(containerPos);
         IItemHandler itemHandler = level.getCapability(Capabilities.ItemHandler.BLOCK, containerPos, state, blockEntity, face);
         if (itemHandler != null) {
-            return itemHandler.getSlots() > 0;
+            return true;
         } else {
             return MiscUtil.canAccessVanillaContainer(level, blockEntity, state, containerPos, face);
         }
@@ -279,12 +279,7 @@ public class NeoForgeService implements LoaderService {
         if (blockEntity instanceof FluidPipeEntity) {
             return false;
         }
-        BlockState state = level.getBlockState(containerPos);
-        IFluidHandler fluidHandler = level.getCapability(Capabilities.FluidHandler.BLOCK, containerPos, state, blockEntity, face);
-        if (fluidHandler != null) {
-            return fluidHandler.getTanks() > 0;
-        }
-        return false;
+        return level.getCapability(Capabilities.FluidHandler.BLOCK, containerPos, level.getBlockState(containerPos), blockEntity, face) != null;
     }
 
     @Override
