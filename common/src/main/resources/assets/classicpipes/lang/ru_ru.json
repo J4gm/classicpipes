@@ -88,7 +88,7 @@
   "item.classicpipes.obsidian_fluid_pipe.desc": "Уничтожает жидкости",
   "item.classicpipes.advanced_copper_pipe.desc": "Принимает стаки предметы из хранилищ. Можно настроить сортировку",
   "item.classicpipes.advanced_copper_fluid_pipe.desc": "Принимает жидкости из резервуаров быстрее. Можно настроить сортировку",
-  "item.classicpipes.inverted.desc": "Инвертированное поведение редстоуна",
+  "item.classicpipes.inverted.desc": "Инвертированное поведение c редстоуном",
   "item.classicpipes.nether_brick_pipe.desc": "Соединяется только с деревянными и кирпичными трубами",
   "item.classicpipes.nether_brick_fluid_pipe.desc": "Соединяется только с деревянными и кирпичными трубами",
   "itemGroup.classicpipes.pipes": "Classic Pipes",
