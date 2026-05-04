@@ -7,9 +7,9 @@ assignees: ''
 
 ---
 
-* **Minecraft version:** [e.g. 1.21.8]
-* **Loader and loader version:** [e.g. NeoForge 21.8.52]
-* **Classic Pipes version:** [e.g. 1.0.9]
+* **Minecraft version:** [e.g. 26.1.2]
+* **Loader:** [e.g. NeoForge]
+* **Classic Pipes version:** [e.g. 1.1.3]
 
 **Problem:** [Clear description of the problem and the expected behaviour]
 
