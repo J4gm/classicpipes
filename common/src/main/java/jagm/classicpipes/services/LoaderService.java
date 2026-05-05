@@ -49,7 +49,9 @@ public interface LoaderService {
 
     boolean handleItemExtraction(ItemPipeEntity pipe, BlockState pipeState, ServerLevel level, BlockPos containerPos, Direction face, int amount, Predicate<ItemStack> predicate);
 
-    List<ItemStack> getContainerItems(ServerLevel level, BlockPos pos, Direction face);
+    List<ItemStack> getExtractableContainerItems(ServerLevel level, BlockPos pos, Direction face);
+
+    List<ItemStack> getAllContainerItems(ServerLevel level, BlockPos pos, Direction face);
 
     boolean extractSpecificItem(ItemPipeEntity pipe, ServerLevel level, BlockPos containerPos, Direction face, ItemStack stack);
 

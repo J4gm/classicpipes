@@ -64,7 +64,7 @@ public class StockingPipeEntity extends NetworkedPipeEntity implements MenuProvi
             }
             BlockPos containerPos = this.getBlockPos().relative(facing);
             if (!filterItems.isEmpty() && Services.LOADER_SERVICE.canAccessContainer(level, containerPos, facing.getOpposite())) {
-                List<ItemStack> containerItems = Services.LOADER_SERVICE.getContainerItems(level, containerPos, facing.getOpposite());
+                List<ItemStack> containerItems = Services.LOADER_SERVICE.getAllContainerItems(level, containerPos, facing.getOpposite());
                 for (ItemStack filterStack : filterItems) {
                     int amountFound = 0;
                     boolean isLabel = filterStack.getItem() instanceof LabelItem;
