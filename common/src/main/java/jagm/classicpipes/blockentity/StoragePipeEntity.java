@@ -56,14 +56,17 @@ public class StoragePipeEntity extends NetworkedPipeEntity implements MenuProvid
         this.providerCache.clear();
         this.matchingCache.clear();
         this.cannotFit.clear();
-        List<ItemStack> stacks = Services.LOADER_SERVICE.getContainerItems(level, pos.relative(facing), facing.getOpposite());
-        for (ItemStack stack : stacks) {
+        List<ItemStack> extractableStacks = Services.LOADER_SERVICE.getExtractableContainerItems(level, pos.relative(facing), facing.getOpposite());
+        for (ItemStack stack : extractableStacks) {
+            if (!stack.isEmpty() && !(stack.getItem() instanceof LabelItem)) {
+                this.providerCache.add(stack);
+            }
+        }
+        List<ItemStack> storedStacks = Services.LOADER_SERVICE.getAllContainerItems(level, pos.relative(facing), facing.getOpposite());
+        for (ItemStack stack : storedStacks) {
             this.matchingCache.add(stack.copy());
             if (this.shouldLeaveOne()) {
                 stack.shrink(1);
-            }
-            if (!stack.isEmpty() && !(stack.getItem() instanceof LabelItem)) {
-                this.providerCache.add(stack);
             }
         }
         if (this.hasNetwork()) {
