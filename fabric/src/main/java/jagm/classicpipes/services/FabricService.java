@@ -107,7 +107,7 @@ public class FabricService implements LoaderService {
         }
         Storage<ItemVariant> itemHandler = ItemStorage.SIDED.find(level, containerPos, face);
         if (itemHandler != null) {
-            return itemHandler.supportsExtraction() || itemHandler.supportsInsertion();
+            return itemHandler.supportsInsertion() || itemHandler.supportsExtraction();
         }
         return false;
     }
@@ -184,7 +184,7 @@ public class FabricService implements LoaderService {
         return false;
     }
 
-    public List<ItemStack> getContainerItems(ServerLevel level, BlockPos pos, Direction face) {
+    public List<ItemStack> getExtractableContainerItems(ServerLevel level, BlockPos pos, Direction face) {
         Storage<ItemVariant> itemHandler = ItemStorage.SIDED.find(level, pos, face);
         List<ItemStack> stacks = new ArrayList<>();
         if (itemHandler != null) {
@@ -202,6 +202,19 @@ public class FabricService implements LoaderService {
                     MiscUtil.mergeStackIntoList(stacks, itemVariant.toStack((int) extracted));
                 }
                 transaction.abort();
+            }
+        }
+        return stacks;
+    }
+
+    public List<ItemStack> getAllContainerItems(ServerLevel level, BlockPos pos, Direction face) {
+        Storage<ItemVariant> itemHandler = ItemStorage.SIDED.find(level, pos, face);
+        List<ItemStack> stacks = new ArrayList<>();
+        if (itemHandler != null) {
+            Iterator<StorageView<ItemVariant>> iterator = itemHandler.nonEmptyIterator();
+            while (iterator.hasNext()) {
+                StorageView<ItemVariant> itemView = iterator.next();
+                MiscUtil.mergeStackIntoList(stacks, itemView.getResource().toStack((int) itemView.getAmount()));
             }
         }
         return stacks;

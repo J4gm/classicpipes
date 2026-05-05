@@ -49,7 +49,7 @@ public class MatchingPipeEntity extends NetworkedPipeEntity implements MenuProvi
     private void updateCache(ServerLevel level, BlockPos pos, Direction facing) {
         this.cache.clear();
         this.cannotFit.clear();
-        this.cache.addAll(Services.LOADER_SERVICE.getContainerItems(level, pos.relative(facing), facing.getOpposite()));
+        this.cache.addAll(Services.LOADER_SERVICE.getAllContainerItems(level, pos.relative(facing), facing.getOpposite()));
     }
 
     @Override

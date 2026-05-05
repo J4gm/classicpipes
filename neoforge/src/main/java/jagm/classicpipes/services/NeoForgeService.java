@@ -225,7 +225,7 @@ public class NeoForgeService implements LoaderService {
         return false;
     }
 
-    public List<ItemStack> getContainerItems(ServerLevel level, BlockPos pos, Direction face) {
+    public List<ItemStack> getExtractableContainerItems(ServerLevel level, BlockPos pos, Direction face) {
         IItemHandler itemHandler = level.getCapability(Capabilities.ItemHandler.BLOCK, pos, face);
         List<ItemStack> stacks = new ArrayList<>();
         if (itemHandler != null) {
@@ -247,6 +247,25 @@ public class NeoForgeService implements LoaderService {
                     if (MiscUtil.canTakeItemFromVanillaContainer(container, slot, extractable, face)) {
                         MiscUtil.mergeStackIntoList(stacks, extractable);
                     }
+                }
+            }
+        }
+        return stacks;
+    }
+
+    public List<ItemStack> getAllContainerItems(ServerLevel level, BlockPos pos, Direction face) {
+        IItemHandler itemHandler = level.getCapability(Capabilities.ItemHandler.BLOCK, pos, face);
+        List<ItemStack> stacks = new ArrayList<>();
+        if (itemHandler != null) {
+            for (int slot = itemHandler.getSlots() - 1; slot >= 0; slot--) {
+                MiscUtil.mergeStackIntoList(stacks, itemHandler.getStackInSlot(slot));
+            }
+        } else {
+            Container container = MiscUtil.getVanillaContainer(level, level.getBlockState(pos), pos);
+            if (container != null) {
+                int[] slots = container instanceof WorldlyContainer worldlyContainer ? worldlyContainer.getSlotsForFace(face) : IntStream.range(0, container.getContainerSize()).toArray();
+                for (int i = slots.length - 1; i >= 0; i--) {
+                    MiscUtil.mergeStackIntoList(stacks, container.getItem(slots[i]));
                 }
             }
         }
