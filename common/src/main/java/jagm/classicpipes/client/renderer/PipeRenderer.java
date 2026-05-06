@@ -38,7 +38,7 @@ public class PipeRenderer implements BlockEntityRenderer<ItemPipeEntity> {
             int maxItems = (int) (32 / Math.max(1, distance - 8));
             if (maxItems > 0) {
                 List<ItemInPipe> contents = pipe.getContents();
-                int step = Math.ceilDiv(contents.size(), maxItems);
+                int step = (int) Math.ceil((double) contents.size() / maxItems);
                 for (int i = 0; i < contents.size(); i += step) {
                     ItemInPipe item = contents.get(i);
                     Direction direction = item.getProgress() < ItemInPipe.HALFWAY ? item.getFromDirection() : item.getTargetDirection();
