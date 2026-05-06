@@ -17,6 +17,8 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 
+import java.util.List;
+
 public class PipeRenderer implements BlockEntityRenderer<ItemPipeEntity> {
 
     private final BlockEntityRendererProvider.Context context;
@@ -32,19 +34,26 @@ public class PipeRenderer implements BlockEntityRenderer<ItemPipeEntity> {
 
     public static void renderPipeItems(BlockEntityRendererProvider.Context context, ItemPipeEntity pipe, float partialTicks, PoseStack poses, MultiBufferSource bufferSource, int light, int overlay) {
         if (!pipe.isEmpty()){
-            for (ItemInPipe item : pipe.getContents()) {
-                Direction direction = item.getProgress() < ItemInPipe.HALFWAY ? item.getFromDirection() : item.getTargetDirection();
-                poses.pushPose();
-                Vec3 renderPos = item.getRenderPosition(partialTicks);
-                poses.translate(renderPos.x, renderPos.y, renderPos.z);
-                poses.scale(0.4375F, 0.4375F, 0.4375F);
-                if (direction.equals(Direction.EAST) || direction.equals(Direction.WEST)) {
-                    poses.mulPose(Axis.YP.rotationDegrees(90.0F));
-                } else if (direction.equals(Direction.UP) || direction.equals(Direction.DOWN)) {
-                    poses.mulPose(Axis.XP.rotationDegrees(90.0F));
+            double distance = Vec3.atCenterOf(pipe.getBlockPos()).distanceTo(context.getBlockEntityRenderDispatcher().camera.getPosition());
+            int maxItems = (int) (32 / Math.max(1, distance - 8));
+            if (maxItems > 0) {
+                List<ItemInPipe> contents = pipe.getContents();
+                int step = Math.ceilDiv(contents.size(), maxItems);
+                for (int i = 0; i < contents.size(); i += step) {
+                    ItemInPipe item = contents.get(i);
+                    Direction direction = item.getProgress() < ItemInPipe.HALFWAY ? item.getFromDirection() : item.getTargetDirection();
+                    poses.pushPose();
+                    Vec3 renderPos = item.getRenderPosition(partialTicks);
+                    poses.translate(renderPos.x, renderPos.y, renderPos.z);
+                    poses.scale(0.4375F, 0.4375F, 0.4375F);
+                    if (direction.equals(Direction.EAST) || direction.equals(Direction.WEST)) {
+                        poses.mulPose(Axis.YP.rotationDegrees(90.0F));
+                    } else if (direction.equals(Direction.UP) || direction.equals(Direction.DOWN)) {
+                        poses.mulPose(Axis.XP.rotationDegrees(90.0F));
+                    }
+                    context.getItemRenderer().renderStatic(item.getStack(), ItemDisplayContext.FIXED, light, overlay, poses, bufferSource, pipe.getLevel(), 0);
+                    poses.popPose();
                 }
-                context.getItemRenderer().renderStatic(item.getStack(), ItemDisplayContext.FIXED, light, overlay, poses, bufferSource, pipe.getLevel(), 0);
-                poses.popPose();
             }
         }
         if (MiscUtil.DEBUG_MODE) {
