@@ -44,10 +44,17 @@ public class PipeRenderer<T extends ItemPipeEntity> implements BlockEntityRender
     public void extractRenderState(T pipe, PipeRenderState pipeState, float partialTicks, Vec3 cameraPos, ModelFeatureRenderer.CrumblingOverlay breakProgress) {
         BlockEntityRenderer.super.extractRenderState(pipe, pipeState, partialTicks, cameraPos, breakProgress);
         List<ItemInPipeRenderState> itemRenderStates = new ArrayList<>();
-        for (ItemInPipe item : pipe.getContents()) {
-            ItemStackRenderState stackState = new ItemStackRenderState();
-            this.context.itemModelResolver().updateForTopItem(stackState, item.getStack(), ItemDisplayContext.FIXED, pipe.getLevel(), null, 0);
-            itemRenderStates.add(new ItemInPipeRenderState(stackState, item.getRenderPosition(partialTicks), item.getProgress() < ItemInPipe.HALFWAY ? item.getFromDirection() : item.getTargetDirection()));
+        double distance = Vec3.atCenterOf(pipe.getBlockPos()).distanceTo(cameraPos);
+        int maxItems = (int) (32 / Math.max(1, distance - 8));
+        if (maxItems > 0) {
+            List<ItemInPipe> contents = pipe.getContents();
+            int step = Math.ceilDiv(contents.size(), maxItems);
+            for (int i = 0; i < contents.size(); i += step) {
+                ItemInPipe item = contents.get(i);
+                ItemStackRenderState stackState = new ItemStackRenderState();
+                this.context.itemModelResolver().updateForTopItem(stackState, item.getStack(), ItemDisplayContext.FIXED, pipe.getLevel(), null, 0);
+                itemRenderStates.add(new ItemInPipeRenderState(stackState, item.getRenderPosition(partialTicks), item.getProgress() < ItemInPipe.HALFWAY ? item.getFromDirection() : item.getTargetDirection()));
+            }
         }
         if (pipe instanceof NetworkedPipeEntity networkedPipe) {
             pipeState.initialise(itemRenderStates, pipe.networkDistances, this.context.font(), networkedPipe.isController(), networkedPipe.syncedNetworkPos);
