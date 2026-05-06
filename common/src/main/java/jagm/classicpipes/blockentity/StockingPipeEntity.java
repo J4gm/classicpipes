@@ -144,7 +144,7 @@ public class StockingPipeEntity extends NetworkedPipeEntity implements MenuProvi
     protected void loadAdditional(ValueInput valueInput) {
         this.filter.clearContent();
         super.loadAdditional(valueInput);
-        ValueInput.TypedInputList<ItemStackWithSlot> filterList = valueInput.listOrEmpty("filter", ItemStackWithSlot.CODEC);
+        ValueInput.TypedInputList<ItemStackWithSlot> filterList = valueInput.listOrEmpty("filter", MiscUtil.UNLIMITED_STACK_WITH_SLOT_CODEC);
         for (ItemStackWithSlot slotStack : filterList) {
             this.filter.setItem(slotStack.slot(), slotStack.stack());
         }
@@ -155,7 +155,7 @@ public class StockingPipeEntity extends NetworkedPipeEntity implements MenuProvi
     @Override
     protected void saveAdditional(ValueOutput valueOutput) {
         super.saveAdditional(valueOutput);
-        ValueOutput.TypedOutputList<ItemStackWithSlot> filterList = valueOutput.list("filter", ItemStackWithSlot.CODEC);
+        ValueOutput.TypedOutputList<ItemStackWithSlot> filterList = valueOutput.list("filter", MiscUtil.UNLIMITED_STACK_WITH_SLOT_CODEC);
         for (int slot = 0; slot < this.filter.getContainerSize(); slot++) {
             ItemStack stack = this.filter.getItem(slot);
             if (!stack.isEmpty()) {

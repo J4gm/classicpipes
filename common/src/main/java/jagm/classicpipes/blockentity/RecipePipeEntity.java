@@ -336,7 +336,7 @@ public class RecipePipeEntity extends NetworkedPipeEntity implements MenuProvide
             this.slotDirections[i] = Direction.from3DDataValue(directionByte);
             i++;
         }
-        ValueInput.TypedInputList<ItemStackWithSlot> filterList = valueInput.listOrEmpty("filter", ItemStackWithSlot.CODEC);
+        ValueInput.TypedInputList<ItemStackWithSlot> filterList = valueInput.listOrEmpty("filter", MiscUtil.UNLIMITED_STACK_WITH_SLOT_CODEC);
         for (ItemStackWithSlot slotStack : filterList) {
             this.filter.setItem(slotStack.slot(), slotStack.stack());
         }
@@ -362,7 +362,7 @@ public class RecipePipeEntity extends NetworkedPipeEntity implements MenuProvide
         for (Direction direction : this.slotDirections) {
             directionsByteList.add(direction == null ? (byte) 0 : (byte) direction.get3DDataValue());
         }
-        ValueOutput.TypedOutputList<ItemStackWithSlot> filterList = valueOutput.list("filter", ItemStackWithSlot.CODEC);
+        ValueOutput.TypedOutputList<ItemStackWithSlot> filterList = valueOutput.list("filter", MiscUtil.UNLIMITED_STACK_WITH_SLOT_CODEC);
         for (int slot = 0; slot < this.filter.getContainerSize(); slot++) {
             ItemStack stack = this.filter.getItem(slot);
             if (!stack.isEmpty()) {

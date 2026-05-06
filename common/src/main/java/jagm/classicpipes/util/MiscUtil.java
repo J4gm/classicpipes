@@ -17,6 +17,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.Container;
 import net.minecraft.world.ItemStackWithSlot;
 import net.minecraft.world.WorldlyContainer;
@@ -52,6 +53,11 @@ public class MiscUtil {
             Codec.INT.fieldOf("count").forGetter(ItemStack::getCount),
             DataComponentPatch.CODEC.optionalFieldOf("components", DataComponentPatch.EMPTY).forGetter(ItemStack::getComponentsPatch)
     ).apply(instance, ItemStack::new));
+
+    public static final Codec<ItemStackWithSlot> UNLIMITED_STACK_WITH_SLOT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            ExtraCodecs.UNSIGNED_BYTE.fieldOf("Slot").orElse(0).forGetter(ItemStackWithSlot::slot),
+            UNLIMITED_STACK_CODEC.fieldOf("ItemStack").forGetter(ItemStackWithSlot::stack)
+    ).apply(instance, ItemStackWithSlot::new));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, ItemStackWithSlot> ITEM_STACK_WITH_SLOT_STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.INT,
