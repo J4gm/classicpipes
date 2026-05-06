@@ -148,7 +148,7 @@ public class StockingPipeEntity extends NetworkedPipeEntity implements MenuProvi
         filterList.forEach(tag -> {
             if (tag instanceof CompoundTag compoundTag) {
                 int slot = compoundTag.getInt("slot");
-                MiscUtil.loadFromTag(tag, ItemStack.CODEC, registries, stack -> this.filter.setItem(slot, stack));
+                MiscUtil.loadFromTag(tag, MiscUtil.UNLIMITED_STACK_CODEC, registries, stack -> this.filter.setItem(slot, stack));
             }
         });
         this.filter.setMatchComponents(valueInput.getBoolean("match_components"));
@@ -164,7 +164,7 @@ public class StockingPipeEntity extends NetworkedPipeEntity implements MenuProvi
             if (!stack.isEmpty()) {
                 CompoundTag tag = new CompoundTag();
                 tag.putInt("slot", slot);
-                MiscUtil.saveToTag(tag, stack, ItemStack.CODEC, registries, filterList::add);
+                MiscUtil.saveToTag(tag, stack, MiscUtil.UNLIMITED_STACK_CODEC, registries, filterList::add);
             }
         }
         valueOutput.put("filter", filterList);

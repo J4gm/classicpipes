@@ -338,7 +338,7 @@ public class RecipePipeEntity extends NetworkedPipeEntity implements MenuProvide
         filterList.forEach(tag -> {
             if (tag instanceof CompoundTag compoundTag) {
                 int slot = compoundTag.getInt("slot");
-                MiscUtil.loadFromTag(tag, ItemStack.CODEC, registries, stack -> this.filter.setItem(slot, stack));
+                MiscUtil.loadFromTag(tag, MiscUtil.UNLIMITED_STACK_CODEC, registries, stack -> this.filter.setItem(slot, stack));
             }
         });
         ListTag heldItemList = valueInput.getList("held_items", ListTag.TAG_COMPOUND);
@@ -348,7 +348,7 @@ public class RecipePipeEntity extends NetworkedPipeEntity implements MenuProvide
                 if (slot >= 0 && slot < 9) {
                     ListTag stacksList = compoundTag.getList("stacks", ListTag.TAG_COMPOUND);
                     for (Tag stackTag: stacksList) {
-                        MiscUtil.loadFromTag(stackTag, ItemStack.CODEC, registries, stack -> this.heldItems.get(slot).add(stack));
+                        MiscUtil.loadFromTag(stackTag, MiscUtil.UNLIMITED_STACK_CODEC, registries, stack -> this.heldItems.get(slot).add(stack));
                     }
                 }
             }
@@ -373,7 +373,7 @@ public class RecipePipeEntity extends NetworkedPipeEntity implements MenuProvide
             if (!stack.isEmpty()) {
                 CompoundTag tag = new CompoundTag();
                 tag.putInt("slot", slot);
-                MiscUtil.saveToTag(tag, stack, ItemStack.CODEC, registries, filterList::add);
+                MiscUtil.saveToTag(tag, stack, MiscUtil.UNLIMITED_STACK_CODEC, registries, filterList::add);
             }
         }
         valueOutput.put("filter", filterList);
@@ -384,7 +384,7 @@ public class RecipePipeEntity extends NetworkedPipeEntity implements MenuProvide
             for (ItemStack stack : stacks) {
                 if (!stack.isEmpty()) {
                     CompoundTag stackTag = new CompoundTag();
-                    MiscUtil.saveToTag(stackTag, stack, ItemStack.CODEC, registries, stacksList::add);
+                    MiscUtil.saveToTag(stackTag, stack, MiscUtil.UNLIMITED_STACK_CODEC, registries, stacksList::add);
                 }
             }
             CompoundTag tag = new CompoundTag();
