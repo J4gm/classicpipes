@@ -20,7 +20,7 @@ public class ItemInPipe {
 
     public static final Codec<ItemInPipe> CODEC = RecordCodecBuilder.create(instance ->
         instance.group(
-                ItemStack.CODEC.fieldOf("item").orElse(ItemStack.EMPTY).forGetter(ItemInPipe::getStack),
+                MiscUtil.UNLIMITED_STACK_CODEC.fieldOf("item").orElse(ItemStack.EMPTY).forGetter(ItemInPipe::getStack),
                 Codec.SHORT.fieldOf("speed").orElse(DEFAULT_SPEED).forGetter(ItemInPipe::getSpeed),
                 Codec.SHORT.fieldOf("progress").orElse((short) 0).forGetter(ItemInPipe::getProgress),
                 Codec.BYTE.fieldOf("from_direction").orElse((byte) 0).forGetter(item -> (byte) item.getFromDirection().get3DDataValue()),
