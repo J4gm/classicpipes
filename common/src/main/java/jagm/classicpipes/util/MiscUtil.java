@@ -56,8 +56,10 @@ public class MiscUtil {
 
     public static final Codec<ItemStackWithSlot> UNLIMITED_STACK_WITH_SLOT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ExtraCodecs.UNSIGNED_BYTE.fieldOf("Slot").orElse(0).forGetter(ItemStackWithSlot::slot),
-            UNLIMITED_STACK_CODEC.fieldOf("ItemStack").forGetter(ItemStackWithSlot::stack)
-    ).apply(instance, ItemStackWithSlot::new));
+            Item.CODEC.fieldOf("id").forGetter(stackWithSlot -> stackWithSlot.stack().getItem().builtInRegistryHolder()),
+            Codec.INT.fieldOf("count").forGetter(stackWithSlot -> stackWithSlot.stack().getCount()),
+            DataComponentPatch.CODEC.optionalFieldOf("components", DataComponentPatch.EMPTY).forGetter(stackWithSlot -> stackWithSlot.stack().getComponentsPatch())
+    ).apply(instance, (slot, id, count, components) -> new ItemStackWithSlot(slot, new ItemStack(id, count, components))));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, ItemStackWithSlot> ITEM_STACK_WITH_SLOT_STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.INT,
