@@ -20,6 +20,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class StoragePipeEntity extends NetworkedPipeEntity implements MenuProvider, ProviderPipe, MatchingPipe {
@@ -57,18 +58,20 @@ public class StoragePipeEntity extends NetworkedPipeEntity implements MenuProvid
         this.matchingCache.clear();
         this.cannotFit.clear();
         List<ItemStack> extractableStacks = Services.LOADER_SERVICE.getExtractableContainerItems(level, pos.relative(facing), facing.getOpposite());
-        for (ItemStack stack : extractableStacks) {
-            if (!stack.isEmpty() && !(stack.getItem() instanceof LabelItem)) {
-                this.providerCache.add(stack);
-            }
-        }
-        List<ItemStack> storedStacks = Services.LOADER_SERVICE.getAllContainerItems(level, pos.relative(facing), facing.getOpposite());
-        for (ItemStack stack : storedStacks) {
-            this.matchingCache.add(stack.copy());
-            if (this.shouldLeaveOne()) {
+        Iterator<ItemStack> iterator = extractableStacks.iterator();
+        while (iterator.hasNext()) {
+            ItemStack stack = iterator.next();
+            if (stack.getItem() instanceof LabelItem) {
+                iterator.remove();
+            } else if (this.shouldLeaveOne()) {
                 stack.shrink(1);
+                if (stack.isEmpty()) {
+                    iterator.remove();
+                }
             }
         }
+        this.providerCache.addAll(extractableStacks);
+        this.matchingCache.addAll(Services.LOADER_SERVICE.getAllContainerItems(level, pos.relative(facing), facing.getOpposite()));
         if (this.hasNetwork()) {
             this.getNetwork().cacheUpdated();
         }
