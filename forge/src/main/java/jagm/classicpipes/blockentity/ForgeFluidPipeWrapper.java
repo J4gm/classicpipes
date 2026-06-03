@@ -39,13 +39,13 @@ public class ForgeFluidPipeWrapper implements IFluidHandler {
 
     @Override
     public int fill(FluidStack fluidStack, FluidAction fluidAction) {
-        if (this.side == null || fluidStack.isEmpty() || !this.pipe.emptyOrMatches(fluidStack.getFluid()) || !this.pipe.getBlockState().getValue(FluidPipeBlock.PROPERTY_BY_DIRECTION.get(this.side))) {
+        if (this.side == null || fluidStack.isEmpty() || !this.pipe.emptyOrMatches(fluidStack.getFluid(), fluidStack.getTag()) || !this.pipe.getBlockState().getValue(FluidPipeBlock.PROPERTY_BY_DIRECTION.get(this.side))) {
             return 0;
         } else {
             int amount = Math.min(this.pipe.remainingCapacity(), fluidStack.getAmount());
             if (fluidAction.execute()) {
                 if (this.pipe.getLevel() instanceof ServerLevel serverLevel) {
-                    this.pipe.setFluid(fluidStack.getFluid());
+                    this.pipe.setFluid(fluidStack.getFluid(), fluidStack.getTag());
                     FluidInPipe fluidPacket = new FluidInPipe(amount, this.pipe.getTargetSpeed(), (short) 0, this.side, this.side, (short) 0);
                     this.pipe.insertFluidPacket(serverLevel, fluidPacket);
                     serverLevel.sendBlockUpdated(this.pipe.getBlockPos(), this.pipe.getBlockState(), this.pipe.getBlockState(), 2);

@@ -4,8 +4,11 @@ import jagm.classicpipes.blockentity.FluidPipeEntity;
 import jagm.classicpipes.blockentity.ItemPipeEntity;
 import jagm.classicpipes.util.FluidInPipe;
 import jagm.classicpipes.util.ItemInPipe;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.FluidModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
@@ -23,6 +26,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.apache.commons.lang3.function.TriFunction;
 
 import java.util.List;
@@ -57,7 +62,7 @@ public interface LoaderService {
 
     String getModName(String modId);
 
-    boolean handleFluidInsertion(FluidPipeEntity pipe, ServerLevel level, BlockPos pipePos, BlockState pipeState, BlockEntity containerEntity, BlockPos containerPos, Fluid fluid, FluidInPipe fluidPacket);
+    boolean handleFluidInsertion(FluidPipeEntity pipe, ServerLevel level, BlockPos pipePos, BlockState pipeState, BlockEntity containerEntity, BlockPos containerPos, Fluid fluid, Object fluidData, FluidInPipe fluidPacket);
 
     boolean canAccessFluidContainer(Level level, BlockPos containerPos, Direction face);
 
@@ -66,5 +71,17 @@ public interface LoaderService {
     Fluid getFluidFromStack(ItemStack stack);
 
     Component getFluidName(Fluid fluid);
+
+    default void saveFluidData(ValueOutput valueOutput, Object fluidData) {
+        if (fluidData instanceof DataComponentPatch components) {
+            valueOutput.store("fluid_data", DataComponentPatch.CODEC, components);
+        }
+    }
+
+    default Object loadFluidData(ValueInput valueInput) {
+        return valueInput.read("fluid_data", DataComponentPatch.CODEC).orElse(null);
+    }
+
+    int getFluidTint(FluidModel fluidModel, Fluid fluid, Object fluidData, BlockAndTintGetter level, BlockPos pos);
 
 }

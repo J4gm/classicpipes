@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import jagm.classicpipes.block.FluidPipeBlock;
 import jagm.classicpipes.blockentity.FluidPipeEntity;
+import jagm.classicpipes.services.Services;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.SubmitNodeCollector;
@@ -16,7 +17,6 @@ import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
@@ -41,8 +41,8 @@ public class FluidPipeRenderer implements BlockEntityRenderer<FluidPipeEntity, F
         BlockEntityRenderer.super.extractRenderState(pipe, pipeState, partialTicks, cameraPos, breakProgress);
         if (pipe.getLevel() instanceof ClientLevel clientLevel) {
             FluidModel fluidModel = Minecraft.getInstance().getModelManager().getFluidStateModelSet().get(pipe.getFluid().defaultFluidState());
-            int tint = fluidModel.tintSource() == null ? -1 : fluidModel.tintSource().colorInWorld(Blocks.AIR.defaultBlockState(), clientLevel, pipe.getBlockPos());
-            TextureAtlasSprite sprite = fluidModel.flowingMaterial().sprite();
+            int tint = Services.LOADER_SERVICE.getFluidTint(fluidModel, pipe.getFluid(), pipe.getFluidData(), clientLevel, pipe.getBlockPos());
+            TextureAtlasSprite sprite = fluidModel.stillMaterial().sprite();
             boolean[] pipeDirections = new boolean[6];
             for (int i = 0; i < 6; i++) {
                 pipeDirections[i] = pipe.getBlockState().getValue(FluidPipeBlock.PROPERTY_BY_DIRECTION.get(Direction.from3DDataValue(i)));

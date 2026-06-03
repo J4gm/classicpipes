@@ -7,8 +7,11 @@ import jagm.classicpipes.network.ForgeServerPacketHandler;
 import jagm.classicpipes.util.FluidInPipe;
 import jagm.classicpipes.util.ItemInPipe;
 import jagm.classicpipes.util.MiscUtil;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.FluidModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
@@ -26,12 +29,16 @@ import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.HopperBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.fluids.FluidStack;
@@ -298,12 +305,13 @@ public class ForgeService implements LoaderService {
     }
 
     @Override
-    public boolean handleFluidInsertion(FluidPipeEntity pipe, ServerLevel level, BlockPos pipePos, BlockState pipeState, BlockEntity containerEntity, BlockPos containerPos, Fluid fluid, FluidInPipe fluidPacket) {
+    public boolean handleFluidInsertion(FluidPipeEntity pipe, ServerLevel level, BlockPos pipePos, BlockState pipeState, BlockEntity containerEntity, BlockPos containerPos, Fluid fluid, Object fluidData, FluidInPipe fluidPacket) {
         Direction face = fluidPacket.getTargetDirection().getOpposite();
         Optional<IFluidHandler> fluidHandlerOptional = containerEntity.getCapability(ForgeCapabilities.FLUID_HANDLER, face).resolve();
         if (fluidHandlerOptional.isPresent()) {
             IFluidHandler fluidHandler = fluidHandlerOptional.get();
-            int amountFilled = fluidHandler.fill(new FluidStack(fluid, fluidPacket.getAmount()), IFluidHandler.FluidAction.EXECUTE);
+            FluidStack fluidStack = fluidData instanceof CompoundTag tag ? new FluidStack(fluid, fluidPacket.getAmount(), tag) : new FluidStack(fluid, fluidPacket.getAmount());
+            int amountFilled = fluidHandler.fill(fluidStack, IFluidHandler.FluidAction.EXECUTE);
             if (amountFilled >= fluidPacket.getAmount()) {
                 return true;
             }
@@ -333,11 +341,13 @@ public class ForgeService implements LoaderService {
             if (fluidHandlerOptional.isPresent()) {
                 IFluidHandler fluidHandler = fluidHandlerOptional.get();
                 int amountToDrain = Math.min(amount, pipe.remainingCapacity());
-                Fluid fluid = pipe.isEmpty() ? fluidHandler.drain(amountToDrain, IFluidHandler.FluidAction.SIMULATE).getFluid() : pipe.getFluid();
-                if (predicate.test(fluid)) {
-                    FluidStack drainedStack = pipe.isEmpty() ? fluidHandler.drain(amountToDrain, IFluidHandler.FluidAction.EXECUTE) : fluidHandler.drain(new FluidStack(pipe.getFluid(), amountToDrain), IFluidHandler.FluidAction.EXECUTE);
+                FluidStack fluidStack = pipe.isEmpty() ?
+                        fluidHandler.drain(amountToDrain, IFluidHandler.FluidAction.SIMULATE) :
+                        (pipe.getFluidData() instanceof CompoundTag tag ? new FluidStack(pipe.getFluid(), amountToDrain, tag) : new FluidStack(pipe.getFluid(), amountToDrain));
+                if (predicate.test(fluidStack.getFluid())) {
+                    FluidStack drainedStack = fluidHandler.drain(fluidStack, IFluidHandler.FluidAction.EXECUTE);
                     if (!drainedStack.isEmpty()) {
-                        pipe.setFluid(drainedStack.getFluid());
+                        pipe.setFluid(drainedStack.getFluid(), drainedStack.getTag());
                         pipe.insertFluidPacket(level, new FluidInPipe(drainedStack.getAmount(), pipe.getTargetSpeed(), (short) 0, face.getOpposite(), face.getOpposite(), (short) 0));
                         return true;
                     }
@@ -362,6 +372,29 @@ public class ForgeService implements LoaderService {
     @Override
     public Component getFluidName(Fluid fluid) {
         return fluid.getFluidType().getDescription();
+    }
+
+    @Override
+    public void saveFluidData(ValueOutput valueOutput, Object fluidData) {
+        if (fluidData instanceof CompoundTag tag) {
+            valueOutput.store("fluid_data", CompoundTag.CODEC, tag);
+        }
+    }
+
+    @Override
+    public Object loadFluidData(ValueInput valueInput) {
+        return valueInput.read("fluid_data", CompoundTag.CODEC).orElse(null);
+    }
+
+    @Override
+    public int getFluidTint(FluidModel fluidModel, Fluid fluid, Object fluidData, BlockAndTintGetter level, BlockPos pos) {
+        if (fluidData instanceof CompoundTag tag && !tag.isEmpty()) {
+            return IClientFluidTypeExtensions.of(fluid).getTintColor(new FluidStack(fluid, 1, tag));
+        } else if (fluidModel.tintSource() != null) {
+            return fluidModel.tintSource().colorInWorld(Blocks.AIR.defaultBlockState(), level, pos);
+        } else {
+            return -1;
+        }
     }
 
 }
