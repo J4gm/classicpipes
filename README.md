@@ -15,10 +15,11 @@ For information about getting started with this mod, see the above video tutoria
 * [MultiLoader template](https://github.com/jaredlll08/MultiLoader-Template): Jaredlll08 and contributors
 * My beta testers: Tipsy, Sketti, and Charlie <3
 * Translators:
+  * **简化字** (Chinese, Simplified): Filmorae
   * **Français** (French): Jagm
   * **Italiano** (Italian): Anonymous
   * **日本語** (Japanese): Hamutaromaru
-  * **Português** (Portuguese): pGabrielVP and PrincessStellar
+  * **Português brasileiro** (Portuguese, Brazilian): pGabrielVP and PrincessStellar
   * **Русский** (Russian): AstardGrimoire
   * **toki pona** (Toki Pona): Jagm
 
