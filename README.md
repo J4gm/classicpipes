@@ -15,7 +15,8 @@ For information about getting started with this mod, see the above video tutoria
 * [MultiLoader template](https://github.com/jaredlll08/MultiLoader-Template): Jaredlll08 and contributors
 * My beta testers: Tipsy, Sketti, and Charlie <3
 * Translators:
-  * **简化字** (Chinese, Simplified): Filmorae
+  * **简体中文** (Chinese, Simplified): Filmorae
+  * **繁體中文** (Chinese, Traditional): Filmorae
   * **Français** (French): Jagm
   * **Italiano** (Italian): Anonymous
   * **日本語** (Japanese): Hamutaromaru
