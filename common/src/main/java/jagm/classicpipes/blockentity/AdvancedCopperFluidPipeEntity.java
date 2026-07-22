@@ -24,7 +24,7 @@ public class AdvancedCopperFluidPipeEntity extends CopperFluidPipeEntity impleme
 
     public AdvancedCopperFluidPipeEntity(BlockPos pos, BlockState state) {
         super(ClassicPipes.ADVANCED_COPPER_FLUID_PIPE_ENTITY, pos, state);
-        this.filter = new SingleItemFilterContainer(this, 9, false);
+        this.filter = new SingleItemFilterContainer(this, 9, true);
     }
 
     @Override

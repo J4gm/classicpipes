@@ -12,7 +12,7 @@ public class AdvancedCopperFluidPipeMenu extends FluidFilterMenu {
     private static final Identifier EMPTY_SLOT = MiscUtil.identifier("container/slot/fluid");
 
     public AdvancedCopperFluidPipeMenu(int id, Inventory playerInventory) {
-        this(id, playerInventory, new SingleItemFilterContainer(null, 9, false));
+        this(id, playerInventory, new SingleItemFilterContainer(null, 9, true));
     }
 
     public AdvancedCopperFluidPipeMenu(int id, Inventory playerInventory, Filter filter) {

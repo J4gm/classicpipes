@@ -39,7 +39,7 @@ public class FluidPipeRenderer implements BlockEntityRenderer<FluidPipeEntity, F
     @Override
     public void extractRenderState(FluidPipeEntity pipe, FluidPipeRenderState pipeState, float partialTicks, Vec3 cameraPos, ModelFeatureRenderer.CrumblingOverlay breakProgress) {
         BlockEntityRenderer.super.extractRenderState(pipe, pipeState, partialTicks, cameraPos, breakProgress);
-        if (pipe.getLevel() instanceof ClientLevel clientLevel && !pipe.isEmpty()) {
+        if (pipe.getLevel() instanceof ClientLevel clientLevel && !pipe.isEmpty() && !pipe.getFluid().isBlank()) {
             FluidModel fluidModel = Minecraft.getInstance().getModelManager().getFluidStateModelSet().get(pipe.getFluid().getFluid().defaultFluidState());
             int tint = Services.LOADER_SERVICE.getFluidTint(fluidModel, pipe.getFluid(), clientLevel, pipe.getBlockPos());
             TextureAtlasSprite sprite = fluidModel.stillMaterial().sprite();

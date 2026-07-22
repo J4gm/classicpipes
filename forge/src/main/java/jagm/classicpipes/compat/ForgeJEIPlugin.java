@@ -103,8 +103,7 @@ public class ForgeJEIPlugin /*implements IModPlugin*/ {
                         } else {
                             fluid = Services.LOADER_SERVICE.getFluidFromStack(stack);
                         }
-                        ItemStack bucketStack = fluid.getBucketStack();
-                        if (!bucketStack.isEmpty()) {
+                        if (!fluid.isBlank()) {
                             for (int i = 0; i < filterScreen.filterSlots(); i++) {
                                 Slot slot = filterScreen.getMenu().getSlot(i);
                                 if (slot.container instanceof Filter) {
@@ -117,6 +116,7 @@ public class ForgeJEIPlugin /*implements IModPlugin*/ {
 
                                         @Override
                                         public void accept(I ingredient) {
+                                            ItemStack bucketStack = fluid.getBucketStack();
                                             slot.set(bucketStack);
                                             Services.LOADER_SERVICE.sendToServer(new ServerBoundSetFilterPayload(slot.index, bucketStack));
                                         }

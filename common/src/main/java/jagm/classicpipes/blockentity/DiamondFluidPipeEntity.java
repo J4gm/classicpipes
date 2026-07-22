@@ -27,7 +27,7 @@ public class DiamondFluidPipeEntity extends FluidPipeEntity implements MenuProvi
 
     public DiamondFluidPipeEntity(BlockPos pos, BlockState state) {
         super(ClassicPipes.DIAMOND_FLUID_PIPE_ENTITY, pos, state);
-        this.filter = new DirectionalFilterContainer(this, false);
+        this.filter = new DirectionalFilterContainer(this, true);
     }
 
     @Override
