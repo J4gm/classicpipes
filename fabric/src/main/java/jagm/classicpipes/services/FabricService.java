@@ -344,14 +344,16 @@ public class FabricService implements LoaderService {
     @Override
     public FluidWithData getFluidFromStack(ItemStack stack) {
         Storage<FluidVariant> fluidHandler = FluidStorage.ITEM.find(stack, ContainerItemContext.withConstant(stack));
-        if (fluidHandler != null) {
+        if (stack.has(ClassicPipes.FLUID_DATA_COMPONENT)) {
+            return stack.get(ClassicPipes.FLUID_DATA_COMPONENT);
+        } else if (fluidHandler != null) {
             Iterator<StorageView<FluidVariant>> iterator = fluidHandler.nonEmptyIterator();
             if (iterator.hasNext()) {
                 FluidVariant fluidVariant = iterator.next().getResource();
                 return new FluidWithData(fluidVariant.getFluid(), fluidVariant.getComponents());
             }
         } else if (stack.getItem() instanceof BucketItem bucket) {
-            return new FluidWithData(bucket.content, stack.has(ClassicPipes.FLUID_DATA_COMPONENT) ? stack.get(ClassicPipes.FLUID_DATA_COMPONENT) : this.emptyFluidData());
+            return new FluidWithData(bucket.content, this.emptyFluidData());
         }
         return new FluidWithData(Fluids.EMPTY, this.emptyFluidData());
     }

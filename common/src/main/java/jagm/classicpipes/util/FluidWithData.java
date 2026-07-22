@@ -10,8 +10,11 @@ import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
+
+import java.util.Objects;
 
 public class FluidWithData {
 
@@ -56,13 +59,9 @@ public class FluidWithData {
     }
 
     public ItemStack getBucketStack() {
-        if (this.fluid.getBucket() == null) {
-            return ItemStack.EMPTY;
-        } else {
-            ItemStack bucketStack = new ItemStack(this.fluid.getBucket());
-            bucketStack.set(ClassicPipes.FLUID_DATA_COMPONENT, this.fluidData);
-            return bucketStack;
-        }
+        ItemStack bucketStack = new ItemStack(this.fluid.getBucket() != Items.AIR ? this.fluid.getBucket() : Items.BUCKET);
+        bucketStack.set(ClassicPipes.FLUID_DATA_COMPONENT, this);
+        return bucketStack;
     }
 
     @Override
@@ -81,6 +80,11 @@ public class FluidWithData {
             }
             return false;
         }
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.fluid, this.fluidData);
     }
 
 }

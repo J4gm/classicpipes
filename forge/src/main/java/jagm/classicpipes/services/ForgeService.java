@@ -379,11 +379,13 @@ public class ForgeService implements LoaderService {
     @Override
     public FluidWithData getFluidFromStack(ItemStack stack) {
         Optional<IFluidHandler> fluidHandlerOptional = stack.getCapability(ForgeCapabilities.FLUID_HANDLER).resolve();
-        if (fluidHandlerOptional.isPresent()) {
+        if (stack.has(ClassicPipes.FLUID_DATA_COMPONENT)) {
+            return stack.get(ClassicPipes.FLUID_DATA_COMPONENT);
+        } else if (fluidHandlerOptional.isPresent()) {
             FluidStack fluidInItem = fluidHandlerOptional.get().getFluidInTank(0);
             return new FluidWithData(fluidInItem.getFluid(), fluidInItem.getTag());
         } else if (stack.getItem() instanceof BucketItem bucket) {
-            return new FluidWithData(bucket.getFluid(), stack.has(ClassicPipes.FLUID_DATA_COMPONENT) ? stack.get(ClassicPipes.FLUID_DATA_COMPONENT) : this.emptyFluidData());
+            return new FluidWithData(bucket.getFluid(), this.emptyFluidData());
         }
         return new FluidWithData(Fluids.EMPTY, this.emptyFluidData());
     }

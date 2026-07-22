@@ -349,11 +349,13 @@ public class NeoForgeService implements LoaderService {
     @Override
     public FluidWithData getFluidFromStack(ItemStack stack) {
         IFluidHandler fluidHandler = stack.getCapability(Capabilities.FluidHandler.ITEM);
-        if (fluidHandler != null) {
+        if (stack.has(ClassicPipes.FLUID_DATA_COMPONENT)) {
+            return stack.get(ClassicPipes.FLUID_DATA_COMPONENT);
+        } else if (fluidHandler != null) {
             FluidStack fluidStack = fluidHandler.getFluidInTank(0);
             return new FluidWithData(fluidStack.getFluid(), fluidStack.getComponentsPatch());
         } else if (stack.getItem() instanceof BucketItem bucket) {
-            return new FluidWithData(bucket.content, stack.has(ClassicPipes.FLUID_DATA_COMPONENT) ? stack.get(ClassicPipes.FLUID_DATA_COMPONENT) : this.emptyFluidData());
+            return new FluidWithData(bucket.content, this.emptyFluidData());
         }
         return new FluidWithData(Fluids.EMPTY, this.emptyFluidData());
     }

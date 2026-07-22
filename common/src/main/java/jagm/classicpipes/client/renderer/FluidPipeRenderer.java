@@ -27,7 +27,7 @@ public class FluidPipeRenderer implements BlockEntityRenderer<FluidPipeEntity> {
 
     @Override
     public void render(FluidPipeEntity pipe, float partialTicks, PoseStack poses, MultiBufferSource bufferSource, int light, int overlay) {
-        if (!pipe.isEmpty()) {
+        if (!pipe.isEmpty() && !pipe.getFluid().isBlank()) {
             poses.pushPose();
             Matrix4f matrix = poses.last().pose();
             FluidRenderInfo info = Services.LOADER_SERVICE.getFluidRenderInfo(pipe.getFluid(), pipe.getLevel(), pipe.getBlockPos());
