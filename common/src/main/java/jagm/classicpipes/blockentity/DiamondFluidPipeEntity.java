@@ -34,7 +34,7 @@ public class DiamondFluidPipeEntity extends FluidPipeEntity implements MenuProvi
     protected List<Direction> getValidDirections(BlockState state, FluidInPipe fluidPacket) {
         List<Direction> validDirections = new ArrayList<>();
         Direction direction = MiscUtil.nextDirection(fluidPacket.getFromDirection());
-        ItemStack bucket = new ItemStack(this.getFluid().getBucket());
+        ItemStack bucket = this.getFluid().getBucketStack();
         for (int i = 0; i < 5; i++) {
             if (this.isPipeConnected(state, direction) && filter.directionMatches(bucket, direction).matches) {
                 validDirections.add(direction);

@@ -1,15 +1,16 @@
 package jagm.classicpipes.services;
 
+import jagm.classicpipes.ClassicPipes;
 import jagm.classicpipes.blockentity.FluidPipeEntity;
 import jagm.classicpipes.blockentity.ItemPipeEntity;
 import jagm.classicpipes.util.FluidInPipe;
+import jagm.classicpipes.util.FluidWithData;
 import jagm.classicpipes.util.ItemInPipe;
 import jagm.classicpipes.util.MiscUtil;
 import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.client.renderer.block.FluidModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
@@ -27,12 +28,10 @@ import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.HopperBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
@@ -299,13 +298,13 @@ public class NeoForgeService implements LoaderService {
     }
 
     @Override
-    public boolean handleFluidInsertion(FluidPipeEntity pipe, ServerLevel level, BlockPos pipePos, BlockState pipeState, BlockEntity containerEntity, BlockPos containerPos, Fluid fluid, Object fluidData, FluidInPipe fluidPacket) {
+    public boolean handleFluidInsertion(FluidPipeEntity pipe, ServerLevel level, BlockPos pipePos, BlockState pipeState, BlockEntity containerEntity, BlockPos containerPos, FluidWithData fluid, FluidInPipe fluidPacket) {
         Direction face = fluidPacket.getTargetDirection().getOpposite();
         BlockState state = level.getBlockState(containerPos);
         ResourceHandler<FluidResource> fluidHandler = level.getCapability(Capabilities.Fluid.BLOCK, containerPos, state, containerEntity, face);
         if (fluidHandler != null) {
             try (Transaction transaction = Transaction.open(null)) {
-                FluidResource fluidResource = fluidData instanceof DataComponentPatch components ? FluidResource.of(fluid, components) : FluidResource.of(fluid);
+                FluidResource fluidResource = FluidResource.of(fluid.getFluid(), fluid.getComponents());
                 if (!fluidResource.isEmpty()) {
                     int amountFilled = fluidHandler.insert(fluidResource, fluidPacket.getAmount(), transaction);
                     transaction.commit();
@@ -329,7 +328,7 @@ public class NeoForgeService implements LoaderService {
     }
 
     @Override
-    public boolean handleFluidExtraction(FluidPipeEntity pipe, BlockState pipeState, ServerLevel level, BlockPos containerPos, Direction face, int amount, Predicate<Fluid> predicate) {
+    public boolean handleFluidExtraction(FluidPipeEntity pipe, BlockState pipeState, ServerLevel level, BlockPos containerPos, Direction face, int amount, Predicate<FluidWithData> predicate) {
         BlockEntity blockEntity = level.getBlockEntity(containerPos);
         if (blockEntity instanceof FluidPipeEntity || pipe.totalAmount() >= FluidPipeEntity.CAPACITY) {
             return false;
@@ -338,12 +337,12 @@ public class NeoForgeService implements LoaderService {
         ResourceHandler<FluidResource> fluidHandler = level.getCapability(Capabilities.Fluid.BLOCK, containerPos, state, blockEntity, face);
         if (fluidHandler != null) {
             int amountToDrain = Math.min(amount, pipe.remainingCapacity());
-            FluidResource fluidResource = pipe.getFluidData() instanceof DataComponentPatch components ? FluidResource.of(pipe.getFluid(), components) : FluidResource.of(pipe.getFluid());
+            FluidResource fluidResource = FluidResource.of(pipe.getFluid().getFluid(), pipe.getFluid().getComponents());
             boolean satisfiesPredicate = predicate.test(pipe.getFluid());
             if (pipe.isEmpty()) {
                 for (int tank = 0; tank < fluidHandler.size(); tank++) {
                     FluidResource tankResource = fluidHandler.getResource(tank);
-                    if (!tankResource.isEmpty() && predicate.test(tankResource.getFluid())) {
+                    if (!tankResource.isEmpty() && predicate.test(new FluidWithData(tankResource.getFluid(), tankResource.getComponentsPatch()))) {
                         fluidResource = tankResource;
                         satisfiesPredicate = true;
                         break;
@@ -354,7 +353,7 @@ public class NeoForgeService implements LoaderService {
                 try (Transaction transaction = Transaction.open(null)) {
                     int amountExtracted = fluidHandler.extract(fluidResource, amountToDrain, transaction);
                     if (amountExtracted > 0) {
-                        pipe.setFluid(fluidResource.getFluid(), fluidResource.getComponentsPatch());
+                        pipe.setFluid(new FluidWithData(fluidResource.getFluid(), fluidResource.getComponentsPatch()));
                         pipe.insertFluidPacket(level, new FluidInPipe(amountExtracted, pipe.getTargetSpeed(), (short) 0, face.getOpposite(), face.getOpposite(), (short) 0));
                         transaction.commit();
                         return true;
@@ -366,30 +365,26 @@ public class NeoForgeService implements LoaderService {
     }
 
     @Override
-    public Fluid getFluidFromStack(ItemStack stack) {
-        Fluid fluid = null;
+    public FluidWithData getFluidFromStack(ItemStack stack) {
         ResourceHandler<FluidResource> fluidHandler = ItemAccess.forStack(stack).getCapability(Capabilities.Fluid.ITEM);
         if (fluidHandler != null) {
-            fluid = fluidHandler.getResource(0).getFluid();
+            FluidResource fluidResource = fluidHandler.getResource(0);
+            return new FluidWithData(fluidResource.getFluid(), fluidResource.getComponentsPatch());
         } else if (stack.getItem() instanceof BucketItem bucket) {
-            fluid = bucket.content;
+            return new FluidWithData(bucket.content, stack.has(ClassicPipes.FLUID_DATA_COMPONENT) ? stack.get(ClassicPipes.FLUID_DATA_COMPONENT) : this.emptyFluidData());
         }
-        return fluid != null && fluid.isSame(Fluids.EMPTY) ? null : fluid;
+        return new FluidWithData(Fluids.EMPTY, this.emptyFluidData());
     }
 
     @Override
-    public Component getFluidName(Fluid fluid) {
-        return fluid.getFluidType().getDescription();
+    public Component getFluidName(FluidWithData fluid) {
+        return fluid.getFluid().getFluidType().getDescription(new FluidStack(fluid.getFluid().builtInRegistryHolder(), 1, fluid.getComponents()));
     }
 
     @Override
-    public int getFluidTint(FluidModel fluidModel, Fluid fluid, Object fluidData, BlockAndTintGetter level, BlockPos pos) {
+    public int getFluidTint(FluidModel fluidModel, FluidWithData fluid, BlockAndTintGetter level, BlockPos pos) {
         if (fluidModel.fluidTintSource() != null) {
-            if (fluidData instanceof DataComponentPatch components && !components.isEmpty()) {
-                return fluidModel.fluidTintSource().colorAsStack(new FluidStack(fluid, 1, components));
-            } else {
-                return fluidModel.fluidTintSource().colorInWorld(Blocks.AIR.defaultBlockState(), level, pos);
-            }
+            return fluidModel.fluidTintSource().colorAsStack(new FluidStack(fluid.getFluid(), 1, fluid.getComponents()));
         } else {
             return -1;
         }

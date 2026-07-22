@@ -3,6 +3,7 @@ package jagm.classicpipes.client.screen;
 import jagm.classicpipes.inventory.container.Filter;
 import jagm.classicpipes.inventory.menu.FluidFilterMenu;
 import jagm.classicpipes.services.Services;
+import jagm.classicpipes.util.FluidWithData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
@@ -16,7 +17,6 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.material.Fluid;
 
 public abstract class FluidFilterScreen<T extends FluidFilterMenu> extends FilterScreen<T> {
 
@@ -27,9 +27,9 @@ public abstract class FluidFilterScreen<T extends FluidFilterMenu> extends Filte
     @Override
     protected void extractSlot(GuiGraphicsExtractor graphics, Slot slot, int mouseX, int mouseY) {
         if (slot.container instanceof Filter && slot.hasItem() && Minecraft.getInstance().level != null && Minecraft.getInstance().player != null) {
-            Fluid fluid = Services.LOADER_SERVICE.getFluidFromStack(slot.getItem());
-            if (fluid != null) {
-                FluidModel fluidModel = Minecraft.getInstance().getModelManager().getFluidStateModelSet().get(fluid.defaultFluidState());
+            FluidWithData fluid = Services.LOADER_SERVICE.getFluidFromStack(slot.getItem());
+            if (!fluid.isBlank()) {
+                FluidModel fluidModel = Minecraft.getInstance().getModelManager().getFluidStateModelSet().get(fluid.getFluid().defaultFluidState());
                 int tint = fluidModel.tintSource() == null ? -1 : fluidModel.tintSource().colorInWorld(Blocks.AIR.defaultBlockState(), Minecraft.getInstance().level, Minecraft.getInstance().player.blockPosition());
                 TextureAtlasSprite sprite = fluidModel.stillMaterial().sprite();
                 graphics.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, ARGB.opaque(tint));
@@ -46,8 +46,8 @@ public abstract class FluidFilterScreen<T extends FluidFilterMenu> extends Filte
             ItemStack stack = this.hoveredSlot.getItem();
             if (this.menu.getCarried().isEmpty() || stack.getTooltipImage().map(ClientTooltipComponent::create).map(ClientTooltipComponent::showTooltipWithItemInHand).orElse(false)) {
                 if (this.hoveredSlot.container instanceof Filter) {
-                    Fluid fluid = Services.LOADER_SERVICE.getFluidFromStack(stack);
-                    if (fluid != null) {
+                    FluidWithData fluid = Services.LOADER_SERVICE.getFluidFromStack(stack);
+                    if (!fluid.isBlank()) {
                         graphics.setTooltipForNextFrame(this.font, Services.LOADER_SERVICE.getFluidName(fluid), mouseX, mouseY);
                         return;
                     }

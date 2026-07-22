@@ -3,6 +3,7 @@ package jagm.classicpipes.blockentity;
 import jagm.classicpipes.ClassicPipes;
 import jagm.classicpipes.inventory.container.SingleItemFilterContainer;
 import jagm.classicpipes.inventory.menu.AdvancedCopperFluidPipeMenu;
+import jagm.classicpipes.util.FluidWithData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.ItemStackWithSlot;
@@ -12,7 +13,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 
@@ -33,8 +33,8 @@ public class AdvancedCopperFluidPipeEntity extends CopperFluidPipeEntity impleme
     }
 
     @Override
-    protected Predicate<Fluid> filterPredicate() {
-        return fluid -> this.filter.isEmpty() || this.filter.matches(new ItemStack(fluid.getBucket())).matches;
+    protected Predicate<FluidWithData> filterPredicate() {
+        return fluid -> this.filter.isEmpty() || this.filter.matches(fluid.getBucketStack()).matches;
     }
 
     @Override

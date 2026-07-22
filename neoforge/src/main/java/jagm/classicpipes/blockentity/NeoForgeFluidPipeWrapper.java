@@ -1,6 +1,7 @@
 package jagm.classicpipes.blockentity;
 
 import jagm.classicpipes.util.FluidInPipe;
+import jagm.classicpipes.util.FluidWithData;
 import jagm.classicpipes.util.Tuple;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -50,7 +51,8 @@ public class NeoForgeFluidPipeWrapper extends SnapshotJournal<Tuple<FluidResourc
 
     @Override
     public int insert(int tank, FluidResource fluidResource, int maxAmount, TransactionContext transaction) {
-        if (maxAmount <= 0 || !this.pipe.emptyOrMatches(fluidResource.getFluid(), fluidResource.getComponentsPatch()) || !this.isValid(tank, fluidResource)) {
+        FluidWithData fluid = new FluidWithData(fluidResource.getFluid(), fluidResource.getComponentsPatch());
+        if (maxAmount <= 0 || !this.pipe.emptyOrMatches(fluid) || !this.isValid(tank, fluidResource)) {
             return 0;
         } else {
             int amount = Math.min(this.pipe.remainingCapacity(), maxAmount);
@@ -78,7 +80,7 @@ public class NeoForgeFluidPipeWrapper extends SnapshotJournal<Tuple<FluidResourc
     @Override
     protected void onRootCommit(Tuple<FluidResource, FluidInPipe> originalState) {
         if (!this.fluidPacketToInsert.a().matches(FluidStack.EMPTY) && this.fluidPacketToInsert.b() != null && this.pipe.getLevel() instanceof ServerLevel serverLevel) {
-            this.pipe.setFluid(fluidPacketToInsert.a().getFluid(), fluidPacketToInsert.a().getComponentsPatch());
+            this.pipe.setFluid(new FluidWithData(fluidPacketToInsert.a().getFluid(), fluidPacketToInsert.a().getComponentsPatch()));
             this.pipe.insertFluidPacket(serverLevel, fluidPacketToInsert.b());
             serverLevel.sendBlockUpdated(this.pipe.getBlockPos(), this.pipe.getBlockState(), this.pipe.getBlockState(), 2);
         }

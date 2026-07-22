@@ -33,7 +33,7 @@ public record ServerBoundSetFilterPayload(int slot, ItemStack stack) implements 
     public void handle(Player player) {
         if (player != null && player.containerMenu instanceof FilterMenu menu) {
             Slot slot = menu.getSlot(this.slot());
-            if (slot.container instanceof Filter && (!(menu instanceof FluidFilterMenu) || Services.LOADER_SERVICE.getFluidFromStack(this.stack()) != null)) {
+            if (slot.container instanceof Filter && (!(menu instanceof FluidFilterMenu) || !Services.LOADER_SERVICE.getFluidFromStack(this.stack()).isBlank())) {
                 slot.set(this.stack());
                 slot.setChanged();
             }
