@@ -27,40 +27,42 @@ public class FluidPipeRenderer implements BlockEntityRenderer<FluidPipeEntity> {
 
     @Override
     public void render(FluidPipeEntity pipe, float partialTicks, PoseStack poses, MultiBufferSource bufferSource, int light, int overlay) {
-        poses.pushPose();
-        Matrix4f matrix = poses.last().pose();
-        FluidRenderInfo info = Services.LOADER_SERVICE.getFluidRenderInfo(pipe.getFluid(), pipe.getFluidData(), pipe.getLevel(), pipe.getBlockPos());
-        TextureAtlasSprite fluidSprite = info.sprite();
-        if (fluidSprite == null) {
-            fluidSprite = Minecraft.getInstance().getBlockRenderer().getBlockModelShaper().getParticleIcon(Blocks.WATER.defaultBlockState());
-        }
-        VertexConsumer vertexBuffer = bufferSource.getBuffer(RenderType.text(fluidSprite.atlasLocation()));
-        float width = pipe.lastRenderWidth + (pipe.targetRenderWidth - pipe.lastRenderWidth) * partialTicks;
-        if (width > 0.01F) {
-            float start = 0.5F - width / 2;
-            float end = 0.5F + width / 2;
-            boolean renderMiddle = false;
-            for (Direction direction : Direction.values()) {
-                if (!pipe.skipRenderingSide[direction.get3DDataValue()] && pipe.getBlockState().getValue(FluidPipeBlock.PROPERTY_BY_DIRECTION.get(direction))) {
-                    renderMiddle = true;
-                    boolean[] renderSides = new boolean[6];
-                    Arrays.fill(renderSides, true);
-                    renderSides[direction.getOpposite().get3DDataValue()] = false;
-                    switch (direction) {
-                        case UP -> this.renderFluidCuboid(vertexBuffer, matrix, start, end, start, end, 1.0F, end, fluidSprite, info.tint(), light, renderSides);
-                        case DOWN -> this.renderFluidCuboid(vertexBuffer, matrix, start, 0.0F, start, end, start, end, fluidSprite, info.tint(), light, renderSides);
-                        case EAST -> this.renderFluidCuboid(vertexBuffer, matrix, end, start, start, 1.0F, end, end, fluidSprite, info.tint(), light, renderSides);
-                        case WEST -> this.renderFluidCuboid(vertexBuffer, matrix, 0.0F, start, start, start, end, end, fluidSprite, info.tint(), light, renderSides);
-                        case SOUTH -> this.renderFluidCuboid(vertexBuffer, matrix, start, start, end, end, end, 1.0F, fluidSprite, info.tint(), light, renderSides);
-                        case NORTH -> this.renderFluidCuboid(vertexBuffer, matrix, start, start, 0.0F, end, end, start, fluidSprite, info.tint(), light, renderSides);
+        if (!pipe.isEmpty()) {
+            poses.pushPose();
+            Matrix4f matrix = poses.last().pose();
+            FluidRenderInfo info = Services.LOADER_SERVICE.getFluidRenderInfo(pipe.getFluid(), pipe.getLevel(), pipe.getBlockPos());
+            TextureAtlasSprite fluidSprite = info.sprite();
+            if (fluidSprite == null) {
+                fluidSprite = Minecraft.getInstance().getBlockRenderer().getBlockModelShaper().getParticleIcon(Blocks.WATER.defaultBlockState());
+            }
+            VertexConsumer vertexBuffer = bufferSource.getBuffer(RenderType.text(fluidSprite.atlasLocation()));
+            float width = pipe.lastRenderWidth + (pipe.targetRenderWidth - pipe.lastRenderWidth) * partialTicks;
+            if (width > 0.01F) {
+                float start = 0.5F - width / 2;
+                float end = 0.5F + width / 2;
+                boolean renderMiddle = false;
+                for (Direction direction : Direction.values()) {
+                    if (!pipe.skipRenderingSide[direction.get3DDataValue()] && pipe.getBlockState().getValue(FluidPipeBlock.PROPERTY_BY_DIRECTION.get(direction))) {
+                        renderMiddle = true;
+                        boolean[] renderSides = new boolean[6];
+                        Arrays.fill(renderSides, true);
+                        renderSides[direction.getOpposite().get3DDataValue()] = false;
+                        switch (direction) {
+                            case UP -> this.renderFluidCuboid(vertexBuffer, matrix, start, end, start, end, 1.0F, end, fluidSprite, info.tint(), light, renderSides);
+                            case DOWN -> this.renderFluidCuboid(vertexBuffer, matrix, start, 0.0F, start, end, start, end, fluidSprite, info.tint(), light, renderSides);
+                            case EAST -> this.renderFluidCuboid(vertexBuffer, matrix, end, start, start, 1.0F, end, end, fluidSprite, info.tint(), light, renderSides);
+                            case WEST -> this.renderFluidCuboid(vertexBuffer, matrix, 0.0F, start, start, start, end, end, fluidSprite, info.tint(), light, renderSides);
+                            case SOUTH -> this.renderFluidCuboid(vertexBuffer, matrix, start, start, end, end, end, 1.0F, fluidSprite, info.tint(), light, renderSides);
+                            case NORTH -> this.renderFluidCuboid(vertexBuffer, matrix, start, start, 0.0F, end, end, start, fluidSprite, info.tint(), light, renderSides);
+                        }
                     }
                 }
+                if (renderMiddle) {
+                    this.renderFluidCuboid(vertexBuffer, matrix, start, start, start, end, end, end, fluidSprite, info.tint(), light, pipe.skipRenderingSide);
+                }
             }
-            if (renderMiddle) {
-                this.renderFluidCuboid(vertexBuffer, matrix, start, start, start, end, end, end, fluidSprite, info.tint(), light, pipe.skipRenderingSide);
-            }
+            poses.popPose();
         }
-        poses.popPose();
     }
 
     public void renderFluidCuboid(VertexConsumer vertexBuffer, Matrix4f matrix, float x1, float y1, float z1, float x2, float y2, float z2, TextureAtlasSprite fluidSprite, int tint, int light, boolean[] renderSide) {

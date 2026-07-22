@@ -9,6 +9,7 @@ import jagm.classicpipes.item.LabelItem;
 import jagm.classicpipes.network.ServerBoundSetFilterPayload;
 import jagm.classicpipes.network.ServerBoundTransferRecipePayload;
 import jagm.classicpipes.services.Services;
+import jagm.classicpipes.util.FluidWithData;
 import jagm.classicpipes.util.MiscUtil;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
@@ -25,16 +26,14 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.tags.TagKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.fluids.FluidStack;
 
 import java.util.ArrayList;
@@ -119,13 +118,14 @@ public class NeoForgeJEIPlugin implements IModPlugin {
                 if (doStart) {
                     ItemStack stack = ingredient.getItemStack().orElse(ItemStack.EMPTY);
                     if (filterScreen instanceof FluidFilterScreen<?>) {
-                        Fluid fluid;
+                        FluidWithData fluid;
                         if (ingredient.getIngredient() instanceof FluidStack fluidStack) {
-                            fluid = fluidStack.getFluid();
+                            fluid = new FluidWithData(fluidStack.getFluid(), fluidStack.getComponentsPatch());
                         } else {
                             fluid = Services.LOADER_SERVICE.getFluidFromStack(stack);
                         }
-                        if (fluid != null && fluid.getBucket() != Items.AIR) {
+                        ItemStack bucketStack = fluid.getBucketStack();
+                        if (!bucketStack.isEmpty()) {
                             for (int i = 0; i < filterScreen.filterSlots(); i++) {
                                 Slot slot = filterScreen.getMenu().getSlot(i);
                                 if (slot.container instanceof Filter) {
@@ -138,7 +138,6 @@ public class NeoForgeJEIPlugin implements IModPlugin {
 
                                         @Override
                                         public void accept(I ingredient) {
-                                            ItemStack bucketStack = new ItemStack(fluid.getBucket());
                                             slot.set(bucketStack);
                                             Services.LOADER_SERVICE.sendToServer(new ServerBoundSetFilterPayload(slot.index, bucketStack));
                                         }

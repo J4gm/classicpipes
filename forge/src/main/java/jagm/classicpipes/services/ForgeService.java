@@ -1,21 +1,22 @@
 package jagm.classicpipes.services;
 
+import com.mojang.datafixers.util.Either;
+import jagm.classicpipes.ClassicPipes;
 import jagm.classicpipes.blockentity.FluidPipeEntity;
 import jagm.classicpipes.blockentity.ItemPipeEntity;
 import jagm.classicpipes.client.network.ForgeClientPacketHandler;
 import jagm.classicpipes.client.renderer.FluidRenderInfo;
 import jagm.classicpipes.network.ForgeServerPacketHandler;
 import jagm.classicpipes.util.FluidInPipe;
+import jagm.classicpipes.util.FluidWithData;
 import jagm.classicpipes.util.ItemInPipe;
 import jagm.classicpipes.util.MiscUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
@@ -39,7 +40,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.HopperBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
@@ -55,7 +55,6 @@ import org.apache.commons.lang3.function.TriFunction;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
@@ -308,12 +307,12 @@ public class ForgeService implements LoaderService {
     }
 
     @Override
-    public boolean handleFluidInsertion(FluidPipeEntity pipe, ServerLevel level, BlockPos pipePos, BlockState pipeState, BlockEntity containerEntity, BlockPos containerPos, Fluid fluid, Object fluidData, FluidInPipe fluidPacket) {
+    public boolean handleFluidInsertion(FluidPipeEntity pipe, ServerLevel level, BlockPos pipePos, BlockState pipeState, BlockEntity containerEntity, BlockPos containerPos, FluidWithData fluid, FluidInPipe fluidPacket) {
         Direction face = fluidPacket.getTargetDirection().getOpposite();
         Optional<IFluidHandler> fluidHandlerOptional = containerEntity.getCapability(ForgeCapabilities.FLUID_HANDLER, face).resolve();
         if (fluidHandlerOptional.isPresent()) {
             IFluidHandler fluidHandler = fluidHandlerOptional.get();
-            FluidStack fluidStack = fluidData instanceof CompoundTag tag ? new FluidStack(fluid, fluidPacket.getAmount(), tag) : new FluidStack(fluid, fluidPacket.getAmount());
+            FluidStack fluidStack = new FluidStack(fluid.getFluid(), fluidPacket.getAmount(), fluid.getCompoundTag());
             int amountFilled = fluidHandler.fill(fluidStack, IFluidHandler.FluidAction.EXECUTE);
             if (amountFilled >= fluidPacket.getAmount()) {
                 return true;
@@ -335,7 +334,7 @@ public class ForgeService implements LoaderService {
     }
 
     @Override
-    public boolean handleFluidExtraction(FluidPipeEntity pipe, BlockState pipeState, ServerLevel level, BlockPos containerPos, Direction face, int amount, Predicate<Fluid> predicate) {
+    public boolean handleFluidExtraction(FluidPipeEntity pipe, BlockState pipeState, ServerLevel level, BlockPos containerPos, Direction face, int amount, Predicate<FluidWithData> predicate) {
         BlockEntity blockEntity = level.getBlockEntity(containerPos);
         if (blockEntity instanceof FluidPipeEntity || pipe.totalAmount() >= FluidPipeEntity.CAPACITY) {
             return false;
@@ -346,11 +345,12 @@ public class ForgeService implements LoaderService {
                 int amountToDrain = Math.min(amount, pipe.remainingCapacity());
                 FluidStack fluidStack = pipe.isEmpty() ?
                         fluidHandler.drain(amountToDrain, IFluidHandler.FluidAction.SIMULATE) :
-                        (pipe.getFluidData() instanceof CompoundTag tag ? new FluidStack(pipe.getFluid(), amountToDrain, tag) : new FluidStack(pipe.getFluid(), amountToDrain));
-                if (predicate.test(fluidStack.getFluid())) {
+                        new FluidStack(pipe.getFluid().getFluid(), amountToDrain, pipe.getFluid().getCompoundTag());
+                FluidWithData fluid = new FluidWithData(fluidStack.getFluid(), fluidStack.getTag());
+                if (predicate.test(fluid)) {
                     FluidStack drainedStack = fluidHandler.drain(fluidStack, IFluidHandler.FluidAction.EXECUTE);
                     if (!drainedStack.isEmpty()) {
-                        pipe.setFluid(drainedStack.getFluid(), drainedStack.getTag());
+                        pipe.setFluid(fluid);
                         pipe.insertFluidPacket(level, new FluidInPipe(drainedStack.getAmount(), pipe.getTargetSpeed(), (short) 0, face.getOpposite(), face.getOpposite(), (short) 0));
                         return true;
                     }
@@ -361,50 +361,41 @@ public class ForgeService implements LoaderService {
     }
 
     @Override
-    public FluidRenderInfo getFluidRenderInfo(Fluid fluid, Object fluidData, BlockAndTintGetter level, BlockPos pos) {
-        IClientFluidTypeExtensions fluidInfo = IClientFluidTypeExtensions.of(fluid);
-        int tint = fluidInfo.getTintColor(fluid.defaultFluidState(), level, pos);
-        TextureAtlasSprite sprite = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(fluidInfo.getStillTexture(fluid.defaultFluidState(), level, pos));
+    public FluidRenderInfo getFluidRenderInfo(FluidWithData fluid, BlockAndTintGetter level, BlockPos pos) {
+        IClientFluidTypeExtensions fluidInfo = IClientFluidTypeExtensions.of(fluid.getFluid());
+        int tint = fluidInfo.getTintColor(fluid.getFluid().defaultFluidState(), level, pos);
+        TextureAtlasSprite sprite = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(fluidInfo.getStillTexture(fluid.getFluid().defaultFluidState(), level, pos));
         return new FluidRenderInfo(tint, sprite);
     }
 
     @Override
-    public FluidRenderInfo getFluidRenderInfo(Fluid fluid, Object fluidData) {
-        IClientFluidTypeExtensions fluidInfo = IClientFluidTypeExtensions.of(fluid);
+    public FluidRenderInfo getFluidRenderInfo(FluidWithData fluid) {
+        IClientFluidTypeExtensions fluidInfo = IClientFluidTypeExtensions.of(fluid.getFluid());
         int tint = fluidInfo.getTintColor();
         TextureAtlasSprite sprite = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(fluidInfo.getStillTexture());
         return new FluidRenderInfo(tint, sprite);
     }
 
     @Override
-    public Fluid getFluidFromStack(ItemStack stack) {
-        Fluid fluid = null;
+    public FluidWithData getFluidFromStack(ItemStack stack) {
         Optional<IFluidHandler> fluidHandlerOptional = stack.getCapability(ForgeCapabilities.FLUID_HANDLER).resolve();
         if (fluidHandlerOptional.isPresent()) {
-            fluid = fluidHandlerOptional.get().getFluidInTank(0).getFluid();
+            FluidStack fluidInItem = fluidHandlerOptional.get().getFluidInTank(0);
+            return new FluidWithData(fluidInItem.getFluid(), fluidInItem.getTag());
         } else if (stack.getItem() instanceof BucketItem bucket) {
-            fluid = bucket.getFluid();
+            return new FluidWithData(bucket.getFluid(), stack.has(ClassicPipes.FLUID_DATA_COMPONENT) ? stack.get(ClassicPipes.FLUID_DATA_COMPONENT) : this.emptyFluidData());
         }
-        return fluid != null && fluid.isSame(Fluids.EMPTY) ? null : fluid;
+        return new FluidWithData(Fluids.EMPTY, this.emptyFluidData());
     }
 
     @Override
-    public Component getFluidName(Fluid fluid) {
-        return fluid.getFluidType().getDescription();
+    public Component getFluidName(FluidWithData fluid) {
+        return fluid.getFluid().getFluidType().getDescription(new FluidStack(fluid.getFluid(), 1, fluid.getCompoundTag()));
     }
 
     @Override
-    public void loadFluidData(CompoundTag valueInput, HolderLookup.Provider registries, BiConsumer<Fluid, Object> setFluid) {
-        Fluid fluid = BuiltInRegistries.FLUID.byNameCodec().parse(registries.createSerializationContext(NbtOps.INSTANCE), valueInput.get("fluid")).result().orElse(Fluids.WATER);
-        CompoundTag tag = CompoundTag.CODEC.parse(registries.createSerializationContext(NbtOps.INSTANCE), valueInput.get("fluid_data")).result().orElse(new CompoundTag());
-        setFluid.accept(fluid, tag);
-    }
-
-    @Override
-    public void saveFluidData(CompoundTag valueOutput, Object fluidData) {
-        if (fluidData instanceof CompoundTag tag) {
-            valueOutput.put("fluid_data", CompoundTag.CODEC.encodeStart(NbtOps.INSTANCE, tag).getOrThrow());
-        }
+    public Either<DataComponentPatch, CompoundTag> emptyFluidData() {
+        return Either.right(new CompoundTag());
     }
 
 }

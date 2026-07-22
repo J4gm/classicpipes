@@ -1,6 +1,7 @@
 package jagm.classicpipes.blockentity;
 
 import jagm.classicpipes.util.FluidInPipe;
+import jagm.classicpipes.util.FluidWithData;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.neoforged.neoforge.fluids.FluidStack;
@@ -23,7 +24,7 @@ public class NeoForgeFluidPipeWrapper implements IFluidHandler {
 
     @Override
     public FluidStack getFluidInTank(int i) {
-        return new FluidStack(this.pipe.getFluid(), this.pipe.totalAmount());
+        return new FluidStack(this.pipe.getFluid().getFluid().builtInRegistryHolder(), this.pipe.totalAmount(), this.pipe.getFluid().getComponents());
     }
 
     @Override
@@ -38,13 +39,14 @@ public class NeoForgeFluidPipeWrapper implements IFluidHandler {
 
     @Override
     public int fill(FluidStack fluidStack, FluidAction fluidAction) {
-        if (fluidStack.isEmpty() || !this.pipe.emptyOrMatches(fluidStack.getFluid(), fluidStack.getComponentsPatch()) || !this.isFluidValid(0, fluidStack)) {
+        FluidWithData fluid = new FluidWithData(fluidStack.getFluid(), fluidStack.getComponentsPatch());
+        if (fluidStack.isEmpty() || !this.pipe.emptyOrMatches(fluid) || !this.isFluidValid(0, fluidStack)) {
             return 0;
         } else {
             int amount = Math.min(this.pipe.remainingCapacity(), fluidStack.getAmount());
             if (fluidAction.execute()) {
                 if (this.pipe.getLevel() instanceof ServerLevel serverLevel) {
-                    this.pipe.setFluid(fluidStack.getFluid(), fluidStack.getComponentsPatch());
+                    this.pipe.setFluid(fluid);
                     FluidInPipe fluidPacket = new FluidInPipe(amount, this.pipe.getTargetSpeed(), (short) 0, this.side, this.side, (short) 0);
                     this.pipe.insertFluidPacket(serverLevel, fluidPacket);
                     serverLevel.sendBlockUpdated(this.pipe.getBlockPos(), this.pipe.getBlockState(), this.pipe.getBlockState(), 2);

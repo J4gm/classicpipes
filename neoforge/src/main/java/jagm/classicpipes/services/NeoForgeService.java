@@ -1,16 +1,17 @@
 package jagm.classicpipes.services;
 
+import jagm.classicpipes.ClassicPipes;
 import jagm.classicpipes.blockentity.FluidPipeEntity;
 import jagm.classicpipes.blockentity.ItemPipeEntity;
 import jagm.classicpipes.client.renderer.FluidRenderInfo;
 import jagm.classicpipes.util.FluidInPipe;
+import jagm.classicpipes.util.FluidWithData;
 import jagm.classicpipes.util.ItemInPipe;
 import jagm.classicpipes.util.MiscUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
@@ -35,7 +36,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.HopperBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
@@ -278,12 +278,12 @@ public class NeoForgeService implements LoaderService {
     }
 
     @Override
-    public boolean handleFluidInsertion(FluidPipeEntity pipe, ServerLevel level, BlockPos pipePos, BlockState pipeState, BlockEntity containerEntity, BlockPos containerPos, Fluid fluid, Object fluidData, FluidInPipe fluidPacket) {
+    public boolean handleFluidInsertion(FluidPipeEntity pipe, ServerLevel level, BlockPos pipePos, BlockState pipeState, BlockEntity containerEntity, BlockPos containerPos, FluidWithData fluid, FluidInPipe fluidPacket) {
         Direction face = fluidPacket.getTargetDirection().getOpposite();
         BlockState state = level.getBlockState(containerPos);
         IFluidHandler fluidHandler = level.getCapability(Capabilities.FluidHandler.BLOCK, containerPos, state, containerEntity, face);
         if (fluidHandler != null) {
-            FluidStack fluidStack = fluidData instanceof DataComponentPatch components ? new FluidStack(fluid.builtInRegistryHolder(), fluidPacket.getAmount(), components) : new FluidStack(fluid, fluidPacket.getAmount());
+            FluidStack fluidStack = new FluidStack(fluid.getFluid().builtInRegistryHolder(), fluidPacket.getAmount(), fluid.getComponents());
             int amountFilled = fluidHandler.fill(fluidStack, IFluidHandler.FluidAction.EXECUTE);
             if (amountFilled >= fluidPacket.getAmount()) {
                 return true;
@@ -303,7 +303,7 @@ public class NeoForgeService implements LoaderService {
     }
 
     @Override
-    public boolean handleFluidExtraction(FluidPipeEntity pipe, BlockState pipeState, ServerLevel level, BlockPos containerPos, Direction face, int amount, Predicate<Fluid> predicate) {
+    public boolean handleFluidExtraction(FluidPipeEntity pipe, BlockState pipeState, ServerLevel level, BlockPos containerPos, Direction face, int amount, Predicate<FluidWithData> predicate) {
         BlockEntity blockEntity = level.getBlockEntity(containerPos);
         if (blockEntity instanceof FluidPipeEntity || pipe.totalAmount() >= FluidPipeEntity.CAPACITY) {
             return false;
@@ -314,11 +314,12 @@ public class NeoForgeService implements LoaderService {
             int amountToDrain = Math.min(amount, pipe.remainingCapacity());
             FluidStack fluidStack = pipe.isEmpty() ?
                     fluidHandler.drain(amountToDrain, IFluidHandler.FluidAction.SIMULATE) :
-                    (pipe.getFluidData() instanceof DataComponentPatch components ? new FluidStack(pipe.getFluid().builtInRegistryHolder(), amountToDrain, components) : new FluidStack(pipe.getFluid(), amountToDrain));
-            if (predicate.test(fluidStack.getFluid())) {
+                    new FluidStack(pipe.getFluid().getFluid().builtInRegistryHolder(), amountToDrain, pipe.getFluid().getComponents());
+            FluidWithData fluid = new FluidWithData(fluidStack.getFluid(), fluidStack.getComponentsPatch());
+            if (predicate.test(fluid)) {
                 FluidStack drainedStack = fluidHandler.drain(fluidStack, IFluidHandler.FluidAction.EXECUTE);
                 if (!drainedStack.isEmpty()) {
-                    pipe.setFluid(drainedStack.getFluid(), drainedStack.getComponentsPatch());
+                    pipe.setFluid(fluid);
                     pipe.insertFluidPacket(level, new FluidInPipe(drainedStack.getAmount(), pipe.getTargetSpeed(), (short) 0, face.getOpposite(), face.getOpposite(), (short) 0));
                     return true;
                 }
@@ -328,17 +329,17 @@ public class NeoForgeService implements LoaderService {
     }
 
     @Override
-    public FluidRenderInfo getFluidRenderInfo(Fluid fluid, Object fluidData, BlockAndTintGetter level, BlockPos pos) {
-        IClientFluidTypeExtensions fluidInfo = IClientFluidTypeExtensions.of(fluid);
-        int tint = fluidInfo.getTintColor(fluid.defaultFluidState(), level, pos);
-        ResourceLocation texture = fluidInfo.getStillTexture(fluid.defaultFluidState(), level, pos);
+    public FluidRenderInfo getFluidRenderInfo(FluidWithData fluid, BlockAndTintGetter level, BlockPos pos) {
+        IClientFluidTypeExtensions fluidInfo = IClientFluidTypeExtensions.of(fluid.getFluid());
+        int tint = fluidInfo.getTintColor(fluid.getFluid().defaultFluidState(), level, pos);
+        ResourceLocation texture = fluidInfo.getStillTexture(fluid.getFluid().defaultFluidState(), level, pos);
         TextureAtlasSprite sprite = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(texture);
         return new FluidRenderInfo(tint, sprite);
     }
 
     @Override
-    public FluidRenderInfo getFluidRenderInfo(Fluid fluid, Object fluidData) {
-        IClientFluidTypeExtensions fluidInfo = IClientFluidTypeExtensions.of(fluid);
+    public FluidRenderInfo getFluidRenderInfo(FluidWithData fluid) {
+        IClientFluidTypeExtensions fluidInfo = IClientFluidTypeExtensions.of(fluid.getFluid());
         int tint = fluidInfo.getTintColor();
         ResourceLocation texture = fluidInfo.getStillTexture();
         TextureAtlasSprite sprite = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(texture);
@@ -346,20 +347,20 @@ public class NeoForgeService implements LoaderService {
     }
 
     @Override
-    public Fluid getFluidFromStack(ItemStack stack) {
-        Fluid fluid = null;
+    public FluidWithData getFluidFromStack(ItemStack stack) {
         IFluidHandler fluidHandler = stack.getCapability(Capabilities.FluidHandler.ITEM);
         if (fluidHandler != null) {
-            fluid = fluidHandler.getFluidInTank(0).getFluid();
+            FluidStack fluidStack = fluidHandler.getFluidInTank(0);
+            return new FluidWithData(fluidStack.getFluid(), fluidStack.getComponentsPatch());
         } else if (stack.getItem() instanceof BucketItem bucket) {
-            fluid = bucket.content;
+            return new FluidWithData(bucket.content, stack.has(ClassicPipes.FLUID_DATA_COMPONENT) ? stack.get(ClassicPipes.FLUID_DATA_COMPONENT) : this.emptyFluidData());
         }
-        return fluid != null && fluid.isSame(Fluids.EMPTY) ? null : fluid;
+        return new FluidWithData(Fluids.EMPTY, this.emptyFluidData());
     }
 
     @Override
-    public Component getFluidName(Fluid fluid) {
-        return fluid.getFluidType().getDescription();
+    public Component getFluidName(FluidWithData fluid) {
+        return fluid.getFluid().getFluidType().getDescription(new FluidStack(fluid.getFluid().builtInRegistryHolder(), 1, fluid.getComponents()));
     }
 
 }

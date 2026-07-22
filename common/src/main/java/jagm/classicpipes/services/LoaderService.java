@@ -1,17 +1,16 @@
 package jagm.classicpipes.services;
 
+import com.mojang.datafixers.util.Either;
 import jagm.classicpipes.blockentity.FluidPipeEntity;
 import jagm.classicpipes.blockentity.ItemPipeEntity;
 import jagm.classicpipes.client.renderer.FluidRenderInfo;
 import jagm.classicpipes.util.FluidInPipe;
+import jagm.classicpipes.util.FluidWithData;
 import jagm.classicpipes.util.ItemInPipe;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentPatch;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
@@ -29,12 +28,9 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.level.material.Fluids;
 import org.apache.commons.lang3.function.TriFunction;
 
 import java.util.List;
-import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
@@ -66,30 +62,22 @@ public interface LoaderService {
 
     String getModName(String modId);
 
-    boolean handleFluidInsertion(FluidPipeEntity pipe, ServerLevel level, BlockPos pipePos, BlockState pipeState, BlockEntity containerEntity, BlockPos containerPos, Fluid fluid, Object fluidData, FluidInPipe fluidPacket);
+    boolean handleFluidInsertion(FluidPipeEntity pipe, ServerLevel level, BlockPos pipePos, BlockState pipeState, BlockEntity containerEntity, BlockPos containerPos, FluidWithData fluid, FluidInPipe fluidPacket);
 
     boolean canAccessFluidContainer(Level level, BlockPos containerPos, Direction face);
 
-    boolean handleFluidExtraction(FluidPipeEntity pipe, BlockState pipeState, ServerLevel level, BlockPos containerPos, Direction face, int amount, Predicate<Fluid> predicate);
+    boolean handleFluidExtraction(FluidPipeEntity pipe, BlockState pipeState, ServerLevel level, BlockPos containerPos, Direction face, int amount, Predicate<FluidWithData> predicate);
 
-    FluidRenderInfo getFluidRenderInfo(Fluid fluid, Object fluidData, BlockAndTintGetter level, BlockPos pos);
+    FluidRenderInfo getFluidRenderInfo(FluidWithData fluid, BlockAndTintGetter level, BlockPos pos);
 
-    FluidRenderInfo getFluidRenderInfo(Fluid fluid, Object fluidData);
+    FluidRenderInfo getFluidRenderInfo(FluidWithData fluid);
 
-    Fluid getFluidFromStack(ItemStack stack);
+    FluidWithData getFluidFromStack(ItemStack stack);
 
-    Component getFluidName(Fluid fluid);
+    Component getFluidName(FluidWithData fluid);
 
-    default void loadFluidData(CompoundTag valueInput, HolderLookup.Provider registries, BiConsumer<Fluid, Object> setFluid) {
-        Fluid fluid = BuiltInRegistries.FLUID.byNameCodec().parse(registries.createSerializationContext(NbtOps.INSTANCE), valueInput.get("fluid")).result().orElse(Fluids.WATER);
-        DataComponentPatch components = DataComponentPatch.CODEC.parse(registries.createSerializationContext(NbtOps.INSTANCE), valueInput.get("fluid_data")).result().orElse(DataComponentPatch.EMPTY);
-        setFluid.accept(fluid, components);
-    }
-
-    default void saveFluidData(CompoundTag valueOutput, Object fluidData) {
-        if (fluidData instanceof DataComponentPatch components) {
-            valueOutput.put("fluid_data", DataComponentPatch.CODEC.encodeStart(NbtOps.INSTANCE, components).getOrThrow());
-        }
+    default Either<DataComponentPatch, CompoundTag> emptyFluidData() {
+        return Either.left(DataComponentPatch.EMPTY);
     }
 
 }

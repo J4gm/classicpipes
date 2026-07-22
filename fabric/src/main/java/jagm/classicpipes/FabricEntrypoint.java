@@ -34,6 +34,7 @@ public class FabricEntrypoint implements ModInitializer {
         ClassicPipes.SOUNDS.forEach((name, soundEvent) -> Registry.register(BuiltInRegistries.SOUND_EVENT, MiscUtil.resourceLocation(name), soundEvent));
         Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, ClassicPipes.PIPES_TAB_KEY, ClassicPipes.PIPES_TAB);
         Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, ClassicPipes.LABEL_COMPONENT_KEY, ClassicPipes.LABEL_COMPONENT);
+        Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, ClassicPipes.FLUID_DATA_COMPONENT_KEY, ClassicPipes.FLUID_DATA_COMPONENT);
         Registry.register(BuiltInRegistries.TRIGGER_TYPES, MiscUtil.resourceLocation("request_item"), ClassicPipes.REQUEST_ITEM_TRIGGER);
         Registry.register(BuiltInRegistries.CUSTOM_STAT, ClassicPipes.ITEMS_REQUESTED_STAT, ClassicPipes.ITEMS_REQUESTED_STAT);
         ClassicPipes.createStats();
