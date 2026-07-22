@@ -30,6 +30,7 @@ public class FluidPipeEntity extends PipeEntity {
     private static final float MAX_RENDER_WIDTH_CHANGE = 1.0F / 64.0F;
 
     protected Fluid fluid;
+    protected Object fluidData;
     protected final List<FluidInPipe> contents;
     protected final List<FluidInPipe> queued;
     private final Map<FluidInPipe, Long> tickAdded;
@@ -47,6 +48,7 @@ public class FluidPipeEntity extends PipeEntity {
         this.queued = new ArrayList<>();
         this.tickAdded = new HashMap<>();
         this.fluid = Fluids.WATER;
+        this.fluidData = null;
         Arrays.fill(this.skipRenderingSide, true);
     }
 
@@ -74,8 +76,8 @@ public class FluidPipeEntity extends PipeEntity {
                     BlockPos containerPos = pos.relative(fluidPacket.getTargetDirection());
                     BlockEntity blockEntity = level.getBlockEntity(containerPos);
                     if (blockEntity instanceof FluidPipeEntity nextPipe) {
-                        if (nextPipe.emptyOrMatches(fluid)) {
-                            nextPipe.setFluid(fluid);
+                        if (nextPipe.emptyOrMatches(this.fluid, this.fluidData)) {
+                            nextPipe.setFluid(this.fluid, this.fluidData);
                             remove = true;
                             int amountToPass = Math.min(fluidPacket.getAmount(), nextPipe.remainingCapacity());
                             if (amountToPass == fluidPacket.getAmount()) {
@@ -93,7 +95,7 @@ public class FluidPipeEntity extends PipeEntity {
                             level.sendBlockUpdated(containerPos, nextPipe.getBlockState(), nextPipe.getBlockState(), 2);
                         }
                     } else if (blockEntity != null) {
-                        remove = Services.LOADER_SERVICE.handleFluidInsertion(this, level, pos, state, blockEntity, containerPos, this.fluid, fluidPacket);
+                        remove = Services.LOADER_SERVICE.handleFluidInsertion(this, level, pos, state, blockEntity, containerPos, this.fluid, this.fluidData, fluidPacket);
                     }
                     if (remove) {
                         iterator.remove();
@@ -132,9 +134,9 @@ public class FluidPipeEntity extends PipeEntity {
                 fluidPacket.move(this.getTargetSpeed(), this.getAcceleration());
                 if (fluidPacket.getProgress() >= ItemInPipe.PIPE_LENGTH) {
                     BlockPos nextPos = pos.relative(fluidPacket.getTargetDirection());
-                    if (level.getBlockEntity(nextPos) instanceof FluidPipeEntity nextPipe && nextPipe.emptyOrMatches(this.fluid)) {
+                    if (level.getBlockEntity(nextPos) instanceof FluidPipeEntity nextPipe && nextPipe.emptyOrMatches(this.fluid, this.fluidData)) {
                         fluidPacket.resetProgress(fluidPacket.getTargetDirection().getOpposite());
-                        nextPipe.setFluid(this.fluid);
+                        nextPipe.setFluid(this.fluid, this.fluidData);
                         nextPipe.insertFluidPacket(level, fluidPacket);
                         iterator.remove();
                     }
@@ -197,7 +199,7 @@ public class FluidPipeEntity extends PipeEntity {
         super.loadAdditional(valueInput, registries);
         ListTag fluidPacketList = valueInput.getList("fluid_packets", ListTag.TAG_COMPOUND);
         fluidPacketList.forEach(tag -> MiscUtil.loadFromTag(tag, FluidInPipe.CODEC, registries, this.contents::add));
-        MiscUtil.loadFromTag(valueInput.get("fluid"), BuiltInRegistries.FLUID.byNameCodec(), registries, this::setFluid);
+        Services.LOADER_SERVICE.loadFluidData(valueInput, registries, this::setFluid);
     }
 
     @Override
@@ -211,6 +213,7 @@ public class FluidPipeEntity extends PipeEntity {
         }
         valueOutput.put("fluid_packets", fluidPacketList);
         valueOutput.put("fluid", BuiltInRegistries.FLUID.byNameCodec().encodeStart(NbtOps.INSTANCE, this.fluid).getOrThrow());
+        Services.LOADER_SERVICE.saveFluidData(valueOutput, this.fluidData);
     }
 
     public void addQueuedPackets(Level level, boolean waitForNextTick) {
@@ -224,8 +227,8 @@ public class FluidPipeEntity extends PipeEntity {
         this.queued.clear();
     }
 
-    public boolean emptyOrMatches(Fluid fluid) {
-        return this.contents.isEmpty() || this.fluid == fluid;
+    public boolean emptyOrMatches(Fluid fluid, Object fluidData) {
+        return this.contents.isEmpty() || (this.fluid == fluid && (this.fluidData == fluidData || this.fluidData.equals(fluidData)));
     }
 
     public int totalAmount() {
@@ -240,8 +243,9 @@ public class FluidPipeEntity extends PipeEntity {
         return CAPACITY - this.totalAmount();
     }
 
-    public void setFluid(Fluid fluid) {
+    public void setFluid(Fluid fluid, Object fluidData) {
         this.fluid = fluid;
+        this.fluidData = fluidData;
     }
 
     public void insertFluidPacket(Level level, FluidInPipe fluidPacket) {
@@ -296,6 +300,10 @@ public class FluidPipeEntity extends PipeEntity {
 
     public Fluid getFluid() {
         return this.fluid;
+    }
+
+    public Object getFluidData() {
+        return this.fluidData;
     }
 
     public boolean isEmpty() {

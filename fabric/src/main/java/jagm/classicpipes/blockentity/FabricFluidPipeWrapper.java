@@ -34,14 +34,14 @@ public class FabricFluidPipeWrapper implements Storage<FluidVariant>, StorageVie
 
     @Override
     public long insert(FluidVariant fluidVariant, long maxAmount, TransactionContext transaction) {
-        if (maxAmount <= 0 || !this.pipe.emptyOrMatches(fluidVariant.getFluid()) || !this.supportsInsertion()) {
+        if (maxAmount <= 0 || !this.pipe.emptyOrMatches(fluidVariant.getFluid(), fluidVariant.getComponents()) || !this.supportsInsertion()) {
             return 0L;
         } else {
             long amount = Math.min(this.pipe.remainingCapacity() * FabricEntrypoint.FLUID_CONVERSION_RATE, maxAmount);
             transaction.addCloseCallback((closingTransaction, result) -> {
                 if (result.wasCommitted()) {
                     if (this.pipe.getLevel() instanceof ServerLevel serverLevel) {
-                        this.pipe.setFluid(fluidVariant.getFluid());
+                        this.pipe.setFluid(fluidVariant.getFluid(), fluidVariant.getComponents());
                         FluidInPipe fluidPacket = new FluidInPipe((int) (amount / FabricEntrypoint.FLUID_CONVERSION_RATE), this.pipe.getTargetSpeed(), (short) 0, this.side, this.side, (short) 0);
                         this.pipe.insertFluidPacket(serverLevel, fluidPacket);
                         serverLevel.sendBlockUpdated(this.pipe.getBlockPos(), this.pipe.getBlockState(), this.pipe.getBlockState(), 2);

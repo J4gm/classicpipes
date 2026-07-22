@@ -29,7 +29,7 @@ public class FluidPipeRenderer implements BlockEntityRenderer<FluidPipeEntity> {
     public void render(FluidPipeEntity pipe, float partialTicks, PoseStack poses, MultiBufferSource bufferSource, int light, int overlay) {
         poses.pushPose();
         Matrix4f matrix = poses.last().pose();
-        FluidRenderInfo info = Services.LOADER_SERVICE.getFluidRenderInfo(pipe.getFluid().defaultFluidState(), pipe.getLevel(), pipe.getBlockPos());
+        FluidRenderInfo info = Services.LOADER_SERVICE.getFluidRenderInfo(pipe.getFluid(), pipe.getFluidData(), pipe.getLevel(), pipe.getBlockPos());
         TextureAtlasSprite fluidSprite = info.sprite();
         if (fluidSprite == null) {
             fluidSprite = Minecraft.getInstance().getBlockRenderer().getBlockModelShaper().getParticleIcon(Blocks.WATER.defaultBlockState());

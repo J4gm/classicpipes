@@ -29,6 +29,7 @@ import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
@@ -50,7 +51,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import org.apache.commons.lang3.function.TriFunction;
 
@@ -250,16 +250,16 @@ public class FabricService implements LoaderService {
     }
 
     @Override
-    public boolean handleFluidInsertion(FluidPipeEntity pipe, ServerLevel level, BlockPos pipePos, BlockState pipeState, BlockEntity containerEntity, BlockPos containerPos, Fluid fluid, FluidInPipe fluidPacket) {
+    public boolean handleFluidInsertion(FluidPipeEntity pipe, ServerLevel level, BlockPos pipePos, BlockState pipeState, BlockEntity containerEntity, BlockPos containerPos, Fluid fluid, Object fluidData, FluidInPipe fluidPacket) {
         Direction face = fluidPacket.getTargetDirection().getOpposite();
         Storage<FluidVariant> fluidHandler = FluidStorage.SIDED.find(level, containerPos, containerEntity.getBlockState(), containerEntity, face);
         if (fluidHandler != null && fluidHandler.supportsInsertion()) {
             long inserted = 0;
             long amount = fluidPacket.getAmount() * FabricEntrypoint.FLUID_CONVERSION_RATE;
             try (Transaction transaction = Transaction.openOuter()) {
-                FluidVariant fluidVariant = FluidVariant.of(fluid);
+                FluidVariant fluidVariant = fluidData instanceof DataComponentPatch components ? FluidVariant.of(fluid, components) : FluidVariant.of(fluid);
                 if (!fluidVariant.isBlank()) {
-                    inserted = fluidHandler.insert(FluidVariant.of(fluid), amount, transaction);
+                    inserted = fluidHandler.insert(fluidVariant, amount, transaction);
                     transaction.commit();
                 }
             }
@@ -295,11 +295,9 @@ public class FabricService implements LoaderService {
             long extracted = 0;
             try (Transaction transaction = Transaction.openOuter()) {
                 long amountToExtract = Math.min(amount, pipe.remainingCapacity()) * FabricEntrypoint.FLUID_CONVERSION_RATE;
-                if (predicate.test(pipe.getFluid())) {
-                    FluidVariant fluidVariant = FluidVariant.of(pipe.getFluid());
-                    if (!fluidVariant.isBlank()) {
-                        extracted = fluidHandler.extract(FluidVariant.of(pipe.getFluid()), amountToExtract, transaction);
-                    }
+                FluidVariant fluidVariant = pipe.getFluidData() instanceof DataComponentPatch components ? FluidVariant.of(pipe.getFluid(), components) : FluidVariant.of(pipe.getFluid());
+                if (predicate.test(pipe.getFluid()) && !fluidVariant.isBlank()) {
+                    extracted = fluidHandler.extract(fluidVariant, amountToExtract, transaction);
                 }
                 if (extracted <= 0 && pipe.isEmpty()) {
                     Iterator<StorageView<FluidVariant>> iterator = fluidHandler.nonEmptyIterator();
@@ -308,7 +306,7 @@ public class FabricService implements LoaderService {
                         if (predicate.test(fluidStorage.getResource().getFluid())) {
                             extracted = fluidHandler.extract(fluidStorage.getResource(), amountToExtract, transaction);
                             if (extracted > 0) {
-                                pipe.setFluid(fluidStorage.getResource().getFluid());
+                                pipe.setFluid(fluidStorage.getResource().getFluid(), fluidStorage.getResource().getComponents());
                                 break;
                             }
                         }
@@ -327,16 +325,16 @@ public class FabricService implements LoaderService {
     }
 
     @Override
-    public FluidRenderInfo getFluidRenderInfo(FluidState fluidState, BlockAndTintGetter level, BlockPos pos) {
-        FluidVariant fluidVariant = FluidVariant.of(fluidState.getType());
+    public FluidRenderInfo getFluidRenderInfo(Fluid fluid, Object fluidData, BlockAndTintGetter level, BlockPos pos) {
+        FluidVariant fluidVariant = fluidData instanceof DataComponentPatch components ? FluidVariant.of(fluid, components) : FluidVariant.of(fluid);
         int tint = FluidVariantRendering.getColor(fluidVariant, level, pos);
         TextureAtlasSprite sprite = FluidVariantRendering.getSprite(fluidVariant);
         return new FluidRenderInfo(tint, sprite);
     }
 
     @Override
-    public FluidRenderInfo getFluidRenderInfo(FluidState fluidState) {
-        FluidVariant fluidVariant = FluidVariant.of(fluidState.getType());
+    public FluidRenderInfo getFluidRenderInfo(Fluid fluid, Object fluidData) {
+        FluidVariant fluidVariant = fluidData instanceof DataComponentPatch components ? FluidVariant.of(fluid, components) : FluidVariant.of(fluid);
         int tint = FluidVariantRendering.getColor(fluidVariant);
         TextureAtlasSprite sprite = FluidVariantRendering.getSprite(fluidVariant);
         return new FluidRenderInfo(tint, sprite);

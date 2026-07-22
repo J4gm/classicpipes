@@ -27,7 +27,7 @@ public abstract class FluidFilterScreen<T extends FluidFilterMenu> extends Filte
         if (slot.container instanceof Filter && slot.hasItem()) {
             Fluid fluid = Services.LOADER_SERVICE.getFluidFromStack(slot.getItem());
             if (fluid != null) {
-                FluidRenderInfo info = Services.LOADER_SERVICE.getFluidRenderInfo(fluid.defaultFluidState());
+                FluidRenderInfo info = Services.LOADER_SERVICE.getFluidRenderInfo(fluid, null);
                 graphics.fill(RenderType.gui(), slot.x, slot.y, slot.x + 16, slot.y + 16, info.tint() | 0xFF000000);
                 RenderSystem.setShaderTexture(0, info.sprite().atlasLocation());
                 RenderSystem.setShader(GameRenderer::getPositionTexColorShader);

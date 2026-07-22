@@ -38,13 +38,13 @@ public class NeoForgeFluidPipeWrapper implements IFluidHandler {
 
     @Override
     public int fill(FluidStack fluidStack, FluidAction fluidAction) {
-        if (fluidStack.isEmpty() || !this.pipe.emptyOrMatches(fluidStack.getFluid()) || !this.isFluidValid(0, fluidStack)) {
+        if (fluidStack.isEmpty() || !this.pipe.emptyOrMatches(fluidStack.getFluid(), fluidStack.getComponentsPatch()) || !this.isFluidValid(0, fluidStack)) {
             return 0;
         } else {
             int amount = Math.min(this.pipe.remainingCapacity(), fluidStack.getAmount());
             if (fluidAction.execute()) {
                 if (this.pipe.getLevel() instanceof ServerLevel serverLevel) {
-                    this.pipe.setFluid(fluidStack.getFluid());
+                    this.pipe.setFluid(fluidStack.getFluid(), fluidStack.getComponentsPatch());
                     FluidInPipe fluidPacket = new FluidInPipe(amount, this.pipe.getTargetSpeed(), (short) 0, this.side, this.side, (short) 0);
                     this.pipe.insertFluidPacket(serverLevel, fluidPacket);
                     serverLevel.sendBlockUpdated(this.pipe.getBlockPos(), this.pipe.getBlockState(), this.pipe.getBlockState(), 2);
