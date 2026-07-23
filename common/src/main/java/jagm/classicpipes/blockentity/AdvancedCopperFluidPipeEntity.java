@@ -3,6 +3,7 @@ package jagm.classicpipes.blockentity;
 import jagm.classicpipes.ClassicPipes;
 import jagm.classicpipes.inventory.container.SingleItemFilterContainer;
 import jagm.classicpipes.inventory.menu.AdvancedCopperFluidPipeMenu;
+import jagm.classicpipes.util.FluidWithData;
 import jagm.classicpipes.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -14,7 +15,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Fluid;
 
 import java.util.function.Predicate;
 
@@ -24,7 +24,7 @@ public class AdvancedCopperFluidPipeEntity extends CopperFluidPipeEntity impleme
 
     public AdvancedCopperFluidPipeEntity(BlockPos pos, BlockState state) {
         super(ClassicPipes.ADVANCED_COPPER_FLUID_PIPE_ENTITY, pos, state);
-        this.filter = new SingleItemFilterContainer(this, 9, false);
+        this.filter = new SingleItemFilterContainer(this, 9, true);
     }
 
     @Override
@@ -33,8 +33,8 @@ public class AdvancedCopperFluidPipeEntity extends CopperFluidPipeEntity impleme
     }
 
     @Override
-    protected Predicate<Fluid> filterPredicate() {
-        return fluid -> this.filter.isEmpty() || this.filter.matches(new ItemStack(fluid.getBucket())).matches;
+    protected Predicate<FluidWithData> filterPredicate() {
+        return fluid -> this.filter.isEmpty() || this.filter.matches(fluid.getBucketStack()).matches;
     }
 
     @Override

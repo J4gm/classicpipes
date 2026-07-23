@@ -9,6 +9,7 @@ import jagm.classicpipes.client.renderer.FluidRenderInfo;
 import jagm.classicpipes.network.PayloadWrapper;
 import jagm.classicpipes.network.SelfHandler;
 import jagm.classicpipes.util.FluidInPipe;
+import jagm.classicpipes.util.FluidWithData;
 import jagm.classicpipes.util.ItemInPipe;
 import jagm.classicpipes.util.MiscUtil;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -33,6 +34,8 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.dispenser.DispenseItemBehavior;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -52,9 +55,6 @@ import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.material.Fluids;
 import org.apache.commons.lang3.function.TriFunction;
 
 import java.util.ArrayList;
@@ -253,16 +253,16 @@ public class FabricService implements LoaderService {
     }
 
     @Override
-    public boolean handleFluidInsertion(FluidPipeEntity pipe, ServerLevel level, BlockPos pipePos, BlockState pipeState, BlockEntity containerEntity, BlockPos containerPos, Fluid fluid, FluidInPipe fluidPacket) {
+    public boolean handleFluidInsertion(FluidPipeEntity pipe, ServerLevel level, BlockPos pipePos, BlockState pipeState, BlockEntity containerEntity, BlockPos containerPos, FluidWithData fluid, FluidInPipe fluidPacket) {
         Direction face = fluidPacket.getTargetDirection().getOpposite();
         Storage<FluidVariant> fluidHandler = FluidStorage.SIDED.find(level, containerPos, containerEntity.getBlockState(), containerEntity, face);
         if (fluidHandler != null && fluidHandler.supportsInsertion()) {
             long inserted = 0;
             long amount = fluidPacket.getAmount() * FabricEntrypoint.FLUID_CONVERSION_RATE;
             try (Transaction transaction = Transaction.openOuter()) {
-                FluidVariant fluidVariant = FluidVariant.of(fluid);
+                FluidVariant fluidVariant = FluidVariant.of(fluid.getFluid(), fluid.getCompoundTag());
                 if (!fluidVariant.isBlank()) {
-                    inserted = fluidHandler.insert(FluidVariant.of(fluid), amount, transaction);
+                    inserted = fluidHandler.insert(fluidVariant, amount, transaction);
                     transaction.commit();
                 }
             }
@@ -288,7 +288,7 @@ public class FabricService implements LoaderService {
     }
 
     @Override
-    public boolean handleFluidExtraction(FluidPipeEntity pipe, BlockState pipeState, ServerLevel level, BlockPos containerPos, Direction face, int amount, Predicate<Fluid> predicate) {
+    public boolean handleFluidExtraction(FluidPipeEntity pipe, BlockState pipeState, ServerLevel level, BlockPos containerPos, Direction face, int amount, Predicate<FluidWithData> predicate) {
         BlockState state = level.getBlockState(containerPos);
         if (state.getBlock() instanceof FluidPipeBlock || pipe.totalAmount() >= FluidPipeEntity.CAPACITY) {
             return false;
@@ -298,20 +298,19 @@ public class FabricService implements LoaderService {
             long extracted = 0;
             try (Transaction transaction = Transaction.openOuter()) {
                 long amountToExtract = Math.min(amount, pipe.remainingCapacity()) * FabricEntrypoint.FLUID_CONVERSION_RATE;
-                if (predicate.test(pipe.getFluid())) {
-                    FluidVariant fluidVariant = FluidVariant.of(pipe.getFluid());
-                    if (!fluidVariant.isBlank()) {
-                        extracted = fluidHandler.extract(FluidVariant.of(pipe.getFluid()), amountToExtract, transaction);
-                    }
+                FluidVariant fluidVariant = FluidVariant.of(pipe.getFluid().getFluid(), pipe.getFluid().getCompoundTag());
+                if (predicate.test(pipe.getFluid()) && !fluidVariant.isBlank()) {
+                    extracted = fluidHandler.extract(fluidVariant, amountToExtract, transaction);
                 }
                 if (extracted <= 0 && pipe.isEmpty()) {
                     Iterator<StorageView<FluidVariant>> iterator = fluidHandler.nonEmptyIterator();
                     while (iterator.hasNext()) {
                         StorageView<FluidVariant> fluidStorage = iterator.next();
-                        if (predicate.test(fluidStorage.getResource().getFluid())) {
+                        FluidWithData fluid = new FluidWithData(fluidStorage.getResource().getFluid(), fluidStorage.getResource().copyNbt());
+                        if (predicate.test(fluid)) {
                             extracted = fluidHandler.extract(fluidStorage.getResource(), amountToExtract, transaction);
                             if (extracted > 0) {
-                                pipe.setFluid(fluidStorage.getResource().getFluid());
+                                pipe.setFluid(fluid);
                                 break;
                             }
                         }
@@ -330,39 +329,41 @@ public class FabricService implements LoaderService {
     }
 
     @Override
-    public FluidRenderInfo getFluidRenderInfo(FluidState fluidState, BlockAndTintGetter level, BlockPos pos) {
-        FluidVariant fluidVariant = FluidVariant.of(fluidState.getType());
+    public FluidRenderInfo getFluidRenderInfo(FluidWithData fluid, BlockAndTintGetter level, BlockPos pos) {
+        FluidVariant fluidVariant = FluidVariant.of(fluid.getFluid(), fluid.getCompoundTag());
         int tint = FluidVariantRendering.getColor(fluidVariant, level, pos);
         TextureAtlasSprite sprite = FluidVariantRendering.getSprite(fluidVariant);
         return new FluidRenderInfo(tint, sprite);
     }
 
     @Override
-    public FluidRenderInfo getFluidRenderInfo(FluidState fluidState) {
-        FluidVariant fluidVariant = FluidVariant.of(fluidState.getType());
+    public FluidRenderInfo getFluidRenderInfo(FluidWithData fluid) {
+        FluidVariant fluidVariant = FluidVariant.of(fluid.getFluid(), fluid.getCompoundTag());
         int tint = FluidVariantRendering.getColor(fluidVariant);
         TextureAtlasSprite sprite = FluidVariantRendering.getSprite(fluidVariant);
         return new FluidRenderInfo(tint, sprite);
     }
 
     @Override
-    public Fluid getFluidFromStack(ItemStack stack) {
-        Fluid fluid = null;
+    public FluidWithData getFluidFromStack(ItemStack stack) {
         Storage<FluidVariant> fluidHandler = FluidStorage.ITEM.find(stack, ContainerItemContext.withConstant(stack));
-        if (fluidHandler != null) {
+        if (stack.getTag() != null && stack.getTag().contains("classic_pipes_fluid_data")) {
+            return FluidWithData.CODEC.parse(NbtOps.INSTANCE, stack.getTag().get("classic_pipes_fluid_data")).result().orElse(FluidWithData.EMPTY);
+        } else if (fluidHandler != null) {
             Iterator<StorageView<FluidVariant>> iterator = fluidHandler.nonEmptyIterator();
             if (iterator.hasNext()) {
-                fluid = iterator.next().getResource().getFluid();
+                FluidVariant fluidVariant = iterator.next().getResource();
+                return new FluidWithData(fluidVariant.getFluid(), fluidVariant.copyNbt());
             }
         } else if (stack.getItem() instanceof BucketItem bucket) {
-            fluid = bucket.content;
+            return new FluidWithData(bucket.content, new CompoundTag());
         }
-        return fluid != null && fluid.isSame(Fluids.EMPTY) ? null : fluid;
+        return FluidWithData.EMPTY;
     }
 
     @Override
-    public Component getFluidName(Fluid fluid) {
-        return FluidVariantAttributes.getName(FluidVariant.of(fluid));
+    public Component getFluidName(FluidWithData fluid) {
+        return FluidVariantAttributes.getName(FluidVariant.of(fluid.getFluid(), fluid.getCompoundTag()));
     }
 
     @Override

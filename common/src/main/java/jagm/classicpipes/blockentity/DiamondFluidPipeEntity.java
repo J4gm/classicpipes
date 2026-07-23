@@ -26,14 +26,14 @@ public class DiamondFluidPipeEntity extends FluidPipeEntity implements MenuProvi
 
     public DiamondFluidPipeEntity(BlockPos pos, BlockState state) {
         super(ClassicPipes.DIAMOND_FLUID_PIPE_ENTITY, pos, state);
-        this.filter = new DirectionalFilterContainer(this, false);
+        this.filter = new DirectionalFilterContainer(this, true);
     }
 
     @Override
     protected List<Direction> getValidDirections(BlockState state, FluidInPipe fluidPacket) {
         List<Direction> validDirections = new ArrayList<>();
         Direction direction = MiscUtil.nextDirection(fluidPacket.getFromDirection());
-        ItemStack bucket = new ItemStack(this.getFluid().getBucket());
+        ItemStack bucket = this.getFluid().getBucketStack();
         for (int i = 0; i < 5; i++) {
             if (this.isPipeConnected(state, direction) && filter.directionMatches(bucket, direction).matches) {
                 validDirections.add(direction);

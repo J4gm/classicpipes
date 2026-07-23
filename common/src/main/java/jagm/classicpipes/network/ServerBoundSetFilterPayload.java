@@ -46,7 +46,7 @@ public record ServerBoundSetFilterPayload(int slot, ItemStack stack) implements 
         public void handle(ServerBoundSetFilterPayload payload, Player player) {
             if (player != null && player.containerMenu instanceof FilterMenu menu) {
                 Slot slot = menu.getSlot(payload.slot());
-                if (slot.container instanceof Filter && (!(menu instanceof FluidFilterMenu) || Services.LOADER_SERVICE.getFluidFromStack(payload.stack()) != null)) {
+                if (slot.container instanceof Filter && (!(menu instanceof FluidFilterMenu) || !Services.LOADER_SERVICE.getFluidFromStack(payload.stack()).isBlank())) {
                     slot.set(payload.stack());
                     slot.setChanged();
                 }

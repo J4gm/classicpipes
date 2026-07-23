@@ -2,12 +2,12 @@ package jagm.classicpipes.inventory.menu;
 
 import jagm.classicpipes.inventory.container.Filter;
 import jagm.classicpipes.services.Services;
+import jagm.classicpipes.util.FluidWithData;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.material.Fluid;
 
 public abstract class FluidFilterMenu extends FilterMenu {
 
@@ -26,9 +26,9 @@ public abstract class FluidFilterMenu extends FilterMenu {
                     slot.remove(1);
                     slot.setChanged();
                 } else {
-                    Fluid fluid = Services.LOADER_SERVICE.getFluidFromStack(this.getCarried());
-                    if (fluid != null) {
-                        slot.set(new ItemStack(fluid.getBucket()));
+                    FluidWithData fluid = Services.LOADER_SERVICE.getFluidFromStack(this.getCarried());
+                    if (!fluid.isBlank()) {
+                        slot.set(fluid.getBucketStack());
                         slot.setChanged();
                     }
                 }
@@ -44,12 +44,12 @@ public abstract class FluidFilterMenu extends FilterMenu {
                 slot.remove(1);
                 slot.setChanged();
             } else {
-                Fluid fluid = Services.LOADER_SERVICE.getFluidFromStack(slot.getItem());
-                if (fluid != null) {
+                FluidWithData fluid = Services.LOADER_SERVICE.getFluidFromStack(slot.getItem());
+                if (!fluid.isBlank()) {
                     for (int i = 0; i < this.getFilter().getContainerSize(); i++) {
                         if (!this.slots.get(i).hasItem()) {
                             Slot toSlot = this.slots.get(i);
-                            toSlot.set(new ItemStack(fluid.getBucket()));
+                            toSlot.set(fluid.getBucketStack());
                             toSlot.setChanged();
                             break;
                         }

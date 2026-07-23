@@ -9,6 +9,7 @@ import jagm.classicpipes.item.LabelItem;
 import jagm.classicpipes.network.ServerBoundSetFilterPayload;
 import jagm.classicpipes.network.ServerBoundTransferRecipePayload;
 import jagm.classicpipes.services.Services;
+import jagm.classicpipes.util.FluidWithData;
 import jagm.classicpipes.util.MiscUtil;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
@@ -34,9 +35,7 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.material.Fluid;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -122,13 +121,13 @@ public class FabricJEIPlugin implements IModPlugin {
                 if (doStart) {
                     ItemStack stack = ingredient.getItemStack().orElse(ItemStack.EMPTY);
                     if (filterScreen instanceof FluidFilterScreen<?>) {
-                        Fluid fluid;
+                        FluidWithData fluid;
                         if (ingredient.getIngredient() instanceof IJeiFluidIngredient fluidStack) {
-                            fluid = fluidStack.getFluid();
+                            fluid = new FluidWithData(fluidStack.getFluid(), fluidStack.getTag().orElse(new CompoundTag()));
                         } else {
                             fluid = Services.LOADER_SERVICE.getFluidFromStack(stack);
                         }
-                        if (fluid != null && fluid.getBucket() != Items.AIR) {
+                        if (!fluid.isBlank()) {
                             for (int i = 0; i < filterScreen.filterSlots(); i++) {
                                 Slot slot = filterScreen.getMenu().getSlot(i);
                                 if (slot.container instanceof Filter) {
@@ -141,7 +140,7 @@ public class FabricJEIPlugin implements IModPlugin {
 
                                         @Override
                                         public void accept(I ingredient) {
-                                            ItemStack bucketStack = new ItemStack(fluid.getBucket());
+                                            ItemStack bucketStack = fluid.getBucketStack();
                                             slot.set(bucketStack);
                                             Services.LOADER_SERVICE.sendToServer(new ServerBoundSetFilterPayload(slot.index, bucketStack));
                                         }

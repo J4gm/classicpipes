@@ -2,6 +2,7 @@ package jagm.classicpipes.blockentity;
 
 import jagm.classicpipes.block.FluidPipeBlock;
 import jagm.classicpipes.util.FluidInPipe;
+import jagm.classicpipes.util.FluidWithData;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraftforge.fluids.FluidStack;
@@ -24,7 +25,7 @@ public class ForgeFluidPipeWrapper implements IFluidHandler {
 
     @Override
     public FluidStack getFluidInTank(int i) {
-        return new FluidStack(this.pipe.getFluid(), this.pipe.totalAmount());
+        return new FluidStack(this.pipe.getFluid().getFluid(), this.pipe.totalAmount(), this.pipe.getFluid().getCompoundTag());
     }
 
     @Override
@@ -39,13 +40,14 @@ public class ForgeFluidPipeWrapper implements IFluidHandler {
 
     @Override
     public int fill(FluidStack fluidStack, FluidAction fluidAction) {
-        if (this.side == null || fluidStack.isEmpty() || !this.pipe.emptyOrMatches(fluidStack.getFluid()) || !this.pipe.getBlockState().getValue(FluidPipeBlock.PROPERTY_BY_DIRECTION.get(this.side))) {
+        FluidWithData fluid = new FluidWithData(fluidStack.getFluid(), fluidStack.getTag());
+        if (this.side == null || fluidStack.isEmpty() || !this.pipe.emptyOrMatches(fluid) || !this.pipe.getBlockState().getValue(FluidPipeBlock.PROPERTY_BY_DIRECTION.get(this.side))) {
             return 0;
         } else {
             int amount = Math.min(this.pipe.remainingCapacity(), fluidStack.getAmount());
             if (fluidAction.execute()) {
                 if (this.pipe.getLevel() instanceof ServerLevel serverLevel) {
-                    this.pipe.setFluid(fluidStack.getFluid());
+                    this.pipe.setFluid(fluid);
                     FluidInPipe fluidPacket = new FluidInPipe(amount, this.pipe.getTargetSpeed(), (short) 0, this.side, this.side, (short) 0);
                     this.pipe.insertFluidPacket(serverLevel, fluidPacket);
                     serverLevel.sendBlockUpdated(this.pipe.getBlockPos(), this.pipe.getBlockState(), this.pipe.getBlockState(), 2);

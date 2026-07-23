@@ -4,13 +4,13 @@ import jagm.classicpipes.ClassicPipes;
 import jagm.classicpipes.block.CopperFluidPipeBlock;
 import jagm.classicpipes.services.Services;
 import jagm.classicpipes.util.FacingOrNone;
+import jagm.classicpipes.util.FluidWithData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Fluid;
 
 import java.util.function.Predicate;
 
@@ -48,7 +48,7 @@ public class CopperFluidPipeEntity extends FluidPipeEntity {
         return 125;
     }
 
-    protected Predicate<Fluid> filterPredicate() {
+    protected Predicate<FluidWithData> filterPredicate() {
         return fluid -> true;
     }
 

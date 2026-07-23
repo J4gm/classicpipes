@@ -15,7 +15,7 @@ public class AdvancedCopperFluidPipeMenu extends FluidFilterMenu {
     private static final ResourceLocation EMPTY_SLOT = MiscUtil.resourceLocation("item/empty_bucket");
 
     public AdvancedCopperFluidPipeMenu(int id, Inventory playerInventory) {
-        this(id, playerInventory, new SingleItemFilterContainer(null, 9, false));
+        this(id, playerInventory, new SingleItemFilterContainer(null, 9, true));
     }
 
     public AdvancedCopperFluidPipeMenu(int id, Inventory playerInventory, Filter filter) {

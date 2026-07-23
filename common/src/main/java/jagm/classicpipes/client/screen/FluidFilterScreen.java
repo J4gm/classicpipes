@@ -7,6 +7,7 @@ import jagm.classicpipes.client.renderer.FluidRenderInfo;
 import jagm.classicpipes.inventory.container.Filter;
 import jagm.classicpipes.inventory.menu.FluidFilterMenu;
 import jagm.classicpipes.services.Services;
+import jagm.classicpipes.util.FluidWithData;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.RenderType;
@@ -16,7 +17,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.material.Fluid;
 import org.joml.Matrix4f;
 
 public abstract class FluidFilterScreen<T extends FluidFilterMenu> extends FilterScreen<T> {
@@ -77,9 +77,9 @@ public abstract class FluidFilterScreen<T extends FluidFilterMenu> extends Filte
             }
         }
         if (renderFluid) {
-            Fluid fluid = Services.LOADER_SERVICE.getFluidFromStack(slot.getItem());
-            if (fluid != null) {
-                FluidRenderInfo info = Services.LOADER_SERVICE.getFluidRenderInfo(fluid.defaultFluidState());
+            FluidWithData fluid = Services.LOADER_SERVICE.getFluidFromStack(slot.getItem());
+            if (!fluid.isBlank()) {
+                FluidRenderInfo info = Services.LOADER_SERVICE.getFluidRenderInfo(fluid);
                 graphics.fill(RenderType.gui(), slot.x, slot.y, slot.x + 16, slot.y + 16, info.tint() | 0xFF000000);
                 RenderSystem.setShaderTexture(0, info.sprite().atlasLocation());
                 RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
@@ -132,8 +132,8 @@ public abstract class FluidFilterScreen<T extends FluidFilterMenu> extends Filte
             ItemStack stack = this.hoveredSlot.getItem();
             if (this.menu.getCarried().isEmpty()) {
                 if (this.hoveredSlot.container instanceof Filter) {
-                    Fluid fluid = Services.LOADER_SERVICE.getFluidFromStack(stack);
-                    if (fluid != null) {
+                    FluidWithData fluid = Services.LOADER_SERVICE.getFluidFromStack(stack);
+                    if (!fluid.isBlank()) {
                         graphics.renderTooltip(this.font, Services.LOADER_SERVICE.getFluidName(fluid), mouseX, mouseY);
                         return;
                     }

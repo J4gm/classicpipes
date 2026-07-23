@@ -14,7 +14,7 @@ public class DiamondFluidPipeMenu extends FluidFilterMenu {
     private static final ResourceLocation EMPTY_SLOT = MiscUtil.resourceLocation("item/empty_bucket");
 
     public DiamondFluidPipeMenu(int id, Inventory playerInventory) {
-        this(id, playerInventory, new DirectionalFilterContainer(null, false));
+        this(id, playerInventory, new DirectionalFilterContainer(null, true));
     }
 
     public DiamondFluidPipeMenu(int id, Inventory playerInventory, DirectionalFilterContainer filter) {

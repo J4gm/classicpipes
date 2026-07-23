@@ -6,6 +6,7 @@ import jagm.classicpipes.client.renderer.FluidRenderInfo;
 import jagm.classicpipes.network.PayloadWrapper;
 import jagm.classicpipes.network.SelfHandler;
 import jagm.classicpipes.util.FluidInPipe;
+import jagm.classicpipes.util.FluidWithData;
 import jagm.classicpipes.util.ItemInPipe;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -24,8 +25,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.level.material.FluidState;
 import org.apache.commons.lang3.function.TriFunction;
 
 import java.util.List;
@@ -60,19 +59,19 @@ public interface LoaderService {
 
     String getModName(String modId);
 
-    boolean handleFluidInsertion(FluidPipeEntity pipe, ServerLevel level, BlockPos pipePos, BlockState pipeState, BlockEntity containerEntity, BlockPos containerPos, Fluid fluid, FluidInPipe fluidPacket);
+    boolean handleFluidInsertion(FluidPipeEntity pipe, ServerLevel level, BlockPos pipePos, BlockState pipeState, BlockEntity containerEntity, BlockPos containerPos, FluidWithData fluid, FluidInPipe fluidPacket);
 
     boolean canAccessFluidContainer(Level level, BlockPos containerPos, Direction face);
 
-    boolean handleFluidExtraction(FluidPipeEntity pipe, BlockState pipeState, ServerLevel level, BlockPos containerPos, Direction face, int amount, Predicate<Fluid> predicate);
+    boolean handleFluidExtraction(FluidPipeEntity pipe, BlockState pipeState, ServerLevel level, BlockPos containerPos, Direction face, int amount, Predicate<FluidWithData> predicate);
 
-    FluidRenderInfo getFluidRenderInfo(FluidState fluidState, BlockAndTintGetter level, BlockPos pos);
+    FluidRenderInfo getFluidRenderInfo(FluidWithData fluid, BlockAndTintGetter level, BlockPos pos);
 
-    FluidRenderInfo getFluidRenderInfo(FluidState fluidState);
+    FluidRenderInfo getFluidRenderInfo(FluidWithData fluid);
 
-    Fluid getFluidFromStack(ItemStack stack);
+    FluidWithData getFluidFromStack(ItemStack stack);
 
-    Component getFluidName(Fluid fluid);
+    Component getFluidName(FluidWithData fluid);
 
     DispenseItemBehavior getDispenserBehaviour(ItemStack stack);
 
