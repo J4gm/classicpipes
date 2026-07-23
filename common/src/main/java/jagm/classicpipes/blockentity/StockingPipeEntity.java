@@ -79,7 +79,6 @@ public class StockingPipeEntity extends NetworkedPipeEntity implements MenuProvi
                             }
                         }
                     }
-                    ClassicPipes.LOGGER.info("{}", amountFound);
                     if (amountFound < filterStack.getCount()) {
                         this.missingItemsCache.add(filterStack.copyWithCount(filterStack.getCount() - amountFound));
                     }
