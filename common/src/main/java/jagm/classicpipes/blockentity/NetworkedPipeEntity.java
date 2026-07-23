@@ -105,7 +105,7 @@ public abstract class NetworkedPipeEntity extends RoundRobinPipeEntity {
             RequestedItem thisRequestedItem = null;
             List<ItemInPipe> spareItems = new ArrayList<>();
             for (RequestedItem requestedItem : this.getNetwork().getRequestedItems()) {
-                if (requestedItem.matches(item) && this.getLevel() != null) {
+                if (requestedItem.matches(item, true) && this.getLevel() != null) {
                     NetworkedPipeEntity target = requestedItem.getTarget(this.getLevel());
                     if (target != null) {
                         if (item.getStack().getCount() > requestedItem.getAmountRemaining()) {
