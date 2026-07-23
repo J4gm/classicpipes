@@ -225,6 +225,9 @@ public class FabricService implements LoaderService {
 
     @Override
     public boolean extractSpecificItem(ItemPipeEntity pipe, ServerLevel level, BlockPos containerPos, Direction face, ItemStack stack) {
+        if (stack.isEmpty()) {
+            return false;
+        }
         Storage<ItemVariant> itemHandler = ItemStorage.SIDED.find(level, containerPos, face);
         boolean success = false;
         if (itemHandler != null) {

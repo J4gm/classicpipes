@@ -43,7 +43,7 @@ public record ServerBoundRequestPayload(ItemStack stack, BlockPos requestPos) im
         @Override
         public void handle(ServerBoundRequestPayload payload, Player player) {
             if (player.level() instanceof ServerLevel serverLevel && player.level().getBlockEntity(payload.requestPos()) instanceof NetworkedPipeEntity pipe && pipe.hasNetwork()) {
-                pipe.getNetwork().request(serverLevel, payload.stack(), payload.requestPos(), player, false);
+                pipe.getNetwork().request(serverLevel, payload.stack(), payload.requestPos(), player, false, true);
             }
         }
 
