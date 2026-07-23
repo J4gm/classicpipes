@@ -41,16 +41,16 @@ public class RequestedItem {
         }
     }
 
-    public boolean matches(ItemInPipe pipeItem) {
-        return this.matches(pipeItem.getStack());
+    public boolean matches(ItemInPipe pipeItem, boolean matchComponents) {
+        return this.matches(pipeItem.getStack(), matchComponents);
     }
 
-    public boolean matches(ItemStack stack) {
-        return ItemStack.isSameItemSameComponents(stack, this.stack);
+    public boolean matches(ItemStack stack, boolean matchComponents) {
+        return matchComponents ? ItemStack.isSameItemSameComponents(stack, this.stack) : ItemStack.isSameItem(stack, this.stack);
     }
 
-    public boolean matches(RequestedItem anotherItem) {
-        return this.playerName.equals(anotherItem.playerName) && this.destination.equals(anotherItem.destination) && this.matches(anotherItem.stack);
+    public boolean matches(RequestedItem anotherItem, boolean matchComponents) {
+        return this.playerName.equals(anotherItem.playerName) && this.destination.equals(anotherItem.destination) && this.matches(anotherItem.stack, matchComponents);
     }
 
     public NetworkedPipeEntity getTarget(Level level) {

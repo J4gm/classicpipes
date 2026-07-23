@@ -73,11 +73,14 @@ public class StockingPipeEntity extends NetworkedPipeEntity implements MenuProvi
                             if (((LabelItem) filterStack.getItem()).itemMatches(filterStack, containerStack)) {
                                 amountFound += containerStack.getCount();
                             }
-                        } else if (ItemStack.isSameItemSameComponents(filterStack, containerStack)) {
+                        } else if (this.shouldMatchComponents() ? ItemStack.isSameItemSameComponents(filterStack, containerStack) : ItemStack.isSameItem(filterStack, containerStack)) {
                             amountFound += containerStack.getCount();
-                            break;
+                            if (this.shouldMatchComponents()) {
+                                break;
+                            }
                         }
                     }
+                    ClassicPipes.LOGGER.info("{}", amountFound);
                     if (amountFound < filterStack.getCount()) {
                         this.missingItemsCache.add(filterStack.copyWithCount(filterStack.getCount() - amountFound));
                     }
@@ -98,7 +101,7 @@ public class StockingPipeEntity extends NetworkedPipeEntity implements MenuProvi
             for (ItemStack stack : this.missingItemsCache) {
                 int alreadyRequested = this.getAlreadyRequested(stack);
                 if (alreadyRequested < stack.getCount()) {
-                    this.getNetwork().request(level, stack.copyWithCount(stack.getCount() - alreadyRequested), this.getBlockPos(), null, true);
+                    this.getNetwork().request(level, stack.copyWithCount(stack.getCount() - alreadyRequested), this.getBlockPos(), null, true, this.shouldMatchComponents());
                 }
             }
         }
@@ -109,12 +112,12 @@ public class StockingPipeEntity extends NetworkedPipeEntity implements MenuProvi
         int alreadyRequested = 0;
         for (ItemInPipe item : this.contents) {
             ItemStack pipeStack = item.getStack();
-            if (ItemStack.isSameItemSameComponents(stack, pipeStack) || isLabel && ((LabelItem) stack.getItem()).itemMatches(stack, pipeStack)) {
+            if (ItemStack.isSameItemSameComponents(stack, pipeStack) || (!this.shouldMatchComponents() && ItemStack.isSameItem(stack, pipeStack)) || isLabel && ((LabelItem) stack.getItem()).itemMatches(stack, pipeStack)) {
                 alreadyRequested += pipeStack.getCount();
             }
         }
         for (RequestedItem requestedItem : this.getNetwork().getRequestedItems()) {
-            if (requestedItem.getDestination().equals(this.getBlockPos()) && (requestedItem.matches(stack) || isLabel && ((LabelItem) stack.getItem()).itemMatches(stack, requestedItem.getStack()))) {
+            if (requestedItem.getDestination().equals(this.getBlockPos()) && (requestedItem.matches(stack, this.shouldMatchComponents()) || isLabel && ((LabelItem) stack.getItem()).itemMatches(stack, requestedItem.getStack()))) {
                 alreadyRequested += requestedItem.getAmountRemaining();
             }
         }

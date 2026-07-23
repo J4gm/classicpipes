@@ -31,4 +31,3 @@ If you'd like to help translate the mod to another language, please get in touch
 * This mod is available for Fabric, NeoForge, and Forge.
 * You have permission to use this mod in mod packs. Refer to the license for other questions about distribution.
 * The source code and issue tracker are available on [Github](https://github.com/J4gm/classicpipes). **Please report any bugs or crashes!**
-* If you want to follow me on social media, I'm on [Tumblr](https://www.tumblr.com/j4gm) and [Bluesky](https://j4gm.bsky.social).

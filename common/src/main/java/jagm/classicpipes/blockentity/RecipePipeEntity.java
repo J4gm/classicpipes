@@ -76,7 +76,7 @@ public class RecipePipeEntity extends NetworkedPipeEntity implements MenuProvide
         BlockPos crafterPos = pos.relative(this.slotDirections[9]);
         if (this.crafterTicked && this.hasNetwork()) {
             for (RequestedItem requestedItem : this.getNetwork().getRequestedItems()) {
-                if (requestedItem.matches(this.getResult())) {
+                if (requestedItem.matches(this.getResult(), true)) {
                     requestedItem.sendMessage(level, Component.translatable("chat." + ClassicPipes.MOD_ID + ".crafter_jammed", crafterPos.toShortString()).withStyle(ChatFormatting.RED));
                 }
             }
@@ -182,7 +182,7 @@ public class RecipePipeEntity extends NetworkedPipeEntity implements MenuProvide
                     readyToCraft = 0;
                     if (this.getLevel() instanceof ServerLevel serverLevel && this.hasNetwork()) {
                         for (RequestedItem requestedItem : this.getNetwork().getRequestedItems()) {
-                            if (requestedItem.matches(this.getResult())) {
+                            if (requestedItem.matches(this.getResult(), true)) {
                                 requestedItem.sendMessage(serverLevel, Component.translatable("chat." + ClassicPipes.MOD_ID + ".missing_recipe_pipe_direction", this.getBlockPos().toShortString()).withStyle(ChatFormatting.RED));
                             }
                         }
