@@ -338,29 +338,34 @@ public class NeoForgeService implements LoaderService {
         if (fluidHandler != null) {
             int amountToDrain = Math.min(amount, pipe.remainingCapacity());
             if (amountToDrain > 0) {
-                FluidResource fluidResource = FluidResource.of(pipe.getFluid().getFluid(), pipe.getFluid().getComponents());
-                boolean satisfiesPredicate = predicate.test(pipe.getFluid());
                 if (pipe.isEmpty()) {
                     for (int tank = 0; tank < fluidHandler.size(); tank++) {
                         FluidResource tankResource = fluidHandler.getResource(tank);
                         if (!tankResource.isEmpty() && predicate.test(new FluidWithData(tankResource.getFluid(), tankResource.getComponentsPatch()))) {
-                            fluidResource = tankResource;
-                            satisfiesPredicate = true;
-                            break;
+                            if (this.tryExtractFluid(fluidHandler, tankResource, amountToDrain, pipe, level, face)) {
+                                return true;
+                            }
                         }
                     }
-                }
-                if (satisfiesPredicate) {
-                    try (Transaction transaction = Transaction.open(null)) {
-                        int amountExtracted = fluidHandler.extract(fluidResource, amountToDrain, transaction);
-                        if (amountExtracted > 0) {
-                            pipe.setFluid(new FluidWithData(fluidResource.getFluid(), fluidResource.getComponentsPatch()));
-                            pipe.insertFluidPacket(level, new FluidInPipe(amountExtracted, pipe.getTargetSpeed(), (short) 0, face.getOpposite(), face.getOpposite(), (short) 0));
-                            transaction.commit();
-                            return true;
-                        }
+                } else {
+                    FluidResource fluidResource = FluidResource.of(pipe.getFluid().getFluid(), pipe.getFluid().getComponents());
+                    if (predicate.test(pipe.getFluid()) && !fluidResource.isEmpty()) {
+                        return this.tryExtractFluid(fluidHandler, fluidResource, amountToDrain, pipe, level, face);
                     }
                 }
+            }
+        }
+        return false;
+    }
+
+    private boolean tryExtractFluid(ResourceHandler<FluidResource> fluidHandler, FluidResource fluidResource, int amountToDrain, FluidPipeEntity pipe, ServerLevel level, Direction face) {
+        try (Transaction transaction = Transaction.open(null)) {
+            int amountExtracted = fluidHandler.extract(fluidResource, amountToDrain, transaction);
+            if (amountExtracted > 0) {
+                pipe.setFluid(new FluidWithData(fluidResource.getFluid(), fluidResource.getComponentsPatch()));
+                pipe.insertFluidPacket(level, new FluidInPipe(amountExtracted, pipe.getTargetSpeed(), (short) 0, face.getOpposite(), face.getOpposite(), (short) 0));
+                transaction.commit();
+                return true;
             }
         }
         return false;
