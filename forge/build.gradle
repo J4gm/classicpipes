@@ -6,11 +6,12 @@ plugins {
 base {
     archivesName = "${mod_id}-forge-${minecraft_version}"
 }
-jar {
+// Forge mixins disabled until it works with JAVA_25.
+/*jar {
     manifest {
         attributes["MixinConfigs"] = "${mod_id}.mixins.json,${mod_id}.forge.mixins.json"
     }
-}
+}*/
 
 minecraft {
 
