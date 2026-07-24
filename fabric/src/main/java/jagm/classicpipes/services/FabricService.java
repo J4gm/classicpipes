@@ -311,7 +311,7 @@ public class FabricService implements LoaderService {
                         while (iterator.hasNext()) {
                             StorageView<FluidVariant> fluidStorage = iterator.next();
                             FluidWithData fluid = new FluidWithData(fluidStorage.getResource().getFluid(), fluidStorage.getResource().copyNbt());
-                            if (predicate.test(fluid)) {
+                            if (predicate.test(fluid) && !fluidStorage.getResource().isBlank()) {
                                 extracted = fluidHandler.extract(fluidStorage.getResource(), amountToExtract, transaction);
                                 if (extracted > 0) {
                                     pipe.setFluid(fluid);
