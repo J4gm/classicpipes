@@ -8,7 +8,6 @@ import jagm.classicpipes.util.ItemInPipe;
 import jagm.classicpipes.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.level.Level;
@@ -196,10 +195,7 @@ public class FluidPipeEntity extends PipeEntity {
         super.loadAdditional(valueInput);
         ValueInput.TypedInputList<FluidInPipe> fluidPacketList = valueInput.listOrEmpty("fluid_packets", FluidInPipe.CODEC);
         fluidPacketList.forEach(this.contents::add);
-        valueInput.read("fluid", BuiltInRegistries.FLUID.byNameCodec()).ifPresentOrElse(
-                fluid -> this.setFluid(new FluidWithData(fluid, Services.LOADER_SERVICE.emptyFluidData())),
-                () -> valueInput.read("fluid_data", FluidWithData.CODEC).ifPresent(this::setFluid)
-        );
+        valueInput.read("fluid_data", FluidWithData.CODEC).ifPresent(this::setFluid);
     }
 
     @Override

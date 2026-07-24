@@ -214,7 +214,7 @@ public class RequestScreen extends AbstractContainerScreen<RequestMenu> {
                         this.menu.update();
                     }
                 } else {
-                    this.minecraft.setScreen(new RequestAmountScreen(toRequest, this, craftable));
+                    this.minecraft.gui.setScreen(new RequestAmountScreen(toRequest, this, craftable));
                 }
             }
         }

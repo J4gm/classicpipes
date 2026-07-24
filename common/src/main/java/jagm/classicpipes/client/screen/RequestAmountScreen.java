@@ -110,7 +110,7 @@ public class RequestAmountScreen extends Screen {
 
     @Override
     public void onClose() {
-        this.minecraft.setScreen(this.previousScreen);
+        this.minecraft.gui.setScreen(this.previousScreen);
     }
 
     @Override
