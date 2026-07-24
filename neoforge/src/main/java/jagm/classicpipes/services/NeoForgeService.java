@@ -312,16 +312,18 @@ public class NeoForgeService implements LoaderService {
         IFluidHandler fluidHandler = level.getCapability(Capabilities.FluidHandler.BLOCK, containerPos, state, blockEntity, face);
         if (fluidHandler != null) {
             int amountToDrain = Math.min(amount, pipe.remainingCapacity());
-            FluidStack fluidStack = pipe.isEmpty() ?
-                    fluidHandler.drain(amountToDrain, IFluidHandler.FluidAction.SIMULATE) :
-                    new FluidStack(pipe.getFluid().getFluid().builtInRegistryHolder(), amountToDrain, pipe.getFluid().getComponents());
-            FluidWithData fluid = new FluidWithData(fluidStack.getFluid(), fluidStack.getComponentsPatch());
-            if (predicate.test(fluid)) {
-                FluidStack drainedStack = fluidHandler.drain(fluidStack, IFluidHandler.FluidAction.EXECUTE);
-                if (!drainedStack.isEmpty()) {
-                    pipe.setFluid(fluid);
-                    pipe.insertFluidPacket(level, new FluidInPipe(drainedStack.getAmount(), pipe.getTargetSpeed(), (short) 0, face.getOpposite(), face.getOpposite(), (short) 0));
-                    return true;
+            if (amountToDrain > 0) {
+                FluidStack fluidStack = pipe.isEmpty() ?
+                        fluidHandler.drain(amountToDrain, IFluidHandler.FluidAction.SIMULATE) :
+                        new FluidStack(pipe.getFluid().getFluid().builtInRegistryHolder(), amountToDrain, pipe.getFluid().getComponents());
+                FluidWithData fluid = new FluidWithData(fluidStack.getFluid(), fluidStack.getComponentsPatch());
+                if (predicate.test(fluid) && !fluidStack.isEmpty()) {
+                    FluidStack drainedStack = fluidHandler.drain(fluidStack, IFluidHandler.FluidAction.EXECUTE);
+                    if (!drainedStack.isEmpty()) {
+                        pipe.setFluid(fluid);
+                        pipe.insertFluidPacket(level, new FluidInPipe(drainedStack.getAmount(), pipe.getTargetSpeed(), (short) 0, face.getOpposite(), face.getOpposite(), (short) 0));
+                        return true;
+                    }
                 }
             }
         }
