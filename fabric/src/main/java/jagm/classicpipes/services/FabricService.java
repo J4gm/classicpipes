@@ -301,26 +301,28 @@ public class FabricService implements LoaderService {
             long extracted = 0;
             try (Transaction transaction = Transaction.openOuter()) {
                 long amountToExtract = Math.min(amount, pipe.remainingCapacity()) * FabricEntrypoint.FLUID_CONVERSION_RATE;
-                FluidVariant fluidVariant = FluidVariant.of(pipe.getFluid().getFluid(), pipe.getFluid().getCompoundTag());
-                if (predicate.test(pipe.getFluid()) && !fluidVariant.isBlank()) {
-                    extracted = fluidHandler.extract(fluidVariant, amountToExtract, transaction);
-                }
-                if (extracted <= 0 && pipe.isEmpty()) {
-                    Iterator<StorageView<FluidVariant>> iterator = fluidHandler.nonEmptyIterator();
-                    while (iterator.hasNext()) {
-                        StorageView<FluidVariant> fluidStorage = iterator.next();
-                        FluidWithData fluid = new FluidWithData(fluidStorage.getResource().getFluid(), fluidStorage.getResource().copyNbt());
-                        if (predicate.test(fluid)) {
-                            extracted = fluidHandler.extract(fluidStorage.getResource(), amountToExtract, transaction);
-                            if (extracted > 0) {
-                                pipe.setFluid(fluid);
-                                break;
+                if (amountToExtract > 0) {
+                    FluidVariant fluidVariant = FluidVariant.of(pipe.getFluid().getFluid(), pipe.getFluid().getCompoundTag());
+                    if (predicate.test(pipe.getFluid()) && !fluidVariant.isBlank()) {
+                        extracted = fluidHandler.extract(fluidVariant, amountToExtract, transaction);
+                    }
+                    if (extracted <= 0 && pipe.isEmpty()) {
+                        Iterator<StorageView<FluidVariant>> iterator = fluidHandler.nonEmptyIterator();
+                        while (iterator.hasNext()) {
+                            StorageView<FluidVariant> fluidStorage = iterator.next();
+                            FluidWithData fluid = new FluidWithData(fluidStorage.getResource().getFluid(), fluidStorage.getResource().copyNbt());
+                            if (predicate.test(fluid)) {
+                                extracted = fluidHandler.extract(fluidStorage.getResource(), amountToExtract, transaction);
+                                if (extracted > 0) {
+                                    pipe.setFluid(fluid);
+                                    break;
+                                }
                             }
                         }
                     }
-                }
-                if (extracted > 0) {
-                    transaction.commit();
+                    if (extracted > 0) {
+                        transaction.commit();
+                    }
                 }
             }
             if (extracted > 0) {

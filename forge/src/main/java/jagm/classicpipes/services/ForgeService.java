@@ -343,16 +343,18 @@ public class ForgeService implements LoaderService {
             if (fluidHandlerOptional.isPresent()) {
                 IFluidHandler fluidHandler = fluidHandlerOptional.get();
                 int amountToDrain = Math.min(amount, pipe.remainingCapacity());
-                FluidStack fluidStack = pipe.isEmpty() ?
-                        fluidHandler.drain(amountToDrain, IFluidHandler.FluidAction.SIMULATE) :
-                        new FluidStack(pipe.getFluid().getFluid(), amountToDrain, pipe.getFluid().getCompoundTag());
-                FluidWithData fluid = new FluidWithData(fluidStack.getFluid(), fluidStack.getTag());
-                if (predicate.test(fluid)) {
-                    FluidStack drainedStack = pipe.isEmpty() ? fluidHandler.drain(amountToDrain, IFluidHandler.FluidAction.EXECUTE) : fluidHandler.drain(fluidStack, IFluidHandler.FluidAction.EXECUTE);
-                    if (!drainedStack.isEmpty()) {
-                        pipe.setFluid(fluid);
-                        pipe.insertFluidPacket(level, new FluidInPipe(drainedStack.getAmount(), pipe.getTargetSpeed(), (short) 0, face.getOpposite(), face.getOpposite(), (short) 0));
-                        return true;
+                if (amountToDrain > 0) {
+                    FluidStack fluidStack = pipe.isEmpty() ?
+                            fluidHandler.drain(amountToDrain, IFluidHandler.FluidAction.SIMULATE) :
+                            new FluidStack(pipe.getFluid().getFluid(), amountToDrain, pipe.getFluid().getCompoundTag());
+                    FluidWithData fluid = new FluidWithData(fluidStack.getFluid(), fluidStack.getTag());
+                    if (predicate.test(fluid) && !fluidStack.isEmpty()) {
+                        FluidStack drainedStack = fluidHandler.drain(fluidStack, IFluidHandler.FluidAction.EXECUTE);
+                        if (!drainedStack.isEmpty()) {
+                            pipe.setFluid(fluid);
+                            pipe.insertFluidPacket(level, new FluidInPipe(drainedStack.getAmount(), pipe.getTargetSpeed(), (short) 0, face.getOpposite(), face.getOpposite(), (short) 0));
+                            return true;
+                        }
                     }
                 }
             }
