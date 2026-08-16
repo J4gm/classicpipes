@@ -247,6 +247,7 @@ public abstract class NetworkedPipeEntity extends RoundRobinPipeEntity {
                     current.setChanged();
                     level.sendBlockUpdated(current.getBlockPos(), current.getBlockState(), current.getBlockState(), 2);
                 }
+                return;
             }
             for (Direction side : current.networkDistances.keySet()) {
                 Tuple<BlockPos, Integer> tuple = current.networkDistances.get(side);
