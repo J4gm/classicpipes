@@ -2,7 +2,7 @@
   "parent": "classicpipes:block/pipe_middle",
   "textures": {
     "texture": "classicpipes:block/recipe_pipe_west",
-    "interior": "classicpipes:block/routing_pipe_linked",
+    "interior": "classicpipes:block/networked_pipe_linked",
     "particle": "classicpipes:block/recipe_pipe_west"
   },
   "elements": [

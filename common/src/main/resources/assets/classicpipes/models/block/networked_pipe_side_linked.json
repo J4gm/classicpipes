@@ -1,5 +1,5 @@
 {
-  "parent": "classicpipes:item/pipe",
+  "parent": "classicpipes:block/pipe_side",
   "textures": {
     "texture": "classicpipes:block/networked_pipe_linked",
     "particle": "classicpipes:block/networked_pipe_linked"

@@ -2,7 +2,7 @@
   "multipart": [
     {
       "apply": {
-        "model": "classicpipes:block/routing_pipe_side_unlinked"
+        "model": "classicpipes:block/networked_pipe_side_unlinked"
       },
       "when": {
         "north": "unlinked",
@@ -11,7 +11,7 @@
     },
     {
       "apply": {
-        "model": "classicpipes:block/routing_pipe_side_linked"
+        "model": "classicpipes:block/networked_pipe_side_linked"
       },
       "when": {
         "north": "linked",
@@ -36,7 +36,7 @@
     },
     {
       "apply": {
-        "model": "classicpipes:block/routing_pipe_side_unlinked",
+        "model": "classicpipes:block/networked_pipe_side_unlinked",
         "uvlock": true,
         "y": 90
       },
@@ -47,7 +47,7 @@
     },
     {
       "apply": {
-        "model": "classicpipes:block/routing_pipe_side_linked",
+        "model": "classicpipes:block/networked_pipe_side_linked",
         "uvlock": true,
         "y": 90
       },
@@ -78,7 +78,7 @@
     },
     {
       "apply": {
-        "model": "classicpipes:block/routing_pipe_side_unlinked",
+        "model": "classicpipes:block/networked_pipe_side_unlinked",
         "uvlock": true,
         "y": 180
       },
@@ -89,7 +89,7 @@
     },
     {
       "apply": {
-        "model": "classicpipes:block/routing_pipe_side_linked",
+        "model": "classicpipes:block/networked_pipe_side_linked",
         "uvlock": true,
         "y": 180
       },
@@ -120,7 +120,7 @@
     },
     {
       "apply": {
-        "model": "classicpipes:block/routing_pipe_side_unlinked",
+        "model": "classicpipes:block/networked_pipe_side_unlinked",
         "uvlock": true,
         "y": 270
       },
@@ -131,7 +131,7 @@
     },
     {
       "apply": {
-        "model": "classicpipes:block/routing_pipe_side_linked",
+        "model": "classicpipes:block/networked_pipe_side_linked",
         "uvlock": true,
         "y": 270
       },
@@ -162,7 +162,7 @@
     },
     {
       "apply": {
-        "model": "classicpipes:block/routing_pipe_side_unlinked",
+        "model": "classicpipes:block/networked_pipe_side_unlinked",
         "uvlock": true,
         "x": 270
       },
@@ -173,7 +173,7 @@
     },
     {
       "apply": {
-        "model": "classicpipes:block/routing_pipe_side_linked",
+        "model": "classicpipes:block/networked_pipe_side_linked",
         "uvlock": true,
         "x": 270
       },
@@ -204,7 +204,7 @@
     },
     {
       "apply": {
-        "model": "classicpipes:block/routing_pipe_side_unlinked",
+        "model": "classicpipes:block/networked_pipe_side_unlinked",
         "uvlock": true,
         "x": 90
       },
@@ -215,7 +215,7 @@
     },
     {
       "apply": {
-        "model": "classicpipes:block/routing_pipe_side_linked",
+        "model": "classicpipes:block/networked_pipe_side_linked",
         "uvlock": true,
         "x": 90
       },
