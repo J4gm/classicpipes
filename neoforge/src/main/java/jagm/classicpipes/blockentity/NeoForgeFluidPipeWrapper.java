@@ -80,9 +80,10 @@ public class NeoForgeFluidPipeWrapper extends SnapshotJournal<Tuple<FluidResourc
     @Override
     protected void onRootCommit(Tuple<FluidResource, FluidInPipe> originalState) {
         if (!this.fluidPacketToInsert.a().matches(FluidStack.EMPTY) && this.fluidPacketToInsert.b() != null && this.pipe.getLevel() instanceof ServerLevel serverLevel) {
-            this.pipe.setFluid(new FluidWithData(fluidPacketToInsert.a().getFluid(), fluidPacketToInsert.a().getComponentsPatch()));
-            this.pipe.insertFluidPacket(serverLevel, fluidPacketToInsert.b());
+            this.pipe.setFluid(new FluidWithData(this.fluidPacketToInsert.a().getFluid(), this.fluidPacketToInsert.a().getComponentsPatch()));
+            this.pipe.insertFluidPacket(serverLevel, this.fluidPacketToInsert.b());
             serverLevel.sendBlockUpdated(this.pipe.getBlockPos(), this.pipe.getBlockState(), this.pipe.getBlockState(), 2);
+            this.fluidPacketToInsert = new Tuple<>(FluidResource.EMPTY, null);
         }
     }
 

@@ -75,6 +75,7 @@ public class NeoForgeItemPipeWrapper extends SnapshotJournal<ItemStack> implemen
     protected void onRootCommit(ItemStack originalState) {
         if (!this.itemToInsert.isEmpty()) {
             this.pipe.setItem(this.side, this.itemToInsert);
+            this.itemToInsert = ItemStack.EMPTY;
         }
     }
 
