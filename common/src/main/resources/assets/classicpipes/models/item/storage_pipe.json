@@ -2,7 +2,7 @@
   "parent": "classicpipes:item/pipe",
   "textures": {
     "texture": "classicpipes:block/storage_pipe",
-    "linked": "classicpipes:block/routing_pipe_linked",
+    "linked": "classicpipes:block/networked_pipe_linked",
     "interior": "minecraft:block/netherite_block",
     "particle": "classicpipes:block/storage_pipe"
   },
