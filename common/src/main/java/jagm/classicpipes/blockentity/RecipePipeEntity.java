@@ -74,13 +74,15 @@ public class RecipePipeEntity extends NetworkedPipeEntity implements MenuProvide
     public void tickServer(ServerLevel level, BlockPos pos, BlockState state) {
         super.tickServer(level, pos, state);
         BlockPos crafterPos = pos.relative(this.slotDirections[9]);
-        if (this.crafterTicked && this.hasNetwork()) {
-            for (RequestedItem requestedItem : this.getNetwork().getRequestedItems()) {
-                if (requestedItem.matches(this.getResult(), true)) {
-                    requestedItem.sendMessage(level, Component.translatable("chat." + ClassicPipes.MOD_ID + ".crafter_jammed", crafterPos.toShortString()).withStyle(ChatFormatting.RED));
+        if (this.crafterTicked) {
+            if (this.hasNetwork()) {
+                for (RequestedItem requestedItem : this.getNetwork().getRequestedItems()) {
+                    if (requestedItem.matches(this.getResult(), true)) {
+                        requestedItem.sendMessage(level, Component.translatable("chat." + ClassicPipes.MOD_ID + ".crafter_jammed", crafterPos.toShortString()).withStyle(ChatFormatting.RED));
+                    }
                 }
+                this.getNetwork().resetRequests(level);
             }
-            this.getNetwork().resetRequests(level);
             this.crafterTicked = false;
             this.waitingForCraft = 0;
             this.setChanged();
@@ -282,10 +284,7 @@ public class RecipePipeEntity extends NetworkedPipeEntity implements MenuProvide
 
     @Override
     public void setRemoved() {
-        if (this.getLevel() instanceof ServerLevel serverLevel) {
-            super.disconnect(serverLevel);
-        }
-        this.remove = true;
+        super.setRemoved();
     }
 
     @Override
