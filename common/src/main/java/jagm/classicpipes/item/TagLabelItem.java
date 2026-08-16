@@ -101,11 +101,7 @@ public class TagLabelItem extends LabelItem {
     public boolean itemMatches(ItemStack tagStack, ItemStack compareStack) {
         String tag = tagStack.get(ClassicPipes.LABEL_COMPONENT);
         if (tag != null) {
-            for (TagKey<Item> tagKey : compareStack.tags().toList()) {
-                if (tag.equals(tagKey.location().toString())) {
-                    return true;
-                }
-            }
+            return compareStack.tags().anyMatch(tagKey -> tag.equals(tagKey.location().toString()));
         }
         return false;
     }
