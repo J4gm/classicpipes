@@ -72,10 +72,11 @@ public abstract class ItemPipeEntity extends PipeEntity implements WorldlyContai
                     }
                 }
                 if (item.getProgress() >= ItemInPipe.PIPE_LENGTH) {
+                    Direction direction = item.getTargetDirection();
                     if (Services.LOADER_SERVICE.handleItemInsertion(this, level, pos, state, item)) {
                         iterator.remove();
-                    } else if (this instanceof MatchingPipe matchingPipe) {
-                        matchingPipe.markCannotFit(item.getStack());
+                    } else if (this instanceof OverflowHandlingPipe overflowingPipe) {
+                        overflowingPipe.markCannotFit(item.getStack(), direction);
                     }
                     sendBlockUpdate = true;
                 }

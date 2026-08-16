@@ -1,12 +1,16 @@
 package jagm.classicpipes.blockentity;
 
 import jagm.classicpipes.ClassicPipes;
+import jagm.classicpipes.block.NetworkedPipeBlock;
 import jagm.classicpipes.inventory.container.Filter;
 import jagm.classicpipes.inventory.container.FilterContainer;
 import jagm.classicpipes.inventory.container.SingleItemFilterContainer;
 import jagm.classicpipes.inventory.menu.RoutingPipeMenu;
+import jagm.classicpipes.util.MiscUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.ItemStackWithSlot;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -17,15 +21,33 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 
-public class RoutingPipeEntity extends NetworkedPipeEntity implements MenuProvider {
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class RoutingPipeEntity extends NetworkedPipeEntity implements MenuProvider, OverflowHandlingPipe {
 
     private final SingleItemFilterContainer filter;
     private boolean defaultRoute;
+    private final Map<Direction, List<ItemStack>> cannotFit;
+    private int overflowCheck;
 
     public RoutingPipeEntity(BlockPos pos, BlockState state) {
         super(ClassicPipes.ROUTING_PIPE_ENTITY, pos, state);
         this.filter = new SingleItemFilterContainer(this, 9, false);
         this.defaultRoute = false;
+        this.cannotFit = new HashMap<>();
+        this.overflowCheck = 0;
+    }
+
+    @Override
+    public void tickServer(ServerLevel level, BlockPos pos, BlockState state) {
+        super.tickServer(level, pos, state);
+        if (this.overflowCheck++ > 100) {
+            this.overflowCheck = 0;
+            this.cannotFit.clear();
+        }
     }
 
     @Override
@@ -88,6 +110,36 @@ public class RoutingPipeEntity extends NetworkedPipeEntity implements MenuProvid
 
     public Filter getFilter() {
         return this.filter;
+    }
+
+    @Override
+    public void markCannotFit(ItemStack stack, Direction direction) {
+        if (this.cannotFit.containsKey(direction)) {
+            MiscUtil.mergeStackIntoList(this.cannotFit.get(direction), stack);
+        } else {
+            List<ItemStack> stacks = new ArrayList<>();
+            stacks.add(stack);
+            this.cannotFit.put(direction, stacks);
+        }
+    }
+
+    @Override
+    public boolean itemCanFit(ItemStack stack) {
+        for (Direction direction : Direction.values()) {
+            if (this.getBlockState().getValue(NetworkedPipeBlock.PROPERTY_BY_DIRECTION.get(direction)).equals(NetworkedPipeBlock.ConnectionState.UNLINKED)) {
+                if (!this.cannotFit.containsKey(direction) || this.cannotFit.get(direction).stream().noneMatch(cannotFitStack -> ItemStack.isSameItemSameComponents(cannotFitStack, stack))) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean itemCanFit(ItemStack stack, Direction direction) {
+        if (this.getBlockState().getValue(NetworkedPipeBlock.PROPERTY_BY_DIRECTION.get(direction)).equals(NetworkedPipeBlock.ConnectionState.UNLINKED)) {
+            return !this.cannotFit.containsKey(direction) || this.cannotFit.get(direction).stream().noneMatch(cannotFitStack -> ItemStack.isSameItemSameComponents(cannotFitStack, stack));
+        }
+        return false;
     }
 
 }
