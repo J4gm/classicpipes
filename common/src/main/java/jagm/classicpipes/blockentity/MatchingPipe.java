@@ -2,15 +2,11 @@ package jagm.classicpipes.blockentity;
 
 import net.minecraft.world.item.ItemStack;
 
-public interface MatchingPipe {
+public interface MatchingPipe extends OverflowHandlingPipe {
 
     boolean matches(ItemStack stack);
 
     NetworkedPipeEntity getAsPipe();
-
-    void markCannotFit(ItemStack stack);
-
-    boolean itemCanFit(ItemStack stack);
 
     void updateCache();
 
