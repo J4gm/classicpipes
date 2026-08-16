@@ -282,7 +282,7 @@ public class PipeNetwork {
                 i++;
             }
         } else if (pipeToUpdate < this.providerPipes.size() + this.matchingPipes.size()) {
-            int i = 0;
+            int i = this.providerPipes.size();
             for (MatchingPipe matchingPipe : this.matchingPipes) {
                 if (i == pipeToUpdate) {
                     matchingPipe.updateCache();
@@ -291,7 +291,7 @@ public class PipeNetwork {
                 i++;
             }
         } else if (pipeToUpdate < updatablePipesCount) {
-            int i = 0;
+            int i = this.providerPipes.size() + this.matchingPipes.size();
             for (StockingPipeEntity stockingPipe : this.stockingPipes) {
                 if (i == pipeToUpdate) {
                     stockingPipe.updateCache();
