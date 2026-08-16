@@ -128,8 +128,8 @@ public class PipeNetwork {
                     int spareAmount = Math.min(spareStack.getCount(), stack.getCount());
                     if (spareAmount > 0) {
                         amount += spareAmount;
-                        spareStack.shrink(spareAmount);
                         requestState.scheduleItemRouting(requestPos, spareStack.copyWithCount(spareAmount));
+                        spareStack.shrink(spareAmount);
                     }
                     if (amount >= stack.getCount()) {
                         break;
@@ -139,8 +139,8 @@ public class PipeNetwork {
                 int spareAmount = Math.min(spareStack.getCount(), stack.getCount());
                 if (spareAmount > 0) {
                     amount += spareAmount;
-                    spareStack.shrink(spareAmount);
                     requestState.scheduleItemRouting(requestPos, spareStack.copyWithCount(spareAmount));
+                    spareStack.shrink(spareAmount);
                 }
                 if (amount >= stack.getCount() || matchComponents) {
                     break;

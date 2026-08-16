@@ -155,7 +155,7 @@ public class NetworkedPipeBlock extends PipeBlock {
         } else if (MiscUtil.DEBUG_MODE && stack.getItem().equals(Items.STICK)) {
             if (player instanceof ServerPlayer serverPlayer && level.getBlockEntity(pos) instanceof NetworkedPipeEntity networkedPipe && networkedPipe.hasNetwork()) {
                 for (RequestedItem requestedItem : networkedPipe.getNetwork().getRequestedItems()) {
-                    serverPlayer.displayClientMessage(Component.literal(requestedItem.getAmountRemaining() + "x " + requestedItem.getStack().getDisplayName().getString()), false);
+                    serverPlayer.displayClientMessage(Component.literal(requestedItem.getAmountRemaining() + "x " + requestedItem.getStack().getDisplayName().getString() + " to " + requestedItem.getDestination().toShortString()), false);
                 }
             }
         }
