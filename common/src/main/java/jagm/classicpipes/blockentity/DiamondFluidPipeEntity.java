@@ -41,7 +41,7 @@ public class DiamondFluidPipeEntity extends FluidPipeEntity implements MenuProvi
             }
             direction = MiscUtil.nextDirection(direction);
         }
-        if (validDirections.isEmpty() && filter.directionMatches(bucket, direction).matches) {
+        if (validDirections.isEmpty() && filter.directionMatches(bucket, fluidPacket.getFromDirection()).matches) {
             validDirections.add(fluidPacket.getFromDirection());
         }
         if (validDirections.isEmpty()) {

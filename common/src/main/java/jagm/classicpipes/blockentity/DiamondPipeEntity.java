@@ -55,7 +55,7 @@ public class DiamondPipeEntity extends RoundRobinPipeEntity implements MenuProvi
         } else if (!matchPriority.get(Filter.MatchingResult.MOD).isEmpty()) {
             validDirections.addAll(matchPriority.get(Filter.MatchingResult.MOD));
         }
-        if (validDirections.isEmpty() && filter.directionMatches(item.getStack(), direction).matches) {
+        if (validDirections.isEmpty() && filter.directionMatches(item.getStack(), item.getFromDirection()).matches) {
             validDirections.add(item.getFromDirection());
         }
         if (validDirections.isEmpty()) {
