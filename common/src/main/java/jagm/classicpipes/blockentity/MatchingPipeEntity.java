@@ -84,7 +84,7 @@ public class MatchingPipeEntity extends NetworkedPipeEntity implements MenuProvi
     }
 
     @Override
-    public void markCannotFit(ItemStack stack) {
+    public void markCannotFit(ItemStack stack, Direction direction) {
         this.cannotFit.add(stack);
     }
 
