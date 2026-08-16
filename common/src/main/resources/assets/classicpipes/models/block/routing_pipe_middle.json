@@ -1,7 +1,7 @@
 {
   "parent": "classicpipes:block/pipe_middle",
   "textures": {
-    "texture": "classicpipes:block/routing_pipe_linked",
-    "particle": "classicpipes:block/routing_pipe_linked"
+    "texture": "classicpipes:block/networked_pipe_linked",
+    "particle": "classicpipes:block/networked_pipe_linked"
   }
 }

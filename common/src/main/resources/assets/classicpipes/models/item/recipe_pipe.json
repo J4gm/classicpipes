@@ -3,7 +3,7 @@
   "textures": {
     "texture": "classicpipes:block/recipe_pipe_up",
     "down": "classicpipes:block/recipe_pipe_down",
-    "interior": "classicpipes:block/routing_pipe_linked",
+    "interior": "classicpipes:block/networked_pipe_linked",
     "particle": "classicpipes:block/recipe_pipe_up"
   },
   "elements": [
