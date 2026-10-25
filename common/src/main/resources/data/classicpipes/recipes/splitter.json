@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "S": {
+      "item": "minecraft:stick"
+    }
+  },
+  "pattern": [ " I", "I ", " S" ],
+  "result": {
+    "count": 1,
+    "item": "classicpipes:splitter"
+  }
+}

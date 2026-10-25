@@ -34,6 +34,10 @@ public class RequestPipeBlock extends NetworkedPipeBlock {
 
     @Override
     public InteractionResult use(BlockState state, Level level, BlockPos pipePos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+        InteractionResult splitterResult = this.useSplitter(state, level, pipePos, player, hand, hitResult);
+        if (splitterResult != InteractionResult.PASS) {
+            return splitterResult;
+        }
         if (player instanceof ServerPlayer serverPlayer && level.getBlockEntity(pipePos) instanceof RequestPipeEntity requestPipe && requestPipe.hasNetwork()) {
             Services.LOADER_SERVICE.openMenu(
                     serverPlayer,

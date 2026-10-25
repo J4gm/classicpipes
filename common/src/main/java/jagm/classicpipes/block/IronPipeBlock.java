@@ -91,6 +91,10 @@ public class IronPipeBlock extends BooleanDirectionsPipeBlock {
 
     @Override
     public InteractionResult use(BlockState state, Level level, BlockPos pipePos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+        InteractionResult splitterResult = this.useSplitter(state, level, pipePos, player, hand, hitResult);
+        if (splitterResult != InteractionResult.PASS) {
+            return splitterResult;
+        }
         if (player.getAbilities().mayBuild && !MiscUtil.itemIsPipe(player.getMainHandItem())) {
             Direction direction = MiscUtil.nextDirection(state.getValue(FACING));
             for (int i = 0; i < 5; i++) {

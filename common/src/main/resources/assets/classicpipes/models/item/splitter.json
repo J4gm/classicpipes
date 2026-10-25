@@ -1,0 +1,18 @@
+{
+  "parent": "item/handheld",
+  "display": {
+    "thirdperson_righthand": {
+      "rotation": [ 0, -90, 55 ],
+      "translation": [ 0, 4.0, 0.5 ],
+      "scale": [ 0.55, 0.55, 0.55 ]
+    },
+    "thirdperson_lefthand": {
+      "rotation": [ 0, 90, -55 ],
+      "translation": [ 0, 4.0, 0.5 ],
+      "scale": [ 0.55, 0.55, 0.55 ]
+    }
+  },
+  "textures": {
+    "layer0": "classicpipes:item/splitter"
+  }
+}

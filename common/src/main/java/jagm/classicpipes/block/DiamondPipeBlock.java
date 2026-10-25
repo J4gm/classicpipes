@@ -35,6 +35,10 @@ public class DiamondPipeBlock extends BooleanDirectionsPipeBlock {
 
     @Override
     public InteractionResult use(BlockState state, Level level, BlockPos pipePos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+        InteractionResult splitterResult = this.useSplitter(state, level, pipePos, player, hand, hitResult);
+        if (splitterResult != InteractionResult.PASS) {
+            return splitterResult;
+        }
         if (level instanceof ServerLevel && level.getBlockEntity(pipePos) instanceof DiamondPipeEntity diamondPipe) {
             Services.LOADER_SERVICE.openMenu((ServerPlayer) player, diamondPipe, new ClientBoundBoolPayload(diamondPipe.shouldMatchComponents()), ClientBoundBoolPayload.HANDLER);
         }

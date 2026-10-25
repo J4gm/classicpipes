@@ -14,15 +14,19 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 
 public abstract class PipeEntity extends BlockEntity {
 
     private final List<ScheduledPipeUpdate> updates;
+    private final Set<Direction> splitDirections;
 
     public PipeEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
         this.updates = new ArrayList<>();
+        this.splitDirections = EnumSet.noneOf(Direction.class);
     }
 
     public static <T extends BlockEntity> void tick(Level level, BlockPos pos, BlockState state, T blockEntity) {
@@ -54,6 +58,21 @@ public abstract class PipeEntity extends BlockEntity {
     public abstract short getTargetSpeed();
 
     public abstract short getAcceleration();
+
+    public final boolean isSplit(Direction direction) {
+        return this.splitDirections.contains(direction);
+    }
+
+    public final void splitConnection(Direction direction) {
+        this.splitDirections.add(direction);
+        this.setChanged();
+    }
+
+    public final void clearSplitConnection(Direction direction) {
+        if (this.splitDirections.remove(direction)) {
+            this.setChanged();
+        }
+    }
 
     protected final boolean isPipeConnected(BlockState state, Direction direction) {
         if (state.getBlock() instanceof PipeBlock pipeBlock) {

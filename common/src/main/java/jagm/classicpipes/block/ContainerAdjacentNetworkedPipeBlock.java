@@ -58,7 +58,7 @@ public abstract class ContainerAdjacentNetworkedPipeBlock extends NetworkedPipeB
             level.scheduleTick(pipePos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
         }
         boolean wasConnected = this.isPipeConnected(state, initialDirection);
-        boolean willConnect = this.canConnect((Level) level, pipePos, initialDirection);
+        boolean willConnect = this.canConnectUnlessSplit((Level) level, pipePos, initialDirection);
         state = this.setPipeConnected(state, initialDirection, willConnect);
         Direction direction = state.getValue(FACING) == FacingOrNone.NONE ? Direction.DOWN : state.getValue(FACING).getDirection();
         state = state.setValue(FACING, FacingOrNone.NONE);
@@ -77,6 +77,10 @@ public abstract class ContainerAdjacentNetworkedPipeBlock extends NetworkedPipeB
 
     @Override
     public InteractionResult use(BlockState state, Level level, BlockPos pipePos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+        InteractionResult splitterResult = this.useSplitter(state, level, pipePos, player, hand, hitResult);
+        if (splitterResult != InteractionResult.PASS) {
+            return splitterResult;
+        }
         Direction facing = state.getValue(FACING).getDirection();
         if (player.getAbilities().mayBuild && player.isCrouching() && !MiscUtil.itemIsPipe(player.getMainHandItem()) && facing != null) {
             Direction direction = MiscUtil.nextDirection(facing);
