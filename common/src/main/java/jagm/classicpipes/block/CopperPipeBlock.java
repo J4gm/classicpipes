@@ -5,7 +5,9 @@ import jagm.classicpipes.blockentity.CopperPipeEntity;
 import jagm.classicpipes.services.Services;
 import jagm.classicpipes.util.FacingOrNone;
 import jagm.classicpipes.util.MiscUtil;
+import jagm.classicpipes.blockentity.PipeEntity;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
@@ -76,6 +78,10 @@ public class CopperPipeBlock extends BooleanDirectionsPipeBlock {
 
     @Override
     protected BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess scheduledTickAccess, BlockPos pipePos, Direction initialDirection, BlockPos neighborPos, BlockState neighborState, RandomSource random) {
+        // Queue a tick update after the neighbor has been updated
+        if (level instanceof ServerLevel serverLevel) {
+            serverLevel.scheduleTick(pipePos, this, 1);
+        }
         BlockState superState = super.updateShape(state, level, scheduledTickAccess, pipePos, initialDirection, neighborPos, neighborState, random);
         Direction direction = state.getValue(FACING) == FacingOrNone.NONE ? Direction.DOWN : state.getValue(FACING).getDirection();
         for (int i = 0; i < 6; i++) {
@@ -123,6 +129,10 @@ public class CopperPipeBlock extends BooleanDirectionsPipeBlock {
     @Override
     protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, Orientation orientation, boolean b) {
         this.checkPoweredState(level, pos, state);
+        // Queue a tick update after the adjacent block has changed
+        if (level instanceof ServerLevel serverLevel) {
+            serverLevel.scheduleTick(pos, this, 1);
+        }
     }
 
     @Override
@@ -130,4 +140,47 @@ public class CopperPipeBlock extends BooleanDirectionsPipeBlock {
         return !(pipeBlock instanceof CopperPipeBlock);
     }
 
+    @Override
+    protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+        BlockState refreshed = state;
+
+        // Recheck after neighboring blocks have finished initialization
+        for (Direction direction : Direction.values()) {
+            BlockPos neighborPos = pos.relative(direction);
+
+            // Avoid checking neighbor in unloaded chunks
+            if (level.hasChunk(SectionPos.blockToSectionCoord(neighborPos.getX()), SectionPos.blockToSectionCoord(neighborPos.getZ()))) {
+                refreshed = this.setPipeConnected(refreshed, direction, this.canConnect(level, pos, direction));
+            }
+        }
+
+        // Sets the extraction face, start from DOWN if none is selected
+        Direction direction = state.getValue(FACING) == FacingOrNone.NONE ? Direction.DOWN : state.getValue(FACING).getDirection();
+        refreshed = refreshed.setValue(FACING, FacingOrNone.NONE);
+
+        // Keep the current extraction face if it is still valid or find another valid inventory.
+        for (int i = 0; i < 6; i++) {
+            BlockPos neighborPos = pos.relative(direction);
+            if (level.hasChunk(SectionPos.blockToSectionCoord(neighborPos.getX()), SectionPos.blockToSectionCoord(neighborPos.getZ()))
+                    && this.isPipeConnected(refreshed, direction)
+                    && Services.LOADER_SERVICE.canAccessContainer(level, neighborPos, direction.getOpposite())) {
+                refreshed = refreshed.setValue(FACING, FacingOrNone.with(direction));
+                break;
+            }
+            direction = MiscUtil.nextDirection(direction);
+        }
+
+        // Update pipe neighbors if the connection state has changed
+        if (refreshed != state) {
+            level.setBlock(pos, refreshed, 3);
+            if (level.getBlockEntity(pos) instanceof PipeEntity pipe) {
+                for (Direction face : Direction.values()) {
+                    boolean wasConnected = this.isPipeConnected(state, face);
+                    if (wasConnected != this.isPipeConnected(refreshed, face)) {
+                        pipe.scheduleUpdate(level, refreshed, pos, face, wasConnected);
+                    }
+                }
+            }
+        }
+    }
 }
