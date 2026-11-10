@@ -15,6 +15,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.InteractionHand;
@@ -62,12 +64,17 @@ public class NetworkedPipeBlock extends PipeBlock {
 
     @Override
     public boolean isPipeConnected(BlockState state, Direction direction) {
-        return !state.getValue(PROPERTY_BY_DIRECTION.get(direction)).equals(ConnectionState.NONE);
+        ConnectionState connection = state.getValue(PROPERTY_BY_DIRECTION.get(direction));
+        return connection != ConnectionState.NONE;
     }
 
     @Override
     public BlockState setPipeConnected(BlockState state, Direction direction, boolean connected) {
-        return state.setValue(PROPERTY_BY_DIRECTION.get(direction), connected ? (this.isLinked(state, direction) ? ConnectionState.LINKED : ConnectionState.UNLINKED) : ConnectionState.NONE);
+        EnumProperty<ConnectionState> property = PROPERTY_BY_DIRECTION.get(direction);
+        if (!connected) {
+            return state.setValue(property, ConnectionState.NONE);
+        }
+        return state.setValue(property, this.isLinked(state, direction) ? ConnectionState.LINKED : ConnectionState.UNLINKED);
     }
 
     public boolean isLinked(BlockState state, Direction direction) {
@@ -124,7 +131,9 @@ public class NetworkedPipeBlock extends PipeBlock {
 
     @Override
     protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
-        if (stack.getItem().equals(ClassicPipes.PIPE_SLICER)) {
+        if (stack.is(ClassicPipes.SPLITTER)) {
+            return super.useItemOn(stack, state, level, pos, player, hand, hitResult);
+        } else if (stack.is(ClassicPipes.PIPE_SLICER)) {
             if (player instanceof ServerPlayer serverPlayer && level.getBlockEntity(pos) instanceof NetworkedPipeEntity networkedPipe && networkedPipe.hasNetwork()) {
                 ClientBoundItemListPayload payload = networkedPipe.getNetwork().requestItemList(pos);
                 Services.LOADER_SERVICE.openMenu(
