@@ -162,7 +162,7 @@ public class RecipePipeEntity extends NetworkedPipeEntity implements MenuProvide
                     readyToCraft = Math.min(readyToCraft, this.heldItems.get(slot).getCount() / this.filter.getItem(slot).getCount());
                 }
                 BlockState state = this.getBlockState();
-                if (!this.filter.getItem(slot).isEmpty() && !state.getValue(RecipePipeBlock.PROPERTY_BY_DIRECTION.get(this.slotDirections[slot])).equals(NetworkedPipeBlock.ConnectionState.UNLINKED)) {
+                if (!this.filter.getItem(slot).isEmpty() && state.getValue(RecipePipeBlock.PROPERTY_BY_DIRECTION.get(this.slotDirections[slot])) != NetworkedPipeBlock.ConnectionState.UNLINKED) {
                     readyToCraft = 0;
                     if (this.getLevel() instanceof ServerLevel serverLevel && this.hasNetwork()) {
                         for (RequestedItem requestedItem : this.getNetwork().getRequestedItems()) {
