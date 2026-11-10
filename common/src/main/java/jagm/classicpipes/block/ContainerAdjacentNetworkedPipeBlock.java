@@ -57,8 +57,9 @@ public abstract class ContainerAdjacentNetworkedPipeBlock extends NetworkedPipeB
             level.scheduleTick(pipePos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
         }
         boolean wasConnected = this.isPipeConnected(state, initialDirection);
-        boolean willConnect = this.canConnect((Level) level, pipePos, initialDirection);
+        boolean willConnect = this.canConnectUnlessSplit((Level) level, pipePos, initialDirection);
         state = this.setPipeConnected(state, initialDirection, willConnect);
+        boolean isConnected = this.isPipeConnected(state, initialDirection);
         Direction direction = state.getValue(FACING) == FacingOrNone.NONE ? Direction.DOWN : state.getValue(FACING).getDirection();
         state = state.setValue(FACING, FacingOrNone.NONE);
         for (int i = 0; i < 6; i++) {
@@ -68,7 +69,7 @@ public abstract class ContainerAdjacentNetworkedPipeBlock extends NetworkedPipeB
             }
             direction = MiscUtil.nextDirection(direction);
         }
-        if (wasConnected != willConnect && level.getBlockEntity(pipePos) instanceof PipeEntity pipe && level instanceof ServerLevel serverLevel) {
+        if (wasConnected != isConnected && level.getBlockEntity(pipePos) instanceof PipeEntity pipe && level instanceof ServerLevel serverLevel) {
             pipe.scheduleUpdate(serverLevel, state, pipePos, initialDirection, wasConnected);
         }
         return state;

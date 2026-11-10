@@ -128,7 +128,9 @@ public class NetworkedPipeBlock extends PipeBlock {
 
     @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
-        if (stack.getItem().equals(ClassicPipes.PIPE_SLICER)) {
+        if (stack.is(ClassicPipes.SPLITTER)) {
+            return super.useItemOn(stack, state, level, pos, player, hand, hitResult);
+        } else if (stack.getItem().equals(ClassicPipes.PIPE_SLICER)) {
             if (player instanceof ServerPlayer serverPlayer && level.getBlockEntity(pos) instanceof NetworkedPipeEntity networkedPipe && networkedPipe.hasNetwork()) {
                 ClientBoundItemListPayload payload = networkedPipe.getNetwork().requestItemList(pos);
                 Services.LOADER_SERVICE.openMenu(
