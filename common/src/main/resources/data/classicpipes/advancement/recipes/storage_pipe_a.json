@@ -16,7 +16,7 @@
     },
     "has_recipe": {
       "conditions": {
-        "recipe": "classicpipes:storage_pipe_a"
+        "recipes": "classicpipes:storage_pipe_a"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

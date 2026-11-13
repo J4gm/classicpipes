@@ -13,7 +13,7 @@
     },
     "has_recipe": {
       "conditions": {
-        "recipe": "classicpipes:dark_oak_pipe"
+        "recipes": "classicpipes:dark_oak_pipe"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
