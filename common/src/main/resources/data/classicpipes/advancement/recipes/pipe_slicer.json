@@ -6,7 +6,7 @@
     },
     "has_recipe": {
       "conditions": {
-        "recipe": "classicpipes:pipe_slicer"
+        "recipes": "classicpipes:pipe_slicer"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

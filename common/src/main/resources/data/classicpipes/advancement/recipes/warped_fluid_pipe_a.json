@@ -13,7 +13,7 @@
     },
     "has_recipe": {
       "conditions": {
-        "recipe": "classicpipes:warped_fluid_pipe_a"
+        "recipes": "classicpipes:warped_fluid_pipe_a"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

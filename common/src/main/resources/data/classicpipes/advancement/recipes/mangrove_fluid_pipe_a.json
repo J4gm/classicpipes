@@ -13,7 +13,7 @@
     },
     "has_recipe": {
       "conditions": {
-        "recipe": "classicpipes:mangrove_fluid_pipe_a"
+        "recipes": "classicpipes:mangrove_fluid_pipe_a"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

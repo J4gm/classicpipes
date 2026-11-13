@@ -13,7 +13,7 @@
     },
     "has_recipe": {
       "conditions": {
-        "recipe": "classicpipes:bone_pipe"
+        "recipes": "classicpipes:bone_pipe"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

@@ -13,7 +13,7 @@
     },
     "has_recipe": {
       "conditions": {
-        "recipe": "classicpipes:cherry_pipe"
+        "recipes": "classicpipes:cherry_pipe"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

@@ -13,7 +13,7 @@
     },
     "has_recipe": {
       "conditions": {
-        "recipe": "classicpipes:flint_pipe"
+        "recipes": "classicpipes:flint_pipe"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
