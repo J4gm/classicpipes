@@ -13,7 +13,7 @@
     },
     "has_recipe": {
       "conditions": {
-        "recipe": "classicpipes:obsidian_pipe"
+        "recipes": "classicpipes:obsidian_pipe"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

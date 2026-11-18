@@ -13,7 +13,7 @@
     },
     "has_recipe": {
       "conditions": {
-        "recipe": "classicpipes:acacia_pipe"
+        "recipes": "classicpipes:acacia_pipe"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

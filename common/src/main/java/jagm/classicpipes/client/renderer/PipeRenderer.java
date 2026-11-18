@@ -2,6 +2,7 @@ package jagm.classicpipes.client.renderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import com.mojang.math.Transformation;
 import jagm.classicpipes.blockentity.ItemPipeEntity;
 import jagm.classicpipes.blockentity.NetworkedPipeEntity;
 import jagm.classicpipes.util.ItemInPipe;
@@ -71,9 +72,9 @@ public class PipeRenderer<T extends ItemPipeEntity> implements BlockEntityRender
                 poses.translate(itemState.renderPos());
                 poses.scale(0.4375F, 0.4375F, 0.4375F);
                 if (itemState.direction().equals(Direction.EAST) || itemState.direction().equals(Direction.WEST)) {
-                    poses.mulPose(Axis.YP.rotationDegrees(90.0F));
+                    poses.rotate(Axis.YP.rotationDegrees(90.0F));
                 } else if (itemState.direction().equals(Direction.UP) || itemState.direction().equals(Direction.DOWN)) {
-                    poses.mulPose(Axis.XP.rotationDegrees(90.0F));
+                    poses.rotate(Axis.XP.rotationDegrees(90.0F));
                 }
                 itemState.stackState().submit(poses, queue, pipeState.lightCoords, OverlayTexture.NO_OVERLAY, 0);
                 poses.popPose();
@@ -90,7 +91,7 @@ public class PipeRenderer<T extends ItemPipeEntity> implements BlockEntityRender
                         0.5F + (direction.equals(Direction.UP) ? 0.375F : (direction.equals(Direction.DOWN) ? -0.375F : 0.0F)),
                         0.5F + (direction.equals(Direction.SOUTH) ? 0.375F : (direction.equals(Direction.NORTH) ? -0.375F : 0.0F))
                 );
-                poses.mulPose(cameraState.orientation);
+                poses.rotate(cameraState.orientation);
                 poses.scale(0.0125F, -0.0125F, 0.0125F);
                 float xOffset = (float)(-font.width(component)) / 2.0F;
                 queue.submitText(poses, xOffset, 0.0F, component.getVisualOrderText(), false, Font.DisplayMode.NORMAL, pipeState.lightCoords, -2130706433, background, 0);
@@ -100,7 +101,7 @@ public class PipeRenderer<T extends ItemPipeEntity> implements BlockEntityRender
                 Component component = Component.literal(pipeState.controller() ? "CONTROLLER" : pipeState.syncedNetworkPos().toShortString());
                 poses.pushPose();
                 poses.translate(0.5F, 0.5F, 0.5F);
-                poses.mulPose(cameraState.orientation);
+                poses.rotate(cameraState.orientation);
                 poses.scale(0.025F, -0.025F, 0.025F);
                 float xOffset = (float)(-font.width(component)) / 2.0F;
                 queue.submitText(poses, xOffset, 0.0F, component.getVisualOrderText(), false, Font.DisplayMode.NORMAL, pipeState.lightCoords, -2130706433, background, 0);

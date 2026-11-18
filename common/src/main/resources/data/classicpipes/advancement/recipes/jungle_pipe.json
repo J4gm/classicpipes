@@ -13,7 +13,7 @@
     },
     "has_recipe": {
       "conditions": {
-        "recipe": "classicpipes:jungle_pipe"
+        "recipes": "classicpipes:jungle_pipe"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

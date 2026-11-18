@@ -13,7 +13,7 @@
     },
     "has_recipe": {
       "conditions": {
-        "recipe": "classicpipes:brick_pipe"
+        "recipes": "classicpipes:brick_pipe"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

@@ -2,5 +2,5 @@ plugins {
     // https://maven.fabricmc.net/fabric-loom/fabric-loom.gradle.plugin/maven-metadata.xml
     id 'net.fabricmc.fabric-loom' version '1.17-SNAPSHOT' apply false
     // https://projects.neoforged.net/neoforged/moddevgradle
-    id 'net.neoforged.moddev' version '2.0.142' apply false
+    id 'net.neoforged.moddev' version '2.0.148' apply false
 }

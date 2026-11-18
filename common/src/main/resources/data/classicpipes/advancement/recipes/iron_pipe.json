@@ -13,7 +13,7 @@
     },
     "has_recipe": {
       "conditions": {
-        "recipe": "classicpipes:iron_pipe"
+        "recipes": "classicpipes:iron_pipe"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

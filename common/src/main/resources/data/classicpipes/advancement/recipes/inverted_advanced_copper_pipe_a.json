@@ -13,7 +13,7 @@
     },
     "has_recipe": {
       "conditions": {
-        "recipe": "classicpipes:inverted_advanced_copper_pipe_a"
+        "recipes": "classicpipes:inverted_advanced_copper_pipe_a"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

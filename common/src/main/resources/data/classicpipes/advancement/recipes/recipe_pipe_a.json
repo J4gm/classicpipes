@@ -16,7 +16,7 @@
     },
     "has_recipe": {
       "conditions": {
-        "recipe": "classicpipes:recipe_pipe_a"
+        "recipes": "classicpipes:recipe_pipe_a"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
